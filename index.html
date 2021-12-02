@@ -2,7 +2,7 @@
 <html>
     <head>
 		<meta charset="utf-8">
-        <title>Hydropocj</title>
+        <title>Hydropoc</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="verdammt">
         <meta name="keywords" content="lol,wtf">
@@ -12,21 +12,23 @@
         <link rel="stylesheet" href="css/fontawesome.css">
         <link rel="stylesheet" href="css/dataTables.bootstrap5.min.css">
         <script src="js/bootstrap.bundle.min.js"></script>
-        <script src="js/vue.global.prod.js"></script>
+        <!--<script src="js/vue.global.prod.js"></script>-->
         <script src="js/jquery-3.6.0.min.js"></script>
         <script src="js/datatables.min.js"></script>
         <script src="js/dataTables.bootstrap5.min.js"></script>
         <script src="js/chart.min.js"></script>
         <script src="js/chartjs-adapter-date-fns.bundle.min.js"></script>
         <script>
-            const app = Vue.createApp({});
+            //const app = Vue.createApp({});
             Chart.register("filler");
             const charts = {
                 "co2": {},
                 "temperature": {},
                 "salinity": {},
-                "pH": {},
-                "waterlevel": {}
+                "ph": {},
+                "waterlevel": {},
+                "ventilation": {},
+                "brightness": {}
             };
             const dataTablesLocalization = {
                 sEmptyTable: "Keine Daten vorhanden",
@@ -54,7 +56,6 @@
             function switchAlert(element, type) {
                 type = type.toLowerCase();
                 element = $("#section-" + element)[0];
-                console.log(element);
                 if (["danger", "warning", "success"].includes(type) && !Object.values(element.classList).includes(type)) {
                     $(element).removeClass("danger warning success").addClass(type);
                     let icon = $(element).find(".section-header > h3 > i:first-of-type");
@@ -95,7 +96,8 @@
             }
             document.addEventListener("DOMContentLoaded", function(event) {
                 // Hier alle Skripte ausführen, die auf DOM zugreifen sollen
-
+                let aso = new Date();
+                $("footer").html("&copy; " + (aso.getFullYear() >= 2022 ? "2021-" + aso.getFullYear() : aso.getFullYear()) + " Deine Mutter")
                 // DataTable für Benutzerkonten
                 $("#user-actions-accordion").on("shown.bs.collapse", function() {
                     if (!DataTable.isDataTable("#usersTable")) {
@@ -161,6 +163,7 @@
                 });
 
                 // Verlauf
+                /*
                 let a = new Chart($("#co2-chart-history")[0].getContext("2d"), {
                     options: {
                         scales: {
@@ -218,10 +221,11 @@
                             }
                         ]
                     }
-                });
+                });*/
                 // Aktuell
                 charts["co2"]["current"] = new Chart($("#co2-chart-current")[0].getContext("2d"), {
                     options: {
+                        maintainAspectRatio: false,
                         onResize: function(a,b) {
                             console.log(a,b);
                         },
@@ -229,7 +233,7 @@
                             x: {
                                 ticks: {
                                     callback: function(val, index) {
-                                        return index % 2 === 0 ? charts["co2"]["current"]["data"]["labels"][index] : "";
+                                        return index % 4 === 0 ? charts["co2"]["current"]["data"]["labels"][index] : "";
                                     }
                                 }
                             },
@@ -248,7 +252,7 @@
                     data: {
                         datasets: [
                             {
-                                label: "Letzter Wert",
+                                label: "Co²-Gehalt in ???",
                                 fill: {
                                     target: "start",
                                     above: function(context) {
@@ -260,63 +264,15 @@
                                         return getGradient(chart.ctx, chart.chartArea, {0: "rgba(205, 133, 63, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
                                     }
                                 },
-                                // ALLE Farben müssen abhängig vom Messwert automatisch gewählt werden
-                                backgroundColor: "rgba(205, 133, 63, 0.5)",
-                                borderColor: "rgba(205, 133, 63, 0.75)",
-                            }
-                        ]
-                    }
-                });
-
-                charts["salinity"]["current"] = new Chart($("#salinity-chart-current")[0].getContext("2d"), {
-                    options: {
-                        onResize: function(a,b) {
-                            console.log(a,b);
-                        },
-                        scales: {
-                            x: {
-                                ticks: {
-                                    callback: function(val, index) {
-                                        return index % 2 === 0 ? charts["salinity"]["current"]["data"]["labels"][index] : "";
-                                    }
-                                }
-                            },
-                            y: { // defining min and max so hiding the dataset does not change scale range
-                                min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100
-                            }
-                        },
-                        elements: {
-                            line: {
-                                borderWidth: 1
-                            }
-                        }
-                    },
-                    type: "line",
-                    data: {
-                        datasets: [
-                            {
-                                label: "(Einheit)",
-                                fill: {
-                                    target: "start",
-                                    above: function(context) {
-                                        let chart = context.chart;
-                                        if (!chart) {
-                                            // This case happens on initial chart load
-                                            return;
-                                        }
-                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(205, 133, 63, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
-                                    }
-                                },
-                                // ALLE Farben müssen abhängig vom Messwert automatisch gewählt werden
-                                backgroundColor: "rgba(205, 133, 63, 0.5)",
-                                borderColor: "rgba(205, 133, 63, 0.75)",
+                                backgroundColor: getCSSVar("--chart-background-info"),
+                                borderColor: getCSSVar("--chart-border-info"),
                             }
                         ]
                     }
                 });
                 charts["temperature"]["current"] = new Chart($("#temperature-chart-current")[0].getContext("2d"), {
                     options: {
+                        maintainAspectRatio: false,
                         onResize: function(a,b) {
                             console.log(a,b);
                         },
@@ -324,7 +280,7 @@
                             x: {
                                 ticks: {
                                     callback: function(val, index) {
-                                        return index % 2 === 0 ? charts["temperature"]["current"]["data"]["labels"][index] : "";
+                                        return index % 4 === 0 ? charts["temperature"]["current"]["data"]["labels"][index] : "";
                                     }
                                 }
                             },
@@ -343,7 +299,7 @@
                     data: {
                         datasets: [
                             {
-                                label: "°C",
+                                label: "Temperatur in °C",
                                 fill: {
                                     target: "start",
                                     above: function(context) {
@@ -355,23 +311,247 @@
                                         return getGradient(chart.ctx, chart.chartArea, {0: "rgba(205, 133, 63, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
                                     }
                                 },
-                                // ALLE Farben müssen abhängig vom Messwert automatisch gewählt werden
-                                backgroundColor: "rgba(205, 133, 63, 0.5)",
-                                borderColor: "rgba(205, 133, 63, 0.75)",
+                                backgroundColor: getCSSVar("--chart-background-info"),
+                                borderColor: getCSSVar("--chart-border-info"),
                             }
                         ]
                     }
                 });
-                app.component('copyright', {
-                    data() {
-                        let aso = new Date();
-                        return {
-                            text: (aso.getFullYear() >= 2022 ? "2021-" + aso.getFullYear() : aso.getFullYear()) + " Deine Mutter"
+                charts["salinity"]["current"] = new Chart($("#salinity-chart-current")[0].getContext("2d"), {
+                    options: {
+                        maintainAspectRatio: false,
+                        onResize: function(a,b) {
+                            console.log(a,b);
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    callback: function(val, index) {
+                                        return index % 4 === 0 ? charts["salinity"]["current"]["data"]["labels"][index] : "";
+                                    }
+                                }
+                            },
+                            y: { // defining min and max so hiding the dataset does not change scale range
+                                min: 0, // muss individuell für jedes diagrammm festgelegt werden
+                                max: 100
+                            }
+                        },
+                        elements: {
+                            line: {
+                                borderWidth: 1
+                            }
                         }
                     },
-                template: `{{ text }}`
+                    type: "line",
+                    data: {
+                        datasets: [
+                            {
+                                label: "Salzgehalt in ???",
+                                fill: {
+                                    target: "start",
+                                    above: function(context) {
+                                        let chart = context.chart;
+                                        if (!chart) {
+                                            // This case happens on initial chart load
+                                            return;
+                                        }
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(205, 133, 63, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                    }
+                                },
+                                backgroundColor: getCSSVar("--chart-background-info"),
+                                borderColor: getCSSVar("--chart-border-info"),
+                            }
+                        ]
+                    }
                 });
-                app.mount($("footer")[0]);
+                charts["waterlevel"]["current"] = new Chart($("#waterlevel-chart-current")[0].getContext("2d"), {
+                    options: {
+                        maintainAspectRatio: false,
+                        onResize: function(a,b) {
+                            console.log(a,b);
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    callback: function(val, index) {
+                                        return index % 4 === 0 ? charts["waterlevel"]["current"]["data"]["labels"][index] : "";
+                                    }
+                                }
+                            },
+                            y: { // defining min and max so hiding the dataset does not change scale range
+                                min: 0, // muss individuell für jedes diagrammm festgelegt werden
+                                max: 100
+                            }
+                        },
+                        elements: {
+                            line: {
+                                borderWidth: 1
+                            }
+                        }
+                    },
+                    type: "line",
+                    data: {
+                        datasets: [
+                            {
+                                label: "Wasserstand in L",
+                                fill: {
+                                    target: "start",
+                                    above: function(context) {
+                                        let chart = context.chart;
+                                        if (!chart) {
+                                            // This case happens on initial chart load
+                                            return;
+                                        }
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(205, 133, 63, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                    }
+                                },
+                                backgroundColor: getCSSVar("--chart-background-info"),
+                                borderColor: getCSSVar("--chart-border-info"),
+                            }
+                        ]
+                    }
+                });
+                charts["ph"]["current"] = new Chart($("#ph-chart-current")[0].getContext("2d"), {
+                    options: {
+                        maintainAspectRatio: false,
+                        onResize: function(a,b) {
+                            console.log(a,b);
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    callback: function(val, index) {
+                                        return index % 4 === 0 ? charts["ph"]["current"]["data"]["labels"][index] : "";
+                                    }
+                                }
+                            },
+                            y: { // defining min and max so hiding the dataset does not change scale range
+                                min: 0, // muss individuell für jedes diagrammm festgelegt werden
+                                max: 100
+                            }
+                        },
+                        elements: {
+                            line: {
+                                borderWidth: 1
+                            }
+                        }
+                    },
+                    type: "line",
+                    data: {
+                        datasets: [
+                            {
+                                label: "pH-Wert in ???",
+                                fill: {
+                                    target: "start",
+                                    above: function(context) {
+                                        let chart = context.chart;
+                                        if (!chart) {
+                                            // This case happens on initial chart load
+                                            return;
+                                        }
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(205, 133, 63, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                    }
+                                },
+                                backgroundColor: getCSSVar("--chart-background-info"),
+                                borderColor: getCSSVar("--chart-border-info"),
+                            }
+                        ]
+                    }
+                });
+                charts["ventilation"]["current"] = new Chart($("#ventilation-chart-current")[0].getContext("2d"), {
+                    options: {
+                        maintainAspectRatio: false,
+                        onResize: function(a,b) {
+                            console.log(a,b);
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    callback: function(val, index) {
+                                        return index % 4 === 0 ? charts["ventilation"]["current"]["data"]["labels"][index] : "";
+                                    }
+                                }
+                            },
+                            y: { // defining min and max so hiding the dataset does not change scale range
+                                min: 0, // muss individuell für jedes diagrammm festgelegt werden
+                                max: 100
+                            }
+                        },
+                        elements: {
+                            line: {
+                                borderWidth: 1
+                            }
+                        }
+                    },
+                    type: "line",
+                    data: {
+                        datasets: [
+                            {
+                                label: "Ventilatorleistung in %",
+                                fill: {
+                                    target: "start",
+                                    above: function(context) {
+                                        let chart = context.chart;
+                                        if (!chart) {
+                                            // This case happens on initial chart load
+                                            return;
+                                        }
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(205, 133, 63, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                    }
+                                },
+                                backgroundColor: getCSSVar("--chart-background-info"),
+                                borderColor: getCSSVar("--chart-border-info"),
+                            }
+                        ]
+                    }
+                });
+                charts["brightness"]["current"] = new Chart($("#brightness-chart-current")[0].getContext("2d"), {
+                    options: {
+                        maintainAspectRatio: false,
+                        onResize: function(a,b) {
+                            console.log(a,b);
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    callback: function(val, index) {
+                                        return index % 4 === 0 ? charts["brightness"]["current"]["data"]["labels"][index] : "";
+                                    }
+                                }
+                            },
+                            y: { // defining min and max so hiding the dataset does not change scale range
+                                min: 0, // muss individuell für jedes diagrammm festgelegt werden
+                                max: 100
+                            }
+                        },
+                        elements: {
+                            line: {
+                                borderWidth: 1
+                            }
+                        }
+                    },
+                    type: "line",
+                    data: {
+                        datasets: [
+                            {
+                                label: "Belichtung in ???",
+                                fill: {
+                                    target: "start",
+                                    above: function(context) {
+                                        let chart = context.chart;
+                                        if (!chart) {
+                                            // This case happens on initial chart load
+                                            return;
+                                        }
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(205, 133, 63, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                    }
+                                },
+                                backgroundColor: getCSSVar("--chart-background-info"),
+                                borderColor: getCSSVar("--chart-border-info"),
+                            }
+                        ]
+                    }
+                });
                 let dropDowns = $("[data-bs-toggle='collapse']");
                 for (dropDown of dropDowns) {
                     $(dropDown).click(function() {
@@ -394,6 +574,18 @@
                                 charts[item]["current"]["options"]["scales"]["x"]["min"] = data[item]["labels"]["current"][0];
                                 charts[item]["current"]["options"]["scales"]["x"]["max"] = data[item]["labels"]["current"][data[item]["labels"]["current"].length -1];
                                 charts[item]["current"]["data"]["datasets"][0]["data"].push({x: data[item]["data"]["current"]["x"], y: Number(data[item]["data"]["current"]["y"])});
+                                // Wenn Wert kleiner gleich Warnwert
+                                if (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["alerts"]["warning"]) && Number(data[item]["data"]["current"]["y"]) > Number(data[item]["alerts"]["danger"])) {
+                                    switchAlert(item, "warning");
+                                }
+                                else if (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["alerts"]["danger"])) {
+                                    switchAlert(item, "danger");
+                                }
+                                else {
+                                    switchAlert(item, "success");
+                                }
+                                $("#section-" + item + "> canvas").css("visibility", "visible");
+                                $("#section-" + item + "> div ").css("display", "none");
                                 charts[item]["current"].update();
                             }
                         }
@@ -415,6 +607,8 @@
                 --chart-border-warning: #cd853fbf;
                 --chart-background-success: #228b2280;
                 --chart-border-success: #228b22bf;
+                --chart-background-info: #0dcaf080;
+                --chart-border-info: #0dcaf0bf;
             }
             body {
                 display: grid;
@@ -467,12 +661,40 @@
             [data-bs-toggle="collapse"] > i {
                 transition: transform 250ms;
             }
+            /*
             .tab-pane > section:not(:last-of-type) {
                 margin-bottom: 24px;
+            }*/
+            #overview {
+                display: grid;
+                /* Höhe */
+                grid-auto-rows: 300px;
+                /* Breite */ 
+                grid-template-columns: repeat(auto-fill, 300px);
+                grid-gap: 5px;
+                align-content: flex-start
             }
 	    	section.lol {
-                border: 2px solid var(--bs-gray-300, #dee2e6);
+                border: 2px solid var(--bs-gray-300, #dee2e6)
 		    }
+	    	section.lol > canvas {
+                visibility: hidden;
+            }
+            section.lol > div > h2 {
+                color: var(--bs-gray-500);
+                margin: 0
+            }
+            section.lol > div {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                align-content: center;
+                justify-content: center;
+                z-index: 10;
+            }
+            /*
             section.section-item {
                 background-color: #fbfbfb;
                 min-height: 400px;
@@ -483,15 +705,18 @@
                 align-content: center;
                 align-items: center;
                 position: relative
-            }
+            }*/
             section.lol.warning {
                 background-color: var(--alert-background-warning);
                 border: 2px dashed var(--alert-color-warning);
+                animation: background-flashing-warning 3s linear 0s infinite
             }
             section.lol.danger {
                 background-color: var(--alert-background-danger);
                 border: 2px dashed var(--alert-color-danger);
+                animation: background-flashing-danger 1s linear 0s infinite
             }
+            /*
             section.lol.warning > .section-body > .section-item {
                 outline: 1px solid var(--alert-color-warning);
             }
@@ -534,7 +759,7 @@
 		    }
 	    	section.lol.danger > .section-body > .separator {
 			    border-right: 1px solid var(--alert-color-danger);
-		    }
+		    }*/
             .tab-content {
                 background-color: #fbfbfb;
                 border-bottom-left-radius: 5px;
@@ -598,7 +823,8 @@
             #tabNavigation .nav-link.disabled {
                 border: 1px solid var(--bs-gray-200, #e9ecef) !important;
             }
-            #tabNavigation a.nav-link:not(.disabled, .active):hover {
+            #tabNavigation a.nav-link:not(.disabled, .active):hover, #tabNavigation a.nav-link:not(.disabled, .active):active,
+            #tabNavigation a.nav-link:not(.disabled, .active):focus {
                 border: 1px solid var(--bs-gray-300, #dee2e6) !important;
                 border-bottom: 1px solid transparent !important
             }
@@ -681,6 +907,16 @@
                 0% { opacity: 0; }
                 50% { opacity: 1; }
                 100% { opacity: 0; }
+            }
+            @keyframes background-flashing-danger {
+                0% { background-color: #ffffff }
+                50%  { background-color: var(--alert-background-danger) }
+                100% { background-color: #ffffff }
+            }
+            @keyframes background-flashing-warning {
+                0% { background-color: #ffffff }
+                50%  { background-color: var(--alert-background-warning) }
+                100% { background-color: #ffffff }
             }
             i.project-admin {
                 font-size: larger;
@@ -788,106 +1024,47 @@
                     </ul>
                     <div class="tab-content p-4 border">
                         <div class="tab-pane active" id="overview">
-                            <!-- Sensoren mit kritischen Werten ganz oben positionieren -->
-                            <section class="rounded-3 p-3 col-12 lol warning" id="section-co2">
-						        <div class="d-flex section-header">
-                                    <h3><i class="fas fa-exclamation-triangle"></i> Co²-Gehalt</h3>
-                                    <hr class="align-self-center ms-2">
+                            <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-co2">
+                                <div>
+                                    <h2><i class="fas fa-info-circle"></i> Keine Daten</h2>
                                 </div>
-                                <div class="d-flex m-0 justify-content-evenly align-items-stretch section-body">
-                                    <span class="section-item-label">Letzte 60 Sekunden:</span>
-						        	<div class="separator me-3 ms-3"></div>
-                                    <span class="section-item-label">Letzte X Stunden:</span>
-                                </div>
-						        <div class="d-flex m-0 justify-content-evenly align-items-stretch section-body">
-        							<section class="section-item">
-                                        <canvas id="co2-chart-current"></canvas>
-                                    </section>
-		        					<div class="separator me-3 ms-3"></div>
-        							<section class="section-item">
-				        			    <canvas id="co2-chart-history"></canvas>
-                                    </section>
-        						</div>
+                                <canvas id="co2-chart-current"></canvas>
                             </section>
-                            <section class="rounded-3 p-3 col-12 lol danger" id="section-temperature">
-                                <div class="d-flex section-header">
-                                    <h3><i class="fas fa-exclamation-circle"></i> Temperatur</h3>
-                                    <hr class="align-self-center ms-2">
+                            <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-temperature">
+                                <div>
+                                    <h2><i class="fas fa-info-circle"></i> Keine Daten</h2>
                                 </div>
-                                <div class="d-flex m-0 justify-content-evenly align-items-stretch section-body">
-                                    <span class="section-item-label">Letzte 60 Sekunden:</span>
-						        	<div class="separator me-3 ms-3"></div>
-                                    <span class="section-item-label">Letzte X Stunden:</span>
-                                </div>
-						        <div class="d-flex m-0 justify-content-evenly align-items-stretch section-body">
-        							<section class="section-item">
-                                        <canvas id="temperature-chart-current"></canvas>
-                                    </section>
-		        					<div class="separator me-3 ms-3"></div>
-				        			<section class="section-item">
-                                        <canvas id="temperature-chart-history"></canvas>
-                                    </section>
-						        </div>
+                                <canvas id="temperature-chart-current"></canvas>
                             </section>
-                            <section class="rounded-3 p-3 col-12 lol success" id="section-salinity">
-                                <div class="d-flex section-header">
-                                    <h3><i class="fas fa-check-circle"></i> Salzgehalt</h3>
-                                    <hr class="align-self-center ms-2">
+                            <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-salinity">
+                                <div>
+                                    <h2><i class="fas fa-info-circle"></i> Keine Daten</h2>
                                 </div>
-                                <div class="d-flex m-0 justify-content-evenly align-items-stretch section-body">
-                                    <span class="section-item-label">Letzte 60 Sekunden:</span>
-						        	<div class="separator me-3 ms-3"></div>
-                                    <span class="section-item-label">Letzte X Stunden:</span>
-                                </div>
-             					<div class="d-flex m-0 justify-content-evenly align-items-stretch section-body">
-		        					<section class="section-item">
-                                        <canvas id="salinity-chart-current"></canvas>
-                                    </section>
-				        			<div class="separator me-3 ms-3"></div>
-						        	<section class="section-item">
-                                        <canvas id="salinity-chart-history"></canvas>
-                                    </section>
-        						</div>
+                                <canvas id="salinity-chart-current"></canvas>
                             </section>
-                            <section class="rounded-3 p-3 col-12 lol" id="section-pH">
-                                <div class="d-flex section-header">
-                                    <h3><i class="fas fa-check-circle"></i> pH-Wert</h3>
-                                    <hr class="align-self-center ms-2">
+                            <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-ph">
+                                <div>
+                                    <h2><i class="fas fa-info-circle"></i> Keine Daten</h2>
                                 </div>
-                                <div class="d-flex m-0 justify-content-evenly align-items-stretch section-body">
-                                    <span class="section-item-label">Letzte 60 Sekunden:</span>
-						        	<div class="separator me-3 ms-3"></div>
-                                    <span class="section-item-label">Letzte X Stunden:</span>
-                                </div>
-  		        				<div class="d-flex m-0 justify-content-evenly align-items-stretch section-body">
-				        			<section class="section-item">
-                                        <canvas id="ph-chart-current"></canvas>
-                                    </section>
-						    	    <div class="separator me-3 ms-3"></div>
-        						    <section class="section-item">
-                                        <canvas id="ph-chart-current"></canvas>
-                                    </section>
-		        				</div>
+                                <canvas id="ph-chart-current"></canvas>
                             </section>
-                            <section class="rounded-3 p-3 col-12 lol" id="section-waterlevel">
-                                <div class="d-flex section-header">
-                                    <h3><i class="fas fa-check-circle"></i> Wasserstand</h3>
-                                    <hr class="align-self-center ms-2">
+                            <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-waterlevel">
+                                <div>
+                                    <h2><i class="fas fa-info-circle"></i> Keine Daten</h2>
                                 </div>
-                                <div class="d-flex m-0 justify-content-evenly align-items-stretch section-body">
-                                    <span class="section-item-label">Letzte X Sekunden:</span>
-						        	<div class="separator me-3 ms-3"></div>
-                                    <span class="section-item-label">Letzte X Stunden:</span>
+                                <canvas id="waterlevel-chart-current"></canvas>
+                            </section>
+                            <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-ventilation">
+                                <div>
+                                    <h2><i class="fas fa-info-circle"></i> Keine Daten</h2>
                                 </div>
-		        				<div class="d-flex m-0 justify-content-evenly align-items-stretch section-body">
-				        			<section class="section-item">
-                                        <canvas id="waterlevel-chart-current"></canvas>
-                                    </section>
-						        	<div class="separator me-3 ms-3"></div>
-        							<section class="section-item">
-                                        <canvas id="waterlevel-chart-current"></canvas>
-                                    </section>
-		        				</div>
+                                <canvas id="ventilation-chart-current"></canvas>
+                            </section>
+                            <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-brightness">
+                                <div>
+                                    <h2><i class="fas fa-info-circle"></i> Keine Daten</h2>
+                                </div>
+                                <canvas id="brightness-chart-current"></canvas>
                             </section>
                         </div>
                         <div class="tab-pane" id="administration">
@@ -1033,7 +1210,7 @@
                                                     <option value="5">Anmeldung</option>
                                                 </select>
                                             </div>
-                                            <div class="mt-3 pt-1" class="table-responsive">
+                                            <div class="mt-3 pt-1 table-responsive">
                                                 <table class="table table-sm w-100" id="logTable">
                                                     <thead>
                                                         <tr>
@@ -1094,10 +1271,7 @@
                 </div>
             </div>
         </main>
-        <footer>
-            &copy;
-            <copyright v-once></copyright>
-        </footer>
+        <footer></footer>
         <div class="modal fade" id="loginModal">
             <div class="modal-dialog">
                 <div class="modal-content">

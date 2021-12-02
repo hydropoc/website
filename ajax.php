@@ -23,6 +23,10 @@
             ],
             "data" => [
                 "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)]
+            ],
+            "alerts" => [
+                "warning" => 30,
+                "danger" => 20
             ]
         ],
         "temperature" => [
@@ -31,6 +35,10 @@
             ],
             "data" => [
                 "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)]
+            ],
+            "alerts" => [
+                "warning" => 30,
+                "danger" => 20
             ]
         ],
         "salinity" => [
@@ -39,6 +47,58 @@
             ],
             "data" => [
                 "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)]
+            ],
+            "alerts" => [
+                "warning" => 30,
+                "danger" => 20
+            ]
+        ],
+        "waterlevel" => [
+            "labels" => [
+                "current" => $labels
+            ],
+            "data" => [
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)]
+            ],
+            "alerts" => [
+                "warning" => 30,
+                "danger" => 20
+            ]
+        ],
+        "ph" => [
+            "labels" => [
+                "current" => $labels
+            ],
+            "data" => [
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)]
+            ],
+            "alerts" => [
+                "warning" => 30,
+                "danger" => 20
+            ]
+        ],
+        "ventilation" => [
+            "labels" => [
+                "current" => $labels
+            ],
+            "data" => [
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)]
+            ],
+            "alerts" => [
+                "warning" => 30,
+                "danger" => 20
+            ]
+        ],
+        "brightness" => [
+            "labels" => [
+                "current" => $labels
+            ],
+            "data" => [
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)]
+            ],
+            "alerts" => [
+                "warning" => 30,
+                "danger" => 20
             ]
         ]
     ];
