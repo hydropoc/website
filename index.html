@@ -17,7 +17,7 @@
         <script src="js/datatables.min.js"></script>
         <script src="js/dataTables.bootstrap5.min.js"></script>
         <script src="js/chart.min.js"></script>
-        <script src="js/chartjs-adapter-date-fns.bundle.min.js"></script>
+        <!--<script src="js/chartjs-adapter-date-fns.bundle.min.js"></script>-->
         <script>
             //const app = Vue.createApp({});
             Chart.register("filler");
@@ -266,6 +266,15 @@
                                 },
                                 backgroundColor: getCSSVar("--chart-background-info"),
                                 borderColor: getCSSVar("--chart-border-info"),
+                            },
+                            {
+                                label: "Mittelwert",
+                                borderColor: "blue",
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                }
                             }
                         ]
                     }
@@ -567,26 +576,38 @@
                         // item = Sensor, z.B. co2
                         for (item of items) {
                             if (charts.hasOwnProperty(item)) {
-                                charts[item]["current"]["data"]["labels"] = data[item]["labels"]["current"];
-                                if (charts[item]["current"]["data"]["datasets"][0]["data"].length >= 13) {
-                                    charts[item]["current"]["data"]["datasets"][0]["data"].splice(0, 1);
-                                }
-                                charts[item]["current"]["options"]["scales"]["x"]["min"] = data[item]["labels"]["current"][0];
-                                charts[item]["current"]["options"]["scales"]["x"]["max"] = data[item]["labels"]["current"][data[item]["labels"]["current"].length -1];
-                                charts[item]["current"]["data"]["datasets"][0]["data"].push({x: data[item]["data"]["current"]["x"], y: Number(data[item]["data"]["current"]["y"])});
-                                // Wenn Wert kleiner gleich Warnwert
-                                if (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["alerts"]["warning"]) && Number(data[item]["data"]["current"]["y"]) > Number(data[item]["alerts"]["danger"])) {
-                                    switchAlert(item, "warning");
-                                }
-                                else if (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["alerts"]["danger"])) {
-                                    switchAlert(item, "danger");
-                                }
-                                else {
-                                    switchAlert(item, "success");
+                                // chart z.B. "current"
+                                //console.log(Object.keys(data[item]["data"]));
+                                let charts_ = Object.keys(data[item]["data"]);
+                                for (chart of charts_) {
+                                    if (data[item]["data"].hasOwnProperty(chart)) {
+                                        console.log(data[item]["data"][chart]);
+                                        let entries = data[item]["data"][chart];
+                                        for (entry of entries) {
+                                            console.log(entry);
+                                            charts[item][chart]["data"]["labels"] = data[item]["labels"][chart];
+                                            if (charts[item][chart]["data"]["datasets"][i]["data"].length >= 13) {
+                                                charts[item][chart]["data"]["datasets"][i]["data"].splice(0, 1);
+                                            }
+                                            charts[item][chart]["options"]["scales"]["x"]["min"] = data[item]["labels"][chart][i];
+                                            charts[item][chart]["options"]["scales"]["x"]["max"] = data[item]["labels"][chart][data[item]["labels"][chart].length -1];
+                                            charts[item][chart]["data"]["datasets"][i]["data"].push(data[item]["data"]["chart"]["datasets"]);
+                                            // Wenn Wert kleiner gleich Warnwert
+                                            if (Number(data[item]["data"][chart]["y"]) <= Number(data[item]["alerts"]["warning"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["alerts"]["danger"])) {
+                                                switchAlert(item, "warning");
+                                            }
+                                            else if (Number(data[item]["data"][chart]["y"]) <= Number(data[item]["alerts"]["danger"])) {
+                                                switchAlert(item, "danger");
+                                            }
+                                            else {
+                                                switchAlert(item, "success");
+                                            }
+                                        }
+                                        charts[item][chart].update();
+                                    }
                                 }
                                 $("#section-" + item + "> canvas").css("visibility", "visible");
                                 $("#section-" + item + "> div ").css("display", "none");
-                                charts[item]["current"].update();
                             }
                         }
                     });
@@ -671,9 +692,9 @@
                 grid-auto-rows: 300px;
                 /* Breite */ 
                 grid-template-columns: repeat(auto-fill, 300px);
-                grid-gap: 5px;
+                grid-gap: 10px;
                 align-content: flex-start;
-                justify-content: space-evenly
+                justify-content: center
             }
 	    	section.lol {
                 border: 2px solid var(--bs-gray-300, #dee2e6)
@@ -1071,7 +1092,7 @@
                             </div>
                         </div>
                         <div class="tab-pane" id="administration">
-                            <section id="pump-actions-accordion">
+                            <section id="pump-actions-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
                                         <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-pump-actions">
@@ -1086,7 +1107,7 @@
                                     </div>
                                 </div>
                             </section>
-                            <section id="actuator-actions-accordion">
+                            <section id="actuator-actions-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
                                         <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-actuator-actions">
@@ -1101,7 +1122,7 @@
                                     </div>
                                 </div>
                             </section>
-                            <section id="self-test-actions-accordion">
+                            <section id="self-test-actions-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
                                         <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-self-test-actions">
@@ -1116,7 +1137,7 @@
                                     </div>
                                 </div>
                             </section>
-                            <section id="user-actions-accordion">
+                            <section id="user-actions-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
                                         <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-user-actions">
@@ -1126,7 +1147,7 @@
                                     </div>
                                     <div id="collapse-user-actions" class="collapse hide" data-bs-parent="#actuator-user-accordion">
                                         <div class="card-body">
-                                            <div class="table-responsive">
+                                            <div class="table-responsive pe-3">
                                                 <table class="table table-sm w-100" id="usersTable">
                                                     <thead>
                                                         <tr>
@@ -1176,7 +1197,7 @@
                                     </div>
                                 </div>
                             </section>
-                            <section id="events-accordion">
+                            <section id="events-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
                                         <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-events-actions">
@@ -1213,7 +1234,7 @@
                                                     <option value="5">Anmeldung</option>
                                                 </select>
                                             </div>
-                                            <div class="mt-3 pt-1 table-responsive">
+                                            <div class="mt-3 pt-1 pe-3 table-responsive">
                                                 <table class="table table-sm w-100" id="logTable">
                                                     <thead>
                                                         <tr>

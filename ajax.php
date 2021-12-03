@@ -22,7 +22,11 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)]
+                "current" => [
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)],
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)],
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)]
+                ]
             ],
             "alerts" => [
                 "warning" => 30,
@@ -34,7 +38,11 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)]
+                "current" => [
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)],
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)],
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)]
+                ]
             ],
             "alerts" => [
                 "warning" => 30,
@@ -46,7 +54,11 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)]
+                "current" => [
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)],
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)],
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)]
+                ]
             ],
             "alerts" => [
                 "warning" => 30,
@@ -58,7 +70,11 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)]
+                "current" => [
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)],
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)],
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)]
+                ]
             ],
             "alerts" => [
                 "warning" => 30,
@@ -70,7 +86,11 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)]
+                "current" => [
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)],
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)],
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)]
+                ]
             ],
             "alerts" => [
                 "warning" => 30,
@@ -82,7 +102,11 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)]
+                "current" => [
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)],
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)],
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)]
+                ]
             ],
             "alerts" => [
                 "warning" => 30,
@@ -94,7 +118,11 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)]
+                "current" => [
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)],
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)],
+                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)]
+                ]
             ],
             "alerts" => [
                 "warning" => 30,
