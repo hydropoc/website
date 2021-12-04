@@ -26,3 +26,5 @@ $.ajax({
         alert("error!");
     }
 });
+
+Bootstrap toggle: https://gitbrent.github.io/bootstrap4-toggle/ - funktioniert auch mit BS5
