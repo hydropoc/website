@@ -22,11 +22,14 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => [
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)],
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)],
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)]
-                ]
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)], // Aktueller Wert
+                "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)], // Sollwert
+                "middle" => ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)], // Mittelwert
+                "upperControlLimit" => 90,
+                "upperWarningLimit" => 80,
+                "lowerControlLimit" => 10,
+                "lowerWarningLimit" => 20,
+                "actuator" => null
             ],
             "alerts" => [
                 "warning" => 30,
@@ -38,11 +41,9 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => [
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)],
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)],
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)]
-                ]
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)], // Aktueller Wert
+                "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)], // Sollwert
+                "mean" => ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)] // Mittelwert
             ],
             "alerts" => [
                 "warning" => 30,
@@ -54,11 +55,9 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => [
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)],
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)],
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)]
-                ]
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)], // Aktueller Wert
+                "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)], // Sollwert
+                "mean" => ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)] // Mittelwert
             ],
             "alerts" => [
                 "warning" => 30,
@@ -70,11 +69,9 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => [
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)],
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)],
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)]
-                ]
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)], // Aktueller Wert
+                "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)], // Sollwert
+                "mean" => ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)] // Mittelwert
             ],
             "alerts" => [
                 "warning" => 30,
@@ -86,11 +83,9 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => [
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)],
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)],
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)]
-                ]
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)], // Aktueller Wert
+                "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)], // Sollwert
+                "mean" => ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)] // Mittelwert
             ],
             "alerts" => [
                 "warning" => 30,
@@ -102,11 +97,9 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => [
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)],
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)],
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)]
-                ]
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)], // Aktueller Wert
+                "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)], // Sollwert
+                "mean" => ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)] // Mittelwert
             ],
             "alerts" => [
                 "warning" => 30,
@@ -118,11 +111,9 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => [
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)],
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)],
-                    ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)]
-                ]
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,70)], // Aktueller Wert
+                "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => rand(50,60)], // Sollwert
+                "mean" => ["x" => $labels[array_key_last($labels)], "y" => rand(50,55)] // Mittelwert
             ],
             "alerts" => [
                 "warning" => 30,

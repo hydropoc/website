@@ -11,13 +11,13 @@
         <link rel="stylesheet" href="css/bootstrap.min.css">
         <link rel="stylesheet" href="css/fontawesome.css">
         <link rel="stylesheet" href="css/dataTables.bootstrap5.min.css">
+        <link rel="stylesheet" href="css/bootstrap4-toggle.min.css">
         <script src="js/bootstrap.bundle.min.js"></script>
-        <!--<script src="js/vue.global.prod.js"></script>-->
         <script src="js/jquery-3.6.0.min.js"></script>
         <script src="js/datatables.min.js"></script>
         <script src="js/dataTables.bootstrap5.min.js"></script>
         <script src="js/chart.min.js"></script>
-        <!--<script src="js/chartjs-adapter-date-fns.bundle.min.js"></script>-->
+        <script src="js/bootstrap4-toggle.min.js"></script>
         <script>
             //const app = Vue.createApp({});
             Chart.register("filler");
@@ -64,19 +64,19 @@
                     switch (type) {
                         case "danger":
                             $(icon).addClass("fa-exclamation-circle");
-                            charts[section]["current"]["data"]["datasets"][0]["fill"]["above"] = getGradient(charts[section]["current"]["ctx"], charts[section]["current"]["chartArea"], {0: getCSSVar("--chart-background-danger"), 1: "rgba(255, 255, 255, 0.5)"});
+                            //charts[section]["current"]["data"]["datasets"][0]["fill"]["above"] = getGradient(charts[section]["current"]["ctx"], charts[section]["current"]["chartArea"], {0: getCSSVar("--chart-background-danger"), 1: "rgba(255, 255, 255, 0.5)"});
                             charts[section]["current"]["data"]["datasets"][0]["backgroundColor"] = getCSSVar("--chart-background-danger");
                             charts[section]["current"]["data"]["datasets"][0]["borderColor"] = getCSSVar("--chart-border-danger");
                             break;
                         case "warning":
                             $(icon).addClass("fa-exclamation-triangle");
-                            charts[section]["current"]["data"]["datasets"][0]["fill"]["above"] = getGradient(charts[section]["current"]["ctx"], charts[section]["current"]["chartArea"], {0: getCSSVar("--chart-background-warning"), 1: "rgba(255, 255, 255, 0.5)"});
+                            //charts[section]["current"]["data"]["datasets"][0]["fill"]["above"] = getGradient(charts[section]["current"]["ctx"], charts[section]["current"]["chartArea"], {0: getCSSVar("--chart-background-warning"), 1: "rgba(255, 255, 255, 0.5)"});
                             charts[section]["current"]["data"]["datasets"][0]["backgroundColor"] = getCSSVar("--chart-background-warning");
                             charts[section]["current"]["data"]["datasets"][0]["borderColor"] = getCSSVar("--chart-border-warning");
                             break;
                         case "success":
                             $(icon).addClass("fa-check-circle");
-                            charts[section]["current"]["data"]["datasets"][0]["fill"]["above"] = getGradient(charts[section]["current"]["ctx"], charts[section]["current"]["chartArea"], {0: getCSSVar("--chart-background-success"), 1: "rgba(255, 255, 255, 0.5)"});
+                            //charts[section]["current"]["data"]["datasets"][0]["fill"]["above"] = getGradient(charts[section]["current"]["ctx"], charts[section]["current"]["chartArea"], {0: getCSSVar("--chart-background-success"), 1: "rgba(255, 255, 255, 0.5)"});
                             charts[section]["current"]["data"]["datasets"][0]["backgroundColor"] = getCSSVar("--chart-background-success");
                             charts[section]["current"]["data"]["datasets"][0]["borderColor"] = getCSSVar("--chart-border-success");
                             break;
@@ -225,15 +225,27 @@
                 // Aktuell
                 charts["co2"]["current"] = new Chart($("#co2-chart-current")[0].getContext("2d"), {
                     options: {
+                        plugins: {
+                                legend: {
+                                    labels: {
+                                        usePointStyle: true,
+                                        pointStyle: "rect"
+                                    }
+                                },
+                                title: {
+                                    text: "Co²-Gehalt",
+                                    display: true,
+                                    font: {
+                                        size: 14
+                                    }
+                                }
+                            },
                         maintainAspectRatio: false,
-                        onResize: function(a,b) {
-                            console.log(a,b);
-                        },
                         scales: {
                             x: {
                                 ticks: {
                                     callback: function(val, index) {
-                                        return index % 4 === 0 ? charts["co2"]["current"]["data"]["labels"][index] : "";
+                                        return index % 3 === 0 ? charts["co2"]["current"]["data"]["labels"][index] : "";
                                     }
                                 }
                             },
@@ -241,18 +253,98 @@
                                 min: 0, // muss individuell für jedes diagrammm festgelegt werden
                                 max: 100
                             }
-                        },
-                        elements: {
-                            line: {
-                                borderWidth: 1
-                            }
                         }
                     },
                     type: "line",
                     data: {
                         datasets: [
                             {
-                                label: "Co²-Gehalt in ???",
+                                label: "",
+                                stack: "current",
+                                backgroundColor: getCSSVar("--chart-background-info"),
+                                borderColor: getCSSVar("--chart-border-info"),
+                            },
+                            {
+                                label: "MW",
+                                stack: "middle",
+                                borderColor: "green",
+                                borderWidth: 2,
+                                pointStyle: "line",
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                }
+                            },
+                            {
+                                label: "SW",
+                                stack: "setpoint",
+                                borderColor: "orange",
+                                borderWidth: 2,
+                                pointStyle: "line",
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                }
+                            },
+                            {
+                                label: "OEG",
+                                stack: "upperControlLimit",
+                                borderColor: "red",
+                                borderWidth: 2,
+                                borderDash: [8,5],
+                                pointStyle: "line",
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                }
+                            },
+                            {
+                                label: "OWG",
+                                stack: "upperWarningLimit",
+                                borderColor: "orange",
+                                borderWidth: 1,
+                                borderDash: [5,3],
+                                pointStyle: "line",
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                }
+                            },
+                            {
+                                label: "UEG",
+                                stack: "lowerControlLimit",
+                                borderColor: "red",
+                                borderWidth: 2,
+                                borderDash: [8,5],
+                                pointStyle: "line",
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                }
+                            },
+                            {
+                                label: "UWG",
+                                stack: "lowerWarningLimit",
+                                borderColor: "orange",
+                                borderWidth: 1,
+                                borderDash: [5,3],
+                                pointStyle: "line",
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                }
+                            },
+                            {
+                                label: "AZ",
+                                stack: "actuator",
+                                borderColor: "blue",
+                                pointStyle: "line",
                                 fill: {
                                     target: "start",
                                     above: function(context) {
@@ -262,17 +354,6 @@
                                             return;
                                         }
                                         return getGradient(chart.ctx, chart.chartArea, {0: "rgba(205, 133, 63, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
-                                    }
-                                },
-                                backgroundColor: getCSSVar("--chart-background-info"),
-                                borderColor: getCSSVar("--chart-border-info"),
-                            },
-                            {
-                                label: "Mittelwert",
-                                borderColor: "blue",
-                                plugins: {
-                                    legend: {
-                                        display: false
                                     }
                                 }
                             }
@@ -570,40 +651,37 @@
 
                 // Neue Daten vom Server laden
                 setInterval(function() {
+                    // "current" gilt für das Diagramm der letzten Minute, "history" ist für das Verlaufsdiagramm
                     $.post("ajax.php", { labels: JSON.stringify(charts["co2"]["current"]["data"]["labels"]) }).done(function(response) {
                         let data = JSON.parse(response);
                         let items = Object.keys(data);
                         // item = Sensor, z.B. co2
                         for (item of items) {
+                            //data.<item>.data.stack
                             if (charts.hasOwnProperty(item)) {
                                 // chart z.B. "current"
-                                //console.log(Object.keys(data[item]["data"]));
-                                let charts_ = Object.keys(data[item]["data"]);
+                                let charts_ = Object.keys(data[item]["data"]); // current, setpoint, mean
                                 for (chart of charts_) {
-                                    if (data[item]["data"].hasOwnProperty(chart)) {
-                                        console.log(data[item]["data"][chart]);
-                                        let entries = data[item]["data"][chart];
-                                        for (entry of entries) {
-                                            console.log(entry);
-                                            charts[item][chart]["data"]["labels"] = data[item]["labels"][chart];
-                                            if (charts[item][chart]["data"]["datasets"][i]["data"].length >= 13) {
-                                                charts[item][chart]["data"]["datasets"][i]["data"].splice(0, 1);
-                                            }
-                                            charts[item][chart]["options"]["scales"]["x"]["min"] = data[item]["labels"][chart][i];
-                                            charts[item][chart]["options"]["scales"]["x"]["max"] = data[item]["labels"][chart][data[item]["labels"][chart].length -1];
-                                            charts[item][chart]["data"]["datasets"][i]["data"].push(data[item]["data"]["chart"]["datasets"]);
-                                            // Wenn Wert kleiner gleich Warnwert
-                                            if (Number(data[item]["data"][chart]["y"]) <= Number(data[item]["alerts"]["warning"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["alerts"]["danger"])) {
-                                                switchAlert(item, "warning");
-                                            }
-                                            else if (Number(data[item]["data"][chart]["y"]) <= Number(data[item]["alerts"]["danger"])) {
-                                                switchAlert(item, "danger");
-                                            }
-                                            else {
-                                                switchAlert(item, "success");
-                                            }
+                                    let index = charts[item]["current"]["data"]["datasets"].findIndex(key => key.stack === chart);
+                                    if (index >= 0) {
+                                        charts[item]["current"]["data"]["labels"] = data[item]["labels"]["current"];
+                                        if (charts[item]["current"]["data"]["datasets"][index]["data"].length >= 13) {
+                                            charts[item]["current"]["data"]["datasets"][index]["data"].splice(0, 1);
                                         }
-                                        charts[item][chart].update();
+                                        charts[item]["current"]["options"]["scales"]["x"]["min"] = data[item]["labels"]["current"][0];
+                                        charts[item]["current"]["options"]["scales"]["x"]["max"] = data[item]["labels"]["current"][data[item]["labels"]["current"].length -1];
+                                        charts[item]["current"]["data"]["datasets"][index]["data"].push(data[item]["data"][chart]);
+                                        // Wenn Wert kleiner gleich Warnwert
+                                        if (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["alerts"]["warning"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["alerts"]["danger"])) {
+                                            switchAlert(item, "warning");
+                                        }
+                                        else if (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["alerts"]["danger"])) {
+                                            switchAlert(item, "danger");
+                                        }
+                                        else {
+                                            switchAlert(item, "success");
+                                        }
+                                        charts[item]["current"].update();
                                     }
                                 }
                                 $("#section-" + item + "> canvas").css("visibility", "visible");
@@ -615,6 +693,41 @@
             });
         </script>
         <style>
+            @font-face {
+                font-family: "Font Awesome 5 Brands";
+                font-style: normal;
+                font-weight: 400;
+                font-display: block;
+                src: url("fonts/free-fa-brands-400.woff") format("woff");
+            }
+            @font-face {
+                font-family: "Font Awesome 5 Free";
+                font-style: normal;
+                font-weight: 400;
+                font-display: block;
+                src: url("fonts/free-fa-regular-400.woff") format("woff"),
+            }
+            @font-face {
+                font-family: "Font Awesome 5 Pro";
+                font-style: normal;
+                font-weight: 400;
+                font-display: block;
+                src: url("fonts/free-fa-regular-400.woff") format("woff")
+            }
+            @font-face {
+                font-family: "Font Awesome 5 Free";
+                font-style: normal;
+                font-weight: 900;
+                font-display: block;
+                src: url("fonts/free-fa-solid-900.woff") format("woff")
+            }
+            @font-face {
+                font-family:"Font Awe0some 5 Pro";
+                font-style: normal;
+                font-weight: 900;
+                font-display: block;
+                src: url("fonts/free-fa-solid-900.woff") format("woff")
+            }
             :root {
                 --alert-color-warning: #cd853f;
                 --alert-background-warning: #f7e8cd;
@@ -665,6 +778,13 @@
 		    	color: #fff;
                 justify-content: center;
             }
+            #logo {
+                background-image: url("img/logo.png");
+                background-size: 115px 32px;
+                background-repeat: no-repeat;
+                width: 115px;
+                height: 32px;
+            }
             footer {
                 height: 50px;
                 color: white; 
@@ -689,12 +809,12 @@
             #overview-panel {
                 display: grid;
                 /* Höhe */
-                grid-auto-rows: 300px;
+                grid-auto-rows: 350px;
                 /* Breite */ 
-                grid-template-columns: repeat(auto-fill, 300px);
+                grid-template-columns: repeat(auto-fill, 350px);
                 grid-gap: 10px;
                 align-content: flex-start;
-                justify-content: center
+                justify-content: space-between
             }
 	    	section.lol {
                 border: 2px solid var(--bs-gray-300, #dee2e6)
@@ -1006,7 +1126,9 @@
     <body class="m-0 p-0">
         <header>
             <nav class="navbar navbar-expand-sm p-0" id="navigation">
-                <h3 class="navbar-brand ms-2 mb-0" href="#">Hydroponic, lol</h3>
+                <a class="navbar-brand ms-2 mb-0" href="#">
+                    <div id="logo"></div>
+                </a>
                 <ul class="navbar-nav" id="first-navbar">
                     <li class="nav-item">
                         <a class="nav-link active rounded-3" href="#" id="randomizeData">Active</a>
@@ -1015,7 +1137,7 @@
                       <a class="nav-link rounded-3" href="#">Link</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link rounded-3" href="#">Link</a>
+                        <a class="nav-link rounded-3" href="#"></a>
                     </li>
                     <li class="nav-item">
                       <a class="nav-link disabled rounded-3" href="#">Disabled</a>
@@ -1046,11 +1168,18 @@
                     </ul>
                     <div class="tab-content p-4 border">
                         <div class="tab-pane active" id="overview">
+                            <div class="d-inline-flex align-items-center mb-3">
+                                <label for="plantSelection">Pflanze:</label>
+                                <select class="form-select ms-2" id="plantSelection">
+                                    <option value="wtf">Riesenrafflesie</option>
+                                </select>
+                            </div>
                             <div id="overview-panel">
                                 <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-co2">
                                     <div>
                                         <h2><i class="fas fa-info-circle"></i> Keine Daten</h2>
                                     </div>
+                                    <button class="btn btn-xs btn-secondary" style="right: 10px; top: 10px; position: absolute; z-index: 5"><i class="fas fa-wrench"></i></button>
                                     <canvas id="co2-chart-current"></canvas>
                                 </section>
                                 <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-temperature">
@@ -1103,6 +1232,7 @@
                                     <div id="collapse-pump-actions" class="collapse hide" data-bs-parent="#pump-actions-accordion">
                                         <div class="card-body">
                                         2 Wasserpumpen, 5 Schlauchpumpen
+                                        <input type="checkbox" checked data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus">
                                         </div>
                                     </div>
                                 </div>
@@ -1111,13 +1241,13 @@
                                 <div class="card">
                                     <div class="card-header">
                                         <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-actuator-actions">
-                                            <h4 class="ms-0 mt-auto me-auto mb-auto"><i class="fas fa-bolt"></i> Aktorensteuerung</h4>
+                                            <h4 class="ms-0 mt-auto me-auto mb-auto"><i class="fas fa-seedling"></i> Pflanzen</h4>
                                             <i class="fas fa-chevron-down ms-auto mt-auto me-2 mb-auto"></i>
                                         </a>
                                     </div>
                                     <div id="collapse-actuator-actions" class="collapse hide" data-bs-parent="#actuator-actions-accordion">
                                         <div class="card-body">
-                                          1 Schwimmerschalter
+                                          Lorem!
                                         </div>
                                     </div>
                                 </div>
