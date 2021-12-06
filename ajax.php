@@ -30,12 +30,8 @@
                 "lowerControlLimit" => 10,
                 "lowerWarningLimit" => 20,
                 "actuator" => null
-            ],
-            "alerts" => [
-                "warning" => 30,
-                "danger" => 20
             ]
-        ],
+        ]/*,
         "temperature" => [
             "labels" => [
                 "current" => $labels
@@ -119,7 +115,7 @@
                 "warning" => 30,
                 "danger" => 20
             ]
-        ]
+        ]*/
     ];
     echo json_encode($data);
     return;

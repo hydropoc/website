@@ -58,29 +58,24 @@
                 element = $("#section-" + element)[0];
                 if (["danger", "warning", "success"].includes(type) && !Object.values(element.classList).includes(type)) {
                     $(element).removeClass("danger warning success").addClass(type);
-                    let icon = $(element).find(".section-header > h3 > i:first-of-type");
-                    $(icon).removeClass("fa-exclamation-circle fa-check-circle fa-exclamation-triangle");
-                    let section = $(element).attr("id").split("-")[1];
+                    /*let section = $(element).attr("id").split("-")[1];
                     switch (type) {
                         case "danger":
-                            $(icon).addClass("fa-exclamation-circle");
                             //charts[section]["current"]["data"]["datasets"][0]["fill"]["above"] = getGradient(charts[section]["current"]["ctx"], charts[section]["current"]["chartArea"], {0: getCSSVar("--chart-background-danger"), 1: "rgba(255, 255, 255, 0.5)"});
                             charts[section]["current"]["data"]["datasets"][0]["backgroundColor"] = getCSSVar("--chart-background-danger");
                             charts[section]["current"]["data"]["datasets"][0]["borderColor"] = getCSSVar("--chart-border-danger");
                             break;
                         case "warning":
-                            $(icon).addClass("fa-exclamation-triangle");
                             //charts[section]["current"]["data"]["datasets"][0]["fill"]["above"] = getGradient(charts[section]["current"]["ctx"], charts[section]["current"]["chartArea"], {0: getCSSVar("--chart-background-warning"), 1: "rgba(255, 255, 255, 0.5)"});
                             charts[section]["current"]["data"]["datasets"][0]["backgroundColor"] = getCSSVar("--chart-background-warning");
                             charts[section]["current"]["data"]["datasets"][0]["borderColor"] = getCSSVar("--chart-border-warning");
                             break;
                         case "success":
-                            $(icon).addClass("fa-check-circle");
                             //charts[section]["current"]["data"]["datasets"][0]["fill"]["above"] = getGradient(charts[section]["current"]["ctx"], charts[section]["current"]["chartArea"], {0: getCSSVar("--chart-background-success"), 1: "rgba(255, 255, 255, 0.5)"});
                             charts[section]["current"]["data"]["datasets"][0]["backgroundColor"] = getCSSVar("--chart-background-success");
                             charts[section]["current"]["data"]["datasets"][0]["borderColor"] = getCSSVar("--chart-border-success");
                             break;
-                    }
+                    }*/
                 }
             }
             function getCSSVar(val) {
@@ -261,8 +256,8 @@
                             {
                                 label: "",
                                 stack: "current",
-                                backgroundColor: getCSSVar("--chart-background-info"),
-                                borderColor: getCSSVar("--chart-border-info"),
+                                borderColor: "black",
+                                borderWidth: 1
                             },
                             {
                                 label: "MW",
@@ -658,12 +653,13 @@
                         // item = Sensor, z.B. co2
                         for (item of items) {
                             //data.<item>.data.stack
+                                console.log(data[item]["data"]);
                             if (charts.hasOwnProperty(item)) {
                                 // chart z.B. "current"
                                 let charts_ = Object.keys(data[item]["data"]); // current, setpoint, mean
                                 for (chart of charts_) {
                                     let index = charts[item]["current"]["data"]["datasets"].findIndex(key => key.stack === chart);
-                                    if (index >= 0) {
+                                    if (index >= 0 && data[item]["data"][chart] !== null) {
                                         charts[item]["current"]["data"]["labels"] = data[item]["labels"]["current"];
                                         if (charts[item]["current"]["data"]["datasets"][index]["data"].length >= 13) {
                                             charts[item]["current"]["data"]["datasets"][index]["data"].splice(0, 1);
@@ -672,10 +668,11 @@
                                         charts[item]["current"]["options"]["scales"]["x"]["max"] = data[item]["labels"]["current"][data[item]["labels"]["current"].length -1];
                                         charts[item]["current"]["data"]["datasets"][index]["data"].push(data[item]["data"][chart]);
                                         // Wenn Wert kleiner gleich Warnwert
-                                        if (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["alerts"]["warning"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["alerts"]["danger"])) {
+                                        // (Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperWarningLimit"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["upperControlLimit"])) ||
+                                        if ((Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerWarningLimit"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["data"]["lowerControlLimit"]))) {
                                             switchAlert(item, "warning");
                                         }
-                                        else if (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["alerts"]["danger"])) {
+                                        else if (Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperControlLimit"]) || Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerControlLimit"])) {
                                             switchAlert(item, "danger");
                                         }
                                         else {
