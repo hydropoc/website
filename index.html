@@ -653,27 +653,29 @@
                         // item = Sensor, z.B. co2
                         for (item of items) {
                             //data.<item>.data.stack
-                                console.log(data[item]["data"]);
+                                //console.log(data[item]["data"]);
                             if (charts.hasOwnProperty(item)) {
                                 // chart z.B. "current"
+                                charts[item]["current"]["data"]["labels"] = data[item]["labels"]["current"];
+                                console.log(data[item]["labels"]["current"][data[item]["labels"]["current"].length -1]);
                                 let charts_ = Object.keys(data[item]["data"]); // current, setpoint, mean
                                 for (chart of charts_) {
                                     let index = charts[item]["current"]["data"]["datasets"].findIndex(key => key.stack === chart);
                                     if (index >= 0 && data[item]["data"][chart] !== null) {
-                                        charts[item]["current"]["data"]["labels"] = data[item]["labels"]["current"];
                                         if (charts[item]["current"]["data"]["datasets"][index]["data"].length >= 13) {
                                             charts[item]["current"]["data"]["datasets"][index]["data"].splice(0, 1);
                                         }
+                                        charts[item]["current"]["data"]["datasets"][index]["data"].push(data[item]["data"][chart]);
                                         charts[item]["current"]["options"]["scales"]["x"]["min"] = data[item]["labels"]["current"][0];
                                         charts[item]["current"]["options"]["scales"]["x"]["max"] = data[item]["labels"]["current"][data[item]["labels"]["current"].length -1];
-                                        charts[item]["current"]["data"]["datasets"][index]["data"].push(data[item]["data"][chart]);
                                         // Wenn Wert kleiner gleich Warnwert
-                                        // (Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperWarningLimit"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["upperControlLimit"])) ||
-                                        if ((Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerWarningLimit"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["data"]["lowerControlLimit"]))) {
+                                        if ((Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["data"]["lowerControlLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["upperControlLimit"]["y"]))) {
+                                            console.log("jo");
                                             switchAlert(item, "warning");
                                         }
-                                        else if (Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperControlLimit"]) || Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerControlLimit"])) {
+                                        else if ((Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperControlLimit"]["y"]) && Number(data[item]["data"]["current"]["y"]) > Number(data[item]["data"]["upperWarningLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerControlLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["lowerWarningLimit"]["y"]))) {
                                             switchAlert(item, "danger");
+                                            console.log("joo");
                                         }
                                         else {
                                             switchAlert(item, "success");
@@ -695,28 +697,28 @@
                 font-style: normal;
                 font-weight: 400;
                 font-display: block;
-                src: url("fonts/free-fa-brands-400.woff") format("woff");
+                src: url("font/free-fa-brands-400.woff") format("woff");
             }
             @font-face {
                 font-family: "Font Awesome 5 Free";
                 font-style: normal;
                 font-weight: 400;
                 font-display: block;
-                src: url("fonts/free-fa-regular-400.woff") format("woff"),
+                src: url("font/free-fa-regular-400.woff") format("woff"),
             }
             @font-face {
                 font-family: "Font Awesome 5 Pro";
                 font-style: normal;
                 font-weight: 400;
                 font-display: block;
-                src: url("fonts/free-fa-regular-400.woff") format("woff")
+                src: url("font/free-fa-regular-400.woff") format("woff")
             }
             @font-face {
                 font-family: "Font Awesome 5 Free";
                 font-style: normal;
                 font-weight: 900;
                 font-display: block;
-                src: url("fonts/free-fa-solid-900.woff") format("woff")
+                src: url("font/free-fa-solid-900.woff") format("woff")
             }
             @font-face {
                 font-family:"Font Awe0some 5 Pro";
