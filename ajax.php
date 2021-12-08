@@ -1,20 +1,20 @@
 <?php
     date_default_timezone_set("Europe/Berlin");
-    $labels = json_decode($_POST["labels"]);
-    $test = $labels;
-
-    if (is_array($labels) && count($labels) == 13) {
-        echo $_POST["labels"];
-        $fullDate = date_create(date_format(date_create(), "d.m.Y") . " " . $labels[array_key_last($labels)]);
-        date_modify($fullDate, "+5 seconds");
-        array_splice($labels, 0, 1);
-        $labels[] = date_format($fullDate, "H:i:s");
+    $labels = $_POST["labels"];
+    if (is_array($labels) && count($labels) >= 13) {
+        $lastLabel = $labels[array_key_last($labels)];
+        $date = date_create(date_format(date_create(), "d.m.Y") . " " . $lastLabel);
+        date_modify($date, "+5 seconds");
+        array_shift($labels);
+        array_push($labels, date_format($date, "H:i:s"));
     }
-    elseif (is_array($labels) && count($labels) <= 0) {
+    else {
+        $labels = [];
         $date = date_create();
-        for ($i = 1; $i <= 13; $i++) {
-            $labels[] = date_format($date, "H:i:s");
+        array_push($labels, date_format($date, "H:i:s"));
+        for ($i = 1; $i <= 12; $i++) {
             date_modify($date, "+5 seconds");
+            array_push($labels, date_format($date, "H:i:s"));
         }
     }
     $data = [

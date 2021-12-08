@@ -19,7 +19,6 @@
         <script src="js/chart.min.js"></script>
         <script src="js/bootstrap4-toggle.min.js"></script>
         <script>
-            //const app = Vue.createApp({});
             Chart.register("filler");
             const charts = {
                 "co2": {},
@@ -221,26 +220,26 @@
                 charts["co2"]["current"] = new Chart($("#co2-chart-current")[0].getContext("2d"), {
                     options: {
                         plugins: {
-                                legend: {
-                                    labels: {
-                                        usePointStyle: true,
-                                        pointStyle: "rect"
-                                    }
-                                },
-                                title: {
-                                    text: "Co²-Gehalt",
-                                    display: true,
-                                    font: {
-                                        size: 14
-                                    }
+                            legend: {
+                                labels: {
+                                    usePointStyle: true,
+                                    pointStyle: "rect"
                                 }
                             },
+                            title: {
+                                text: "Co²-Gehalt",
+                                display: true,
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
                         maintainAspectRatio: false,
                         scales: {
                             x: {
                                 ticks: {
                                     callback: function(val, index) {
-                                        return index % 3 === 0 ? charts["co2"]["current"]["data"]["labels"][index] : "";
+                                        return index % 4 === 0 ? charts["co2"]["current"]["data"]["labels"][index] : "";
                                     }
                                 }
                             },
@@ -254,15 +253,17 @@
                     data: {
                         datasets: [
                             {
-                                label: "",
+                                label: "Aktuell",
                                 stack: "current",
                                 borderColor: "black",
+                                backgroundColor: "rgba(0, 0, 0, 0.75)",
                                 borderWidth: 1
                             },
                             {
                                 label: "MW",
                                 stack: "middle",
                                 borderColor: "green",
+                                backgroundColor: "rgba(0, 255, 0, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "line",
                                 plugins: {
@@ -275,6 +276,7 @@
                                 label: "SW",
                                 stack: "setpoint",
                                 borderColor: "orange",
+                                backgroundColor: "rgba(253, 126, 20, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "line",
                                 plugins: {
@@ -286,9 +288,10 @@
                             {
                                 label: "OEG",
                                 stack: "upperControlLimit",
-                                borderColor: "red",
+                                borderColor: "rgb(220, 53, 69)",
+                                backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
-                                borderDash: [8,5],
+                                borderDash: [10, 5],
                                 pointStyle: "line",
                                 plugins: {
                                     legend: {
@@ -299,9 +302,10 @@
                             {
                                 label: "OWG",
                                 stack: "upperWarningLimit",
-                                borderColor: "orange",
+                                borderColor: "rgb(255, 127, 39)",
+                                backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
-                                borderDash: [5,3],
+                                borderDash: [5, 5],
                                 pointStyle: "line",
                                 plugins: {
                                     legend: {
@@ -312,9 +316,10 @@
                             {
                                 label: "UEG",
                                 stack: "lowerControlLimit",
-                                borderColor: "red",
+                                borderColor: "rgb(220, 53, 69)",
+                                backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
-                                borderDash: [8,5],
+                                borderDash: [10, 5],
                                 pointStyle: "line",
                                 plugins: {
                                     legend: {
@@ -325,9 +330,10 @@
                             {
                                 label: "UWG",
                                 stack: "lowerWarningLimit",
-                                borderColor: "orange",
+                                borderColor: "rgb(255, 127, 39)",
+                                backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
-                                borderDash: [5,3],
+                                borderDash: [5, 5],
                                 pointStyle: "line",
                                 plugins: {
                                     legend: {
@@ -339,6 +345,7 @@
                                 label: "AZ",
                                 stack: "actuator",
                                 borderColor: "blue",
+                                backgroundColor: "rgba(0, 0, 255, 0.75)",
                                 pointStyle: "line",
                                 fill: {
                                     target: "start",
@@ -348,7 +355,7 @@
                                             // This case happens on initial chart load
                                             return;
                                         }
-                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(205, 133, 63, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(0, 0, 255, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
                                     }
                                 }
                             }
@@ -657,20 +664,19 @@
                             if (charts.hasOwnProperty(item)) {
                                 // chart z.B. "current"
                                 charts[item]["current"]["data"]["labels"] = data[item]["labels"]["current"];
-                                console.log(data[item]["labels"]["current"][data[item]["labels"]["current"].length -1]);
+                                //console.log(data[item]["labels"]["current"][data[item]["labels"]["current"].length -1]);
                                 let charts_ = Object.keys(data[item]["data"]); // current, setpoint, mean
                                 for (chart of charts_) {
                                     let index = charts[item]["current"]["data"]["datasets"].findIndex(key => key.stack === chart);
                                     if (index >= 0 && data[item]["data"][chart] !== null) {
                                         if (charts[item]["current"]["data"]["datasets"][index]["data"].length >= 13) {
-                                            charts[item]["current"]["data"]["datasets"][index]["data"].splice(0, 1);
+                                            charts[item]["current"]["data"]["datasets"][index]["data"].shift();
                                         }
                                         charts[item]["current"]["data"]["datasets"][index]["data"].push(data[item]["data"][chart]);
                                         charts[item]["current"]["options"]["scales"]["x"]["min"] = data[item]["labels"]["current"][0];
                                         charts[item]["current"]["options"]["scales"]["x"]["max"] = data[item]["labels"]["current"][data[item]["labels"]["current"].length -1];
                                         // Wenn Wert kleiner gleich Warnwert
                                         if ((Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["data"]["lowerControlLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["upperControlLimit"]["y"]))) {
-                                            console.log("jo");
                                             switchAlert(item, "warning");
                                         }
                                         else if ((Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperControlLimit"]["y"]) && Number(data[item]["data"]["current"]["y"]) > Number(data[item]["data"]["upperWarningLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerControlLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["lowerWarningLimit"]["y"]))) {
@@ -835,18 +841,6 @@
                 justify-content: center;
                 z-index: 10;
             }
-            /*
-            section.section-item {
-                background-color: #fbfbfb;
-                min-height: 400px;
-                flex: 2 0;
-                border-radius: 2px;
-                outline: 1px solid var(--bs-gray-300);
-                display: flex;
-                align-content: center;
-                align-items: center;
-                position: relative
-            }*/
             section.lol.warning {
                 background-color: var(--alert-background-warning);
                 border: 2px dashed var(--alert-color-warning);
@@ -857,50 +851,6 @@
                 border: 2px dashed var(--alert-color-danger);
                 animation: background-flashing-danger 1s linear 0s infinite
             }
-            /*
-            section.lol.warning > .section-body > .section-item {
-                outline: 1px solid var(--alert-color-warning);
-            }
-            section.lol.danger > .section-body > .section-item {
-                outline: 1px solid var(--alert-color-danger);
-            }
-            section.lol > .section-header > hr {
-                flex: 1 0 auto;
-                background-color: var(--bs-gray-300, #dee2e6);
-            }
-            section.lol.warning > .section-header > hr {
-                background-color: var(--alert-color-warning)
-            }
-            section.lol.danger > .section-header > hr {
-                background-color: var(--alert-color-danger)
-            }
-            section.lol.warning > .section-header > h3 > i:first-of-type {
-                color: var(--alert-color-warning);
-                animation: flashing 3s linear 0s infinite
-            }
-            section.lol.danger > .section-header > h3 > i:first-of-type {
-                color: var(--alert-color-danger);
-                animation: flashing 1s linear 0s infinite
-            }
-            section.lol.success > .section-header > h3 > i:first-of-type {
-                color: var(--alert-color-success)
-            }
-            .section-item-label {
-                flex: 2 0
-            }
-	    	.separator {
-		    	width: 0;
-			    border-right: 1px solid var(--bs-gray-300, #dee2e6);
-    			margin-left: -1px;
-	    		flex: 0 0 1px;
-                align-self: stretch;
-		    }
-	    	section.lol.warning > .section-body > .separator {
-			    border-right: 1px solid var(--alert-color-warning);
-		    }
-	    	section.lol.danger > .section-body > .separator {
-			    border-right: 1px solid var(--alert-color-danger);
-		    }*/
             .tab-content {
                 background-color: #fbfbfb;
                 border-bottom-left-radius: 5px;
@@ -1128,6 +1078,7 @@
                 <a class="navbar-brand ms-2 mb-0" href="#">
                     <div id="logo"></div>
                 </a>
+                <!--
                 <ul class="navbar-nav" id="first-navbar">
                     <li class="nav-item">
                         <a class="nav-link active rounded-3" href="#" id="randomizeData">Active</a>
@@ -1142,6 +1093,7 @@
                       <a class="nav-link disabled rounded-3" href="#">Disabled</a>
                     </li>
                 </ul>
+            -->
                 <ul class="navbar-nav mt-auto me-2 mb-auto ms-auto" id="second-navbar">
                     <li class="nav-item">
                         <a class="nav-link rounded-3" href="#" data-bs-toggle="modal" data-bs-target="#loginModal"><i class="fas fa-sign-in-alt"></i> Anmelden</a>
