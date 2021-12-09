@@ -52,6 +52,14 @@
                     sSortDescending: ": aktivieren, um Spalte absteigend zu sortieren"
                 }
             }
+            // Aktorensimulation
+            const actuators = {
+                "co2": {
+                    "current": {
+                        "count" : 0
+                    }
+                }
+            };
             function switchAlert(element, type) {
                 type = type.toLowerCase();
                 element = $("#section-" + element)[0];
@@ -221,6 +229,7 @@
                     options: {
                         plugins: {
                             legend: {
+                                display: false,
                                 labels: {
                                     usePointStyle: true,
                                     pointStyle: "rect"
@@ -253,96 +262,66 @@
                     data: {
                         datasets: [
                             {
-                                label: "Aktuell",
+                                label: "Aktueller Wert",
                                 stack: "current",
                                 borderColor: "black",
                                 backgroundColor: "rgba(0, 0, 0, 0.75)",
                                 borderWidth: 1
                             },
                             {
-                                label: "MW",
+                                label: "Mittelwert",
                                 stack: "middle",
                                 borderColor: "green",
                                 backgroundColor: "rgba(0, 255, 0, 0.75)",
                                 borderWidth: 2,
-                                pointStyle: "line",
-                                plugins: {
-                                    legend: {
-                                        display: false
-                                    }
-                                }
+                                pointStyle: "line"
                             },
                             {
-                                label: "SW",
+                                label: "Sollwert",
                                 stack: "setpoint",
                                 borderColor: "orange",
                                 backgroundColor: "rgba(253, 126, 20, 0.75)",
                                 borderWidth: 2,
-                                pointStyle: "line",
-                                plugins: {
-                                    legend: {
-                                        display: false
-                                    }
-                                }
+                                pointStyle: "line"
                             },
                             {
-                                label: "OEG",
+                                label: "Obere Eingriffsgrenze",
                                 stack: "upperControlLimit",
                                 borderColor: "rgb(220, 53, 69)",
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 borderDash: [10, 5],
-                                pointStyle: "line",
-                                plugins: {
-                                    legend: {
-                                        display: false
-                                    }
-                                }
+                                pointStyle: "line"
                             },
                             {
-                                label: "OWG",
+                                label: "Obere Warngrenze",
                                 stack: "upperWarningLimit",
                                 borderColor: "rgb(255, 127, 39)",
                                 backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
                                 borderDash: [5, 5],
-                                pointStyle: "line",
-                                plugins: {
-                                    legend: {
-                                        display: false
-                                    }
-                                }
+                                pointStyle: "line"
                             },
                             {
-                                label: "UEG",
+                                label: "Untere Eingriffsgrenze",
                                 stack: "lowerControlLimit",
                                 borderColor: "rgb(220, 53, 69)",
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 borderDash: [10, 5],
-                                pointStyle: "line",
-                                plugins: {
-                                    legend: {
-                                        display: false
-                                    }
-                                }
+                                pointStyle: "line"
                             },
                             {
-                                label: "UWG",
+                                label: "Untere Warngrenze",
                                 stack: "lowerWarningLimit",
                                 borderColor: "rgb(255, 127, 39)",
                                 backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
                                 borderDash: [5, 5],
-                                pointStyle: "line",
-                                plugins: {
-                                    legend: {
-                                        display: false
-                                    }
-                                }
+                                pointStyle: "line"
                             },
                             {
-                                label: "AZ",
+                                label: "Aktorenzeit",
                                 stack: "actuator",
                                 borderColor: "blue",
                                 backgroundColor: "rgba(0, 0, 255, 0.75)",
@@ -654,7 +633,10 @@
                 // Neue Daten vom Server laden
                 setInterval(function() {
                     // "current" gilt für das Diagramm der letzten Minute, "history" ist für das Verlaufsdiagramm
-                    $.post("ajax.php", { labels: JSON.stringify(charts["co2"]["current"]["data"]["labels"]) }).done(function(response) {
+                    $.post("ajax.php", {
+                        labels: JSON.stringify(charts["co2"]["current"]["data"]["labels"]),
+                        actuator: JSON.stringify(actuators["co2"]["current"])
+                    }).done(function(response) {
                         let data = JSON.parse(response);
                         let items = Object.keys(data);
                         // item = Sensor, z.B. co2
@@ -669,6 +651,9 @@
                                 for (chart of charts_) {
                                     let index = charts[item]["current"]["data"]["datasets"].findIndex(key => key.stack === chart);
                                     if (index >= 0 && data[item]["data"][chart] !== null) {
+                                        if (data[item]["data"][chart] == "actuator" && actuators[item][chart]["on"] == 1) {
+                                            //
+                                        }
                                         if (charts[item]["current"]["data"]["datasets"][index]["data"].length >= 13) {
                                             charts[item]["current"]["data"]["datasets"][index]["data"].shift();
                                         }
