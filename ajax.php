@@ -1,7 +1,7 @@
 <?php
     date_default_timezone_set("Europe/Berlin");
     $labels = json_decode($_POST["labels"], true);
-    $actuator = json_decode($_POST["actuator"], true);
+    $actuators = json_decode($_POST["actuators"], true);
     // Sollwerte
     $setpoints = [
         "co2" => 60,
@@ -52,20 +52,21 @@
 
     // key z.B. co2, value z.B. 60
     foreach ($setpoints as $key => $value) {
-        if (array_key_exists($key, $actuator)) {
+        if (array_key_exists($key, $actuators)) {
             // Wenn Simulation bereits läuft, Restwert berechnen und hinzufügen
-            if (array_key_exists("enabled", $actuator[$key]) && $actuator[$key]["enabled"] == 1) {
+            if (array_key_exists("enabled", $actuators[$key]) && $actuators[$key]["enabled"] == 1) {
                 // Wenn fertig, enabled auf 0 setzen
             }
             else {
                 // Wennn Simulation nicht läuft, zufallsbedingt starten
-                if (random_int(0, 5) == 1) {
+                if (random_int(0, 3) == 1) {
                     // Zufallsbedingte Dauer des Aktors festlegen (Spanne von N Label, steigende Aktorleistung parallel mit steigendem aktuellen Wert)
-                    $actuator[$key]["enabled"] = 1;
+                    $actuators[$key]["enabled"] = 1;
                     $actuatorDuration = random_int(4, 7);
                     $currentValues = [];
                     $startLabel = array_rand($labels);
-                    $actuator[$key]["count"] = $actuatorDuration; // Muss immer weiter sinken pro Serveranfrage
+                    $startPosition = $labels[array_search($startLabel, array_keys($labels))];
+                    $actuators[$key]["count"] = $actuatorDuration; // Muss immer weiter sinken pro Serveranfrage
                     // Zu hohen Wert normalisieren (80+)
                     if (random_int(0, 1) == 1) {
                         // Muss für jedes Diagramm gemacht werden (co2, temperature...)
@@ -75,7 +76,8 @@
                         $lol = $difference / $actuatorDuration; // Ermitteln, um wie viel der Wert pro Label sinken kann
                         $currentValues[] = [$labels[$startLabel] => $lol];
                         for ($i = 1; $i < $actuatorDuration; $i++) {
-                            $currentValues[] = [$labels[$i] => $lol];
+                            $currentValues[] = [$labels[array_search($startLabel, array_keys($labels)) + $i] => $lol];
+                            // Was, wenn out of range?
                         }
                     }
                     // Zu niedrigen Wert normalisieren (20-)
@@ -93,7 +95,7 @@
                             }
                         }
                     }*/
-                    $actuator[$key]["values"] = $currentValues;
+                    $actuators[$key]["values"] = $currentValues;
                     //array_push($currentValues, (count($currentValues) >= 1 ? random_int($currentValues[array_key_last($currentValues)] + $i, $currentValues[array_key_last($currentValues)] + random_int(1,5)) : random_int(1 ,10)));
                 }
                 else {
@@ -117,7 +119,7 @@
                 "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 80],
                 "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 10],
                 "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 20],
-                "actuator" => null
+                "actuator" => $actuators["co2"]
             ]
         ],
         "temperature" => [
