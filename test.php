@@ -1,4 +1,4 @@
 <?php
-    $test = ["A", "B", "C"];
-    echo $test[random_int(0, array_key_last($test))] . "<br>" . array_key_last($test);
+    $test = ["A" => 1, "B" => 2, "C" => 3];
+    print_r($test["A"]++);
 ?>

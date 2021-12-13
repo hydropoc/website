@@ -54,11 +54,13 @@
             }
             // Aktorensimulation
             const actuators = {
-                "co2": {
-                    "current": {
-                        "enabled" : 0
-                    }
-                }
+                "co2": {},
+                "temperature": {},
+                "salinity": {},
+                "ph": {},
+                "waterlevel": {},
+                "ventilation": {},
+                "brightness": {}
             };
             function switchAlert(element, type) {
                 type = type.toLowerCase();
@@ -1118,7 +1120,7 @@
                                 for (chart of charts_) {
                                     let index = charts[item]["current"]["data"]["datasets"].findIndex(key => key.stack === chart);
                                     if (index >= 0 && data[item]["data"][chart] !== null) {
-                                        if (data[item]["data"][chart] == "actuator" && actuators[item][chart]["on"] == 1) {
+                                        if (data[item]["data"][chart] == "actuator" && data[item]["data"][chart]["actuator"] == 1) {
                                             //
                                         }
                                         if (charts[item]["current"]["data"]["datasets"][index]["data"].length >= 13) {

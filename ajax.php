@@ -47,7 +47,6 @@
             }
         }
     }
-    // "Programm" für Aktoren erzeugen als Objekte: ["00:00:05" => ["y" => "00:00:05", "x" => random_int()]]
     // Objekte immer zwischen Client und Server senden und anpassen (Schlüssel entfernen und hinzufügen wie bei AKtualisierung der Label)
 
     // key z.B. co2, value z.B. 60
@@ -55,6 +54,13 @@
         if (array_key_exists($key, $actuators)) {
             // Wenn Simulation bereits läuft, Restwert berechnen und hinzufügen
             if (array_key_exists("enabled", $actuators[$key]) && $actuators[$key]["enabled"] == 1) {
+                //$currentValue = $actuator[$key]["value"];
+                $actuator[$key]["count"] = $actuator[$key]["count"] -1;
+                $actuator[$key]["value"] = $actuator[$key]["value"] - $actuators[$key]["factor"];
+                $actuator[$key]["data"] = ["x" => $labels[array_key_last($labels)], "y" => $actuators[$key]["value"]];
+                if ($actuator[$key]["count"] == 0) {
+                    $actuator[$key] = ["enabled" => 0];
+                }
                 // Wenn fertig, enabled auf 0 setzen
             }
             else {
@@ -62,23 +68,26 @@
                 if (random_int(0, 3) == 1) {
                     // Zufallsbedingte Dauer des Aktors festlegen (Spanne von N Label, steigende Aktorleistung parallel mit steigendem aktuellen Wert)
                     $actuators[$key]["enabled"] = 1;
-                    $actuatorDuration = random_int(4, 7);
+                    $actuatorDuration = random_int(5, 10); //soll auch länger dauern können als anzahl label
                     $currentValues = [];
-                    $startLabel = array_rand($labels);
-                    $startPosition = $labels[array_search($startLabel, array_keys($labels))];
+                    //$startPosition = array_search(array_rand($labels), array_keys($labels));
                     $actuators[$key]["count"] = $actuatorDuration; // Muss immer weiter sinken pro Serveranfrage
                     // Zu hohen Wert normalisieren (80+)
                     if (random_int(0, 1) == 1) {
                         // Muss für jedes Diagramm gemacht werden (co2, temperature...)
                         $wtf = random_int(80, 100);
-                        $difference = $wtf - $value;
+                        $difference = $wtf - $value; // Differenz zwischen Sollwert und Zufallswert
                         // wtf müssen immer weiter sinken
-                        $lol = $difference / $actuatorDuration; // Ermitteln, um wie viel der Wert pro Label sinken kann
-                        $currentValues[] = [$labels[$startLabel] => $lol];
-                        for ($i = 1; $i < $actuatorDuration; $i++) {
-                            $currentValues[] = [$labels[array_search($startLabel, array_keys($labels)) + $i] => $lol];
-                            // Was, wenn out of range?
-                        }
+                        $lol = $difference / $actuatorDuration; // Ermitteln, um wie viel der Wert pro Label sinken wird
+                        $actuators[$key]["method"] = "reduce";
+                        $actuators[$key]["factor"] = $lol;
+                        $actuators[$key]["value"] = $wtf; // Muss immer mittels $lol weiter gesenkt werden pro Serveranfrage
+                        $actuators[$key]["data"] = ["x" => $labels[array_key_last($labels)], "y" => $actuators[$key]["value"]];
+                        /*
+                        for ($i = 1; $i <= $actuatorDuration; $i++) {
+                            $wtf -= $lol;
+                            $currentValues[] = [$startPosition + $i => $wtf];
+                        }*/
                     }
                     // Zu niedrigen Wert normalisieren (20-)
                     /*
@@ -95,7 +104,6 @@
                             }
                         }
                     }*/
-                    $actuators[$key]["values"] = $currentValues;
                     //array_push($currentValues, (count($currentValues) >= 1 ? random_int($currentValues[array_key_last($currentValues)] + $i, $currentValues[array_key_last($currentValues)] + random_int(1,5)) : random_int(1 ,10)));
                 }
                 else {
