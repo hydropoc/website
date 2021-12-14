@@ -54,13 +54,13 @@
             }
             // Aktorensimulation
             const actuators = {
-                "co2": {},
-                "temperature": {},
-                "salinity": {},
-                "ph": {},
-                "waterlevel": {},
-                "ventilation": {},
-                "brightness": {}
+                "co2": {enabled: 0},
+                "temperature": {enabled: 0},
+                "salinity": {enabled: 0},
+                "ph": {enabled: 0},
+                "waterlevel": {enabled: 0},
+                "ventilation": {enabled: 0},
+                "brightness": {enabled: 0}
             };
             function switchAlert(element, type) {
                 type = type.toLowerCase();
@@ -334,8 +334,9 @@
                             {
                                 label: "Aktorenzeit",
                                 stack: "actuator",
-                                borderColor: "blue",
-                                backgroundColor: "rgba(0, 0, 255, 0.75)",
+                                borderColor: "rgb(112, 146, 190)",
+                                backgroundColor: "rgba(112, 146, 190, 0.75)",
+                                borderWidth: 1,
                                 pointStyle: "line",
                                 fill: {
                                     target: "start",
@@ -344,7 +345,7 @@
                                         if (!chart) {
                                             return;
                                         }
-                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(0, 0, 255, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(112, 146, 190, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
                                     }
                                 }
                             }
@@ -458,8 +459,9 @@
                             {
                                 label: "Aktorenzeit",
                                 stack: "actuator",
-                                borderColor: "blue",
-                                backgroundColor: "rgba(0, 0, 255, 0.75)",
+                                borderColor: "rgb(112, 146, 190)",
+                                backgroundColor: "rgba(112, 146, 190, 0.75)",
+                                borderWidth: 1,
                                 pointStyle: "line",
                                 fill: {
                                     target: "start",
@@ -468,7 +470,7 @@
                                         if (!chart) {
                                             return;
                                         }
-                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(0, 0, 255, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(112, 146, 190, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
                                     }
                                 }
                             }
@@ -582,8 +584,9 @@
                             {
                                 label: "Aktorenzeit",
                                 stack: "actuator",
-                                borderColor: "blue",
-                                backgroundColor: "rgba(0, 0, 255, 0.75)",
+                                borderColor: "rgb(112, 146, 190)",
+                                backgroundColor: "rgba(112, 146, 190, 0.75)",
+                                borderWidth: 1,
                                 pointStyle: "line",
                                 fill: {
                                     target: "start",
@@ -592,7 +595,7 @@
                                         if (!chart) {
                                             return;
                                         }
-                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(0, 0, 255, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(112, 146, 190, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
                                     }
                                 }
                             }
@@ -706,8 +709,9 @@
                             {
                                 label: "Aktorenzeit",
                                 stack: "actuator",
-                                borderColor: "blue",
-                                backgroundColor: "rgba(0, 0, 255, 0.75)",
+                                borderColor: "rgb(112, 146, 190)",
+                                backgroundColor: "rgba(112, 146, 190, 0.75)",
+                                borderWidth: 1,
                                 pointStyle: "line",
                                 fill: {
                                     target: "start",
@@ -716,7 +720,7 @@
                                         if (!chart) {
                                             return;
                                         }
-                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(0, 0, 255, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(112, 146, 190, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
                                     }
                                 }
                             }
@@ -830,8 +834,9 @@
                             {
                                 label: "Aktorenzeit",
                                 stack: "actuator",
-                                borderColor: "blue",
-                                backgroundColor: "rgba(0, 0, 255, 0.75)",
+                                borderColor: "rgb(112, 146, 190)",
+                                backgroundColor: "rgba(112, 146, 190, 0.75)",
+                                borderWidth: 1,
                                 pointStyle: "line",
                                 fill: {
                                     target: "start",
@@ -840,7 +845,7 @@
                                         if (!chart) {
                                             return;
                                         }
-                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(0, 0, 255, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(112, 146, 190, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
                                     }
                                 }
                             }
@@ -954,8 +959,9 @@
                             {
                                 label: "Aktorenzeit",
                                 stack: "actuator",
-                                borderColor: "blue",
-                                backgroundColor: "rgba(0, 0, 255, 0.75)",
+                                borderColor: "rgb(112, 146, 190)",
+                                backgroundColor: "rgba(112, 146, 190, 0.75)",
+                                borderWidth: 1,
                                 pointStyle: "line",
                                 fill: {
                                     target: "start",
@@ -964,7 +970,7 @@
                                         if (!chart) {
                                             return;
                                         }
-                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(0, 0, 255, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(112, 146, 190, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
                                     }
                                 }
                             }
@@ -1078,8 +1084,9 @@
                             {
                                 label: "Aktorenzeit",
                                 stack: "actuator",
-                                borderColor: "blue",
-                                backgroundColor: "rgba(0, 0, 255, 0.75)",
+                                borderColor: "rgb(112, 146, 190)",
+                                backgroundColor: "rgba(112, 146, 190, 0.75)",
+                                borderWidth: 1,
                                 pointStyle: "line",
                                 fill: {
                                     target: "start",
@@ -1088,7 +1095,7 @@
                                         if (!chart) {
                                             return;
                                         }
-                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(0, 0, 255, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(112, 146, 190, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
                                     }
                                 }
                             }
@@ -1120,25 +1127,39 @@
                                 for (chart of charts_) {
                                     let index = charts[item]["current"]["data"]["datasets"].findIndex(key => key.stack === chart);
                                     if (index >= 0 && data[item]["data"][chart] !== null) {
-                                        if (data[item]["data"][chart] == "actuator" && data[item]["data"][chart]["actuator"] == 1) {
-                                            //
-                                        }
-                                        if (charts[item]["current"]["data"]["datasets"][index]["data"].length >= 13) {
-                                            charts[item]["current"]["data"]["datasets"][index]["data"].shift();
-                                        }
-                                        charts[item]["current"]["data"]["datasets"][index]["data"].push(data[item]["data"][chart]);
-                                        charts[item]["current"]["options"]["scales"]["x"]["min"] = data[item]["labels"]["current"][0];
-                                        charts[item]["current"]["options"]["scales"]["x"]["max"] = data[item]["labels"]["current"][data[item]["labels"]["current"].length -1];
-                                        // Wenn Wert kleiner gleich Warnwert
-                                        if ((Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["data"]["lowerControlLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["upperControlLimit"]["y"]))) {
-                                            switchAlert(item, "warning");
-                                        }
-                                        else if ((Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperControlLimit"]["y"]) && Number(data[item]["data"]["current"]["y"]) > Number(data[item]["data"]["upperWarningLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerControlLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["lowerWarningLimit"]["y"]))) {
-                                            switchAlert(item, "danger");
-                                            console.log("joo");
+
+                                        if (chart == "actuator" && data[item]["data"]["actuator"]["enabled"] == 1) {
+                                            currentIndex = charts[item]["current"]["data"]["datasets"].findIndex(key => key.stack === "current");
+                                            Object.assign(actuators[item], data[item]["data"]["actuator"]);
+                                            delete actuators[item]["data"];
+                                            if (data[item]["data"]["actuator"]["count"] == 0) {
+                                                actuators[item]["enabled"] = 0;
+                                            }
+                                            if (charts[item]["current"]["data"]["datasets"][index]["data"].length >= 13) {
+                                                charts[item]["current"]["data"]["datasets"][index]["data"].shift();
+                                            }
+                                            charts[item]["current"]["data"]["datasets"][index]["data"].push(data[item]["data"]["actuator"]["data"]);
+                                            //es muss das richtige label gewählt werden!
+                                            charts[item]["current"]["data"]["datasets"][currentIndex]["data"].push(data[item]["data"]["actuator"]["data"]);
                                         }
                                         else {
-                                            switchAlert(item, "success");
+                                            if (charts[item]["current"]["data"]["datasets"][index]["data"].length >= 13) {
+                                                charts[item]["current"]["data"]["datasets"][index]["data"].shift();
+                                            }
+                                            charts[item]["current"]["data"]["datasets"][index]["data"].push(data[item]["data"][chart]);
+                                            charts[item]["current"]["options"]["scales"]["x"]["min"] = data[item]["labels"]["current"][0];
+                                            charts[item]["current"]["options"]["scales"]["x"]["max"] = data[item]["labels"]["current"][data[item]["labels"]["current"].length -1];
+                                            // Wenn Wert kleiner gleich Warnwert
+                                            if ((Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["data"]["lowerControlLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["upperControlLimit"]["y"]))) {
+                                                switchAlert(item, "warning");
+                                            }
+                                            else if ((Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperControlLimit"]["y"]) && Number(data[item]["data"]["current"]["y"]) > Number(data[item]["data"]["upperWarningLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerControlLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["lowerWarningLimit"]["y"]))) {
+                                                switchAlert(item, "danger");
+                                                console.log("joo");
+                                            }
+                                            else {
+                                                switchAlert(item, "success");
+                                            }
                                         }
                                     }
                                 }

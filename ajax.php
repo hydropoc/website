@@ -51,17 +51,13 @@
 
     // key z.B. co2, value z.B. 60
     foreach ($setpoints as $key => $value) {
+        //co2 . "=" . 60;
         if (array_key_exists($key, $actuators)) {
             // Wenn Simulation bereits läuft, Restwert berechnen und hinzufügen
-            if (array_key_exists("enabled", $actuators[$key]) && $actuators[$key]["enabled"] == 1) {
-                //$currentValue = $actuator[$key]["value"];
-                $actuator[$key]["count"] = $actuator[$key]["count"] -1;
-                $actuator[$key]["value"] = $actuator[$key]["value"] - $actuators[$key]["factor"];
-                $actuator[$key]["data"] = ["x" => $labels[array_key_last($labels)], "y" => $actuators[$key]["value"]];
-                if ($actuator[$key]["count"] == 0) {
-                    $actuator[$key] = ["enabled" => 0];
-                }
-                // Wenn fertig, enabled auf 0 setzen
+            if ($actuators[$key]["enabled"] == 1) {
+                $actuators[$key]["count"] -= 1;
+                $actuators[$key]["value"] = ($actuators[$key]["method"] == "reduce" ? $actuators[$key]["value"] - $actuators[$key]["factor"] : $actuators[$key]["value"] + $actuators[$key]["factor"]);
+                $actuators[$key]["data"] = ["x" => $labels[array_key_last($labels)], "y" => $actuators[$key]["value"]];
             }
             else {
                 // Wennn Simulation nicht läuft, zufallsbedingt starten
@@ -70,7 +66,6 @@
                     $actuators[$key]["enabled"] = 1;
                     $actuatorDuration = random_int(5, 10); //soll auch länger dauern können als anzahl label
                     $currentValues = [];
-                    //$startPosition = array_search(array_rand($labels), array_keys($labels));
                     $actuators[$key]["count"] = $actuatorDuration; // Muss immer weiter sinken pro Serveranfrage
                     // Zu hohen Wert normalisieren (80+)
                     if (random_int(0, 1) == 1) {
@@ -83,28 +78,18 @@
                         $actuators[$key]["factor"] = $lol;
                         $actuators[$key]["value"] = $wtf; // Muss immer mittels $lol weiter gesenkt werden pro Serveranfrage
                         $actuators[$key]["data"] = ["x" => $labels[array_key_last($labels)], "y" => $actuators[$key]["value"]];
-                        /*
-                        for ($i = 1; $i <= $actuatorDuration; $i++) {
-                            $wtf -= $lol;
-                            $currentValues[] = [$startPosition + $i => $wtf];
-                        }*/
                     }
                     // Zu niedrigen Wert normalisieren (20-)
-                    /*
                     else {
-                        $wtf = 20;
-                        for ($i = 1; $i <= $actuatorDuration; $i++) {
-                            // wtf darf nie vor Schleifenende auf Sollwert steigen!
-                            $wtf -= 0;
-                            if (count($currentValues) >= 1) {
-                               // array_push($currentValues, )
-                            }
-                            else {
-                                //
-                            }
-                        }
-                    }*/
-                    //array_push($currentValues, (count($currentValues) >= 1 ? random_int($currentValues[array_key_last($currentValues)] + $i, $currentValues[array_key_last($currentValues)] + random_int(1,5)) : random_int(1 ,10)));
+                        $wtf = random_int(10, 20);
+                        $difference = $value - $wtf; // Differenz zwischen Sollwert und Zufallswert
+                        // wtf müssen immer weiter sinken
+                        $lol = $difference / $actuatorDuration; // Ermitteln, um wie viel der Wert pro Label sinken wird
+                        $actuators[$key]["method"] = "raise";
+                        $actuators[$key]["factor"] = $lol;
+                        $actuators[$key]["value"] = $wtf; // Muss immer mittels $lol weiter gesenkt werden pro Serveranfrage
+                        $actuators[$key]["data"] = ["x" => $labels[array_key_last($labels)], "y" => $actuators[$key]["value"]];
+                    }
                 }
                 else {
                     // Zufallsdaten ohne Aktoren erzeugen
@@ -142,7 +127,7 @@
                 "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 80],
                 "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 10],
                 "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 20],
-                "actuator" => null
+                "actuator" => $actuators["temperature"]
             ]
         ],
         "salinity" => [
@@ -157,7 +142,7 @@
                 "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 80],
                 "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 10],
                 "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 20],
-                "actuator" => null
+                "actuator" => $actuators["salinity"]
             ]
         ],
         "waterlevel" => [
@@ -172,7 +157,7 @@
                 "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 80],
                 "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 10],
                 "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 20],
-                "actuator" => null
+                "actuator" => $actuators["waterlevel"]
             ]
         ],
         "ph" => [
@@ -187,7 +172,7 @@
                 "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 12],
                 "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 8],
                 "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 9],
-                "actuator" => null
+                "actuator" => $actuators["ph"]
             ]
         ],
         "ventilation" => [
@@ -202,7 +187,7 @@
                 "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 80],
                 "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 10],
                 "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 20],
-                "actuator" => null
+                "actuator" => $actuators["ventilation"]
             ]
         ],
         "brightness" => [
@@ -217,7 +202,7 @@
                 "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 80],
                 "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 10],
                 "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 20],
-                "actuator" => null
+                "actuator" => $actuators["brightness"]
             ]
         ]
     ];
