@@ -62,6 +62,7 @@
                 "ventilation": {enabled: 0},
                 "brightness": {enabled: 0}
             };
+            var isLoadingCurrentChartData = false;
             function switchAlert(element, type) {
                 type = type.toLowerCase();
                 element = $("#section-" + element)[0];
@@ -101,8 +102,7 @@
             document.addEventListener("DOMContentLoaded", function(event) {
                 // Hier alle Skripte ausführen, die auf DOM zugreifen sollen
                 $(".config-chart-button").click(function() {
-
-                    console.log($(this).attr("data-chart"));
+                    $("#chartHistoryElementTitle").html($(this).attr("data-chart-title"));
                 });
                 let aso = new Date();
                 $("footer").html("&copy; " + (aso.getFullYear() >= 2022 ? "2021-" + aso.getFullYear() : aso.getFullYear()) + " Deine Mutter")
@@ -336,7 +336,7 @@
                                 pointStyle: "line"
                             },
                             {
-                                label: "Aktorenzeit",
+                                label: "Aktoraktivität",
                                 stack: "actuator",
                                 borderColor: "rgb(112, 146, 190)",
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
@@ -461,7 +461,7 @@
                                 pointStyle: "line"
                             },
                             {
-                                label: "Aktorenzeit",
+                                label: "Aktoraktivität",
                                 stack: "actuator",
                                 borderColor: "rgb(112, 146, 190)",
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
@@ -586,7 +586,7 @@
                                 pointStyle: "line"
                             },
                             {
-                                label: "Aktorenzeit",
+                                label: "Aktoraktivität",
                                 stack: "actuator",
                                 borderColor: "rgb(112, 146, 190)",
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
@@ -711,7 +711,7 @@
                                 pointStyle: "line"
                             },
                             {
-                                label: "Aktorenzeit",
+                                label: "Aktoraktivität",
                                 stack: "actuator",
                                 borderColor: "rgb(112, 146, 190)",
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
@@ -769,7 +769,7 @@
                             },
                             y: { // defining min and max so hiding the dataset does not change scale range
                                 min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 14
+                                max: 100
                             }
                         }
                     },
@@ -836,7 +836,7 @@
                                 pointStyle: "line"
                             },
                             {
-                                label: "Aktorenzeit",
+                                label: "Aktoraktivität",
                                 stack: "actuator",
                                 borderColor: "rgb(112, 146, 190)",
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
@@ -961,7 +961,7 @@
                                 pointStyle: "line"
                             },
                             {
-                                label: "Aktorenzeit",
+                                label: "Aktoraktivität",
                                 stack: "actuator",
                                 borderColor: "rgb(112, 146, 190)",
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
@@ -1086,7 +1086,7 @@
                                 pointStyle: "line"
                             },
                             {
-                                label: "Aktorenzeit",
+                                label: "Aktoraktivität",
                                 stack: "actuator",
                                 borderColor: "rgb(112, 146, 190)",
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
@@ -1112,7 +1112,10 @@
                             legend: {
                                 labels: {
                                     usePointStyle: true,
-                                    pointStyle: "rect"
+                                    pointStyle: "rect",
+                                    font: {
+                                        size: 14
+                                    }
                                 }
                             }
                         },
@@ -1131,11 +1134,11 @@
                             }
                         }
                     },
-                    type: "line",
                     data: {
                         datasets: [
                             {
-                                label: "Messwerte",
+                                type: "line",
+                                label: "Messwert",
                                 stack: "measured",
                                 borderColor: "rgb(98, 162, 228)",
                                 backgroundColor: "rgba(98, 162, 228, 0.75)",
@@ -1153,24 +1156,32 @@
                                 }
                             },
                             {
+                                type: "line",
                                 label: "Mittelwert",
                                 stack: "middle",
-                                borderColor: "rgb(0, 187, 94)",
-                                backgroundColor: "rgba(0, 187, 94, 0.75)",
+                                borderColor: "rgb(102, 102, 153)",
+                                backgroundColor: "rgba(102, 102, 153, 0.75)",
                                 borderWidth: 1,
-                                pointStyle: "line",
-                                fill: {
-                                    target: "start",
-                                    above: function(context) {
-                                        let chart = context.chart;
-                                        if (!chart) {
-                                            return;
-                                        }
-                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(0, 187, 94, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
-                                    }
-                                }
+                                pointStyle: "line"
+                            },
+                            {
+                                type: "scatter",
+                                label: "Höchstwert",
+                                stack: "highest",
+                                borderColor: "rgb(220, 53, 69)",
+                                backgroundColor: "rgba(220, 53, 69, 0.75)",
+                                borderWidth: 1,
+                                pointStyle: "line"
+                            },
+                            {
+                                type: "scatter",
+                                label: "Tiefstwert",
+                                stack: "lowest",
+                                borderColor: "rgb(255, 127, 39)",
+                                backgroundColor: "rgba(255, 127, 39, 0.75)",
+                                borderWidth: 1,
+                                pointStyle: "line"
                             }
-                            // Höchster und niedrigster Wert?
                         ]
                     }
                 });
@@ -1184,70 +1195,75 @@
                 // Neue Daten vom Server laden
                 setInterval(function() {
                     // "current" gilt für das Diagramm der letzten Minute, "history" ist für das Verlaufsdiagramm
-                    $.post("ajax.php", {
-                        labels: JSON.stringify(charts["co2"]["current"]["data"]["labels"]),
-                        actuators: JSON.stringify(actuators)
-                    }).done(function(response) {
-                        let data = JSON.parse(response);
-                        let items = Object.keys(data);
-                        // item = Sensor, z.B. co2
-                        for (item of items) {
-                            if (charts.hasOwnProperty(item)) {
-                                // chart z.B. "current"
-                                charts[item]["current"]["data"]["labels"] = data[item]["labels"]["current"];
-                                let charts_ = Object.keys(data[item]["data"]); // current, setpoint, mean
-                                for (chart of charts_) {
-                                    let index = charts[item]["current"]["data"]["datasets"].findIndex(key => key.stack === chart);
-                                    if (index >= 0 && data[item]["data"][chart] !== null) {
+                    if (!isLoadingCurrentChartData) {
+                        isLoadingCurrentChartData = true;
+                        $.post("ajax.php", {
+                            labels: JSON.stringify(charts["co2"]["current"]["data"]["labels"]),
+                            actuators: JSON.stringify(actuators)
+                        }).done(function(response) {
+                            let data = JSON.parse(response);
+                            let items = Object.keys(data);
+                            // item = Sensor, z.B. co2
+                            for (item of items) {
+                                if (charts.hasOwnProperty(item)) {
+                                    // chart z.B. "current"
+                                    charts[item]["current"]["data"]["labels"] = data[item]["labels"]["current"];
+                                    let charts_ = Object.keys(data[item]["data"]); // current, setpoint, mean
+                                    for (chart of charts_) {
+                                        let index = charts[item]["current"]["data"]["datasets"].findIndex(key => key.stack === chart);
+                                        if (index >= 0 && data[item]["data"][chart] !== null) {
 
-                                        // Aktorenaktionen
-                                        if (chart == "actuator" && data[item]["data"]["actuator"]["enabled"] == 1) {
-                                            currentIndex = charts[item]["current"]["data"]["datasets"].findIndex(key => key.stack === "current");
-                                            if (charts[item]["current"]["data"]["datasets"][index]["data"].length >= 13) {
-                                                charts[item]["current"]["data"]["datasets"][index]["data"].shift();
-                                            }
-                                            let lastXPosition = charts[item]["current"]["data"]["datasets"][currentIndex]["data"].length -1;
-                                            let lastXValue = charts[item]["current"]["data"]["datasets"][currentIndex]["data"][lastXPosition]["x"];
-                                            if (lastXValue == data[item]["data"]["actuator"]["data"]["x"]) {
-                                                charts[item]["current"]["data"]["datasets"][currentIndex]["data"].splice(lastXPosition, 1);
-                                            }
-                                            // Damit Objekte wirklich zugewiesen werden, statt als Referenz!
-                                            Object.assign(actuators[item], data[item]["data"]["actuator"]);
-                                            delete actuators[item]["data"];
-                                            if (data[item]["data"]["actuator"]["count"] == 0) {
-                                                actuators[item]["enabled"] = 0;
-                                            }
-                                            charts[item]["current"]["data"]["datasets"][index]["data"].push(data[item]["data"]["actuator"]["data"]);
-                                            charts[item]["current"]["data"]["datasets"][currentIndex]["data"].push(data[item]["data"]["actuator"]["data"]);
-                                        }
-                                        else {
-                                            if (charts[item]["current"]["data"]["datasets"][index]["data"].length >= 13) {
-                                                charts[item]["current"]["data"]["datasets"][index]["data"].shift();
-                                            }
-                                            charts[item]["current"]["data"]["datasets"][index]["data"].push(data[item]["data"][chart]);
-                                            charts[item]["current"]["options"]["scales"]["x"]["min"] = data[item]["labels"]["current"][0];
-                                            charts[item]["current"]["options"]["scales"]["x"]["max"] = data[item]["labels"]["current"][data[item]["labels"]["current"].length -1];
-                                            // Wenn Wert kleiner gleich Warnwert
-                                            if ((Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["data"]["lowerControlLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["upperControlLimit"]["y"]))) {
-                                                switchAlert(item, "warning");
-                                            }
-                                            else if ((Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperControlLimit"]["y"]) && Number(data[item]["data"]["current"]["y"]) > Number(data[item]["data"]["upperWarningLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerControlLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["lowerWarningLimit"]["y"]))) {
-                                                switchAlert(item, "danger");
-                                                console.log("joo");
+                                            // Aktorenaktionen
+                                            if (chart == "actuator" && data[item]["data"]["actuator"]["enabled"] == 1) {
+                                                currentIndex = charts[item]["current"]["data"]["datasets"].findIndex(key => key.stack === "current");
+                                                if (charts[item]["current"]["data"]["datasets"][index]["data"].length >= 13) {
+                                                    charts[item]["current"]["data"]["datasets"][index]["data"].shift();
+                                                }
+                                                let lastXPosition = charts[item]["current"]["data"]["datasets"][currentIndex]["data"].length -1;
+                                                let lastXValue = charts[item]["current"]["data"]["datasets"][currentIndex]["data"][lastXPosition]["x"];
+                                                if (lastXValue == data[item]["data"]["actuator"]["data"]["x"]) {
+                                                    charts[item]["current"]["data"]["datasets"][currentIndex]["data"].splice(lastXPosition, 1);
+                                                }
+                                                // Damit Objekte wirklich zugewiesen werden, statt als Referenz!
+                                                Object.assign(actuators[item], data[item]["data"]["actuator"]);
+                                                delete actuators[item]["data"];
+                                                if (data[item]["data"]["actuator"]["count"] == 0) {
+                                                    actuators[item]["enabled"] = 0;
+                                                }
+                                                charts[item]["current"]["data"]["datasets"][index]["data"].push(data[item]["data"]["actuator"]["data"]);
+                                                charts[item]["current"]["data"]["datasets"][currentIndex]["data"].push(data[item]["data"]["actuator"]["data"]);
                                             }
                                             else {
-                                                switchAlert(item, "success");
+                                                if (charts[item]["current"]["data"]["datasets"][index]["data"].length >= 13) {
+                                                    charts[item]["current"]["data"]["datasets"][index]["data"].shift();
+                                                }
+                                                charts[item]["current"]["data"]["datasets"][index]["data"].push(data[item]["data"][chart]);
+                                                charts[item]["current"]["options"]["scales"]["x"]["min"] = data[item]["labels"]["current"][0];
+                                                charts[item]["current"]["options"]["scales"]["x"]["max"] = data[item]["labels"]["current"][data[item]["labels"]["current"].length -1];
+                                                // Wenn Wert kleiner gleich Warnwert
+                                                if ((Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["data"]["lowerControlLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["upperControlLimit"]["y"]))) {
+                                                    switchAlert(item, "warning");
+                                                }
+                                                else if ((Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperControlLimit"]["y"]) && Number(data[item]["data"]["current"]["y"]) > Number(data[item]["data"]["upperWarningLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerControlLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["lowerWarningLimit"]["y"]))) {
+                                                    switchAlert(item, "danger");
+                                                    console.log("joo");
+                                                }
+                                                else {
+                                                    switchAlert(item, "success");
+                                                }
                                             }
                                         }
                                     }
+                                    charts[item]["current"].update("none"); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
+                                    $("#section-" + item + "> canvas").css("visibility", "visible");
+                                    $("#section-" + item + "> div ").css("display", "none");
+                                    $("#section-" + item + "> button.config-chart-button ").css("display", "block");
                                 }
-                                charts[item]["current"].update("none"); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
-                                $("#section-" + item + "> canvas").css("visibility", "visible");
-                                $("#section-" + item + "> div ").css("display", "none");
-                                $("#section-" + item + "> button.config-chart-button ").css("display", "block");
                             }
-                        }
-                    });
+                        }).always(function() {
+                            isLoadingCurrentChartData = false;
+                        });
+                    }
                 }, 5000);
             });
         </script>
@@ -1697,49 +1713,49 @@
                                     <div class="chart-overlay">
                                         <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
                                     </div>
-                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="co2" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="co2" data-chart-title="Co²" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     <canvas id="co2-chart-current"></canvas>
                                 </section>
                                 <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-temperature">
                                     <div class="chart-overlay">
                                         <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
                                     </div>
-                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="temperature" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="temperature" data-chart-title="Temperatur" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     <canvas id="temperature-chart-current"></canvas>
                                 </section>
                                 <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-salinity">
                                     <div class="chart-overlay">
                                         <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
                                     </div>
-                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="salinity" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="salinity" data-chart-title="Salzgehalt" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     <canvas id="salinity-chart-current"></canvas>
                                 </section>
                                 <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-ph">
                                     <div class="chart-overlay">
                                         <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
                                     </div>
-                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ph" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ph" data-chart-title="pH-Wert" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     <canvas id="ph-chart-current"></canvas>
                                 </section>
                                 <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-waterlevel">
                                     <div class="chart-overlay">
                                         <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
                                     </div>
-                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="waterlevel" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="waterlevel" data-chart-title="Wasserstand" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     <canvas id="waterlevel-chart-current"></canvas>
                                 </section>
                                 <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-ventilation">
                                     <div class="chart-overlay">
                                         <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
                                     </div>
-                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ventilation" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ventilation" data-chart-title="Belüftung" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     <canvas id="ventilation-chart-current"></canvas>
                                 </section>
                                 <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-brightness">
                                     <div class="chart-overlay">
                                         <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
                                     </div>
-                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="brightness" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="brightness" data-chart-title="Beleuchtung" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     <canvas id="brightness-chart-current"></canvas>
                                 </section>
                             </div>
@@ -2026,21 +2042,33 @@
             </div>
         </div>
         <div class="modal fade" id="chartHistoryModal">
-            <div class="modal-dialog modal-xl">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h4 class="modal-title">Verlauf von lol</h4>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title"><span id="chartHistoryElementTitle"></span>-Verlauf</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-inline-flex align-items-center mb-3">
+                            <label for="historyTimespan">Zeitraum:</label>
+                            <select id="historyTimespan" class="form-select ms-2">
+                                <option value="1">Letzte Stunde</option>
+                                <option value="2">Letzte 3 Stunden</option>
+                                <option value="3">Letzte 6 Stunden</option>
+                                <option value="4">Letzte 12 Stunden</option>
+                                <option value="5">Letzte 24 Stunden</option>
+                            </select>
+                            <span class="spinner-border ms-2 text-primary" style="flex: 0 0 auto; width: 20px; height: 20px;"></span>
+                        </div>
+                        <section id="history" class="w-100" style="height:60vh">
+                            <canvas id="charts-history"></canvas>
+                        </section>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Schließen</button>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <div>llokpodfkpidfjdoifjdifhih</div>
-                    <canvas id="charts-history"></canvas>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-                </div>
-              </div>
             </div>
-          </div>
+        </div>
     </body>
 </html>

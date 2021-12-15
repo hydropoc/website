@@ -9,8 +9,52 @@
         "salinity" => 20,
         "waterlevel" => 10,
         "ventilation" => 50,
-        "ph" => 10,
+        "ph" => 30,
         "brightness" => 50
+    ];
+    $limits = [
+        "co2" => [
+            "upperControlLimit" => 90,
+            "upperWarningLimit" => 80,
+            "lowerControlLimit" => 10,
+            "lowerWarningLimit" => 20
+        ],
+        "temperature" => [
+            "upperControlLimit" => 90,
+            "upperWarningLimit" => 80,
+            "lowerControlLimit" => 10,
+            "lowerWarningLimit" => 20
+        ],
+        "salinity" => [
+            "upperControlLimit" => 90,
+            "upperWarningLimit" => 80,
+            "lowerControlLimit" => 10,
+            "lowerWarningLimit" => 20
+        ],
+        "waterlevel" => [
+            "upperControlLimit" => 90,
+            "upperWarningLimit" => 80,
+            "lowerControlLimit" => 10,
+            "lowerWarningLimit" => 20
+        ],
+        "ventilation" => [
+            "upperControlLimit" => 90,
+            "upperWarningLimit" => 80,
+            "lowerControlLimit" => 10,
+            "lowerWarningLimit" => 20
+        ],
+        "ph" => [
+            "upperControlLimit" => 90,
+            "upperWarningLimit" => 80,
+            "lowerControlLimit" => 10,
+            "lowerWarningLimit" => 20
+        ],
+        "brightness" => [
+            "upperControlLimit" => 90,
+            "upperWarningLimit" => 80,
+            "lowerControlLimit" => 10,
+            "lowerWarningLimit" => 20
+        ]
     ];
     if (is_array($labels)) {
         $labelCount = count($labels);
@@ -61,7 +105,7 @@
             }
             else {
                 // Wennn Simulation nicht läuft, zufallsbedingt starten
-                if (random_int(0, 3) == 1) {
+                if (random_int(0, 5) == 1) {
                     // Zufallsbedingte Dauer des Aktors festlegen (Spanne von N Label, steigende Aktorleistung parallel mit steigendem aktuellen Wert)
                     $actuators[$key]["enabled"] = 1;
                     $actuatorDuration = random_int(5, 10); //soll auch länger dauern können als anzahl label
@@ -70,7 +114,7 @@
                     // Zu hohen Wert normalisieren (80+)
                     if (random_int(0, 1) == 1) {
                         // Muss für jedes Diagramm gemacht werden (co2, temperature...)
-                        $wtf = random_int(80, 100);
+                        $wtf = random_int($limits[$key]["upperControlLimit"], 100);
                         $difference = $wtf - $value; // Differenz zwischen Sollwert und Zufallswert
                         // wtf müssen immer weiter sinken
                         $lol = $difference / $actuatorDuration; // Ermitteln, um wie viel der Wert pro Label sinken wird
@@ -81,7 +125,7 @@
                     }
                     // Zu niedrigen Wert normalisieren (20-)
                     else {
-                        $wtf = random_int(10, 20);
+                        $wtf = random_int(0, $limits[$key]["lowerControlLimit"]);
                         $difference = $value - $wtf; // Differenz zwischen Sollwert und Zufallswert
                         // wtf müssen immer weiter sinken
                         $lol = $difference / $actuatorDuration; // Ermitteln, um wie viel der Wert pro Label sinken wird
@@ -100,13 +144,13 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(5,95)], // Aktueller Wert
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["co2"] -10, $setpoints["co2"] +10)], // Aktueller Wert
                 "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => $setpoints["co2"]], // Sollwert
-                "middle" => ["x" => $labels[array_key_last($labels)], "y" => rand(50,53)], // Mittelwert
-                "upperControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 90],
-                "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 80],
-                "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 10],
-                "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 20],
+                "middle" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["co2"] -1, $setpoints["co2"] +1)], // Mittelwert
+                "upperControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["co2"]["upperControlLimit"]],
+                "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["co2"]["upperWarningLimit"]],
+                "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["co2"]["lowerControlLimit"]],
+                "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["co2"]["lowerWarningLimit"]],
                 "actuator" => $actuators["co2"]
             ]
         ],
@@ -115,13 +159,13 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(25,40)], // Aktueller Wert
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["temperature"] -10, $setpoints["temperature"] +10)], // Aktueller Wert
                 "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => $setpoints["temperature"]], // Sollwert
-                "middle" => ["x" => $labels[array_key_last($labels)], "y" => rand(25,40)], // Mittelwert
-                "upperControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 90],
-                "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 80],
-                "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 10],
-                "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 20],
+                "middle" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["temperature"] -1, $setpoints["temperature"] +1)], // Mittelwert
+                "upperControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["temperature"]["upperControlLimit"]],
+                "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["temperature"]["upperWarningLimit"]],
+                "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["temperature"]["lowerControlLimit"]],
+                "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["temperature"]["lowerWarningLimit"]],
                 "actuator" => $actuators["temperature"]
             ]
         ],
@@ -130,13 +174,13 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,20)], // Aktueller Wert
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["salinity"] -10, $setpoints["salinity"] +10)], // Aktueller Wert
                 "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => $setpoints["salinity"]], // Sollwert
-                "middle" => ["x" => $labels[array_key_last($labels)], "y" => rand(10,20)], // Mittelwert
-                "upperControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 90],
-                "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 80],
-                "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 10],
-                "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 20],
+                "middle" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["salinity"] -1, $setpoints["salinity"] +1)], // Mittelwert
+                "upperControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["salinity"]["upperControlLimit"]],
+                "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["salinity"]["upperWarningLimit"]],
+                "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["salinity"]["lowerControlLimit"]],
+                "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["salinity"]["lowerWarningLimit"]],
                 "actuator" => $actuators["salinity"]
             ]
         ],
@@ -145,13 +189,13 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(8,12)], // Aktueller Wert
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["waterlevel"] -10, $setpoints["waterlevel"] +10)], // Aktueller Wert
                 "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => $setpoints["waterlevel"]], // Sollwert
-                "middle" => ["x" => $labels[array_key_last($labels)], "y" => rand(8,12)], // Mittelwert
-                "upperControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 90],
-                "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 80],
-                "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 10],
-                "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 20],
+                "middle" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["waterlevel"] -1, $setpoints["waterlevel"] +1)], // Mittelwert
+                "upperControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["waterlevel"]["upperControlLimit"]],
+                "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["waterlevel"]["upperWarningLimit"]],
+                "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["waterlevel"]["lowerControlLimit"]],
+                "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["waterlevel"]["lowerWarningLimit"]],
                 "actuator" => $actuators["waterlevel"]
             ]
         ],
@@ -160,13 +204,13 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(8,11)], // Aktueller Wert
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["ph"] -10, $setpoints["ph"] +10)], // Aktueller Wert
                 "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => $setpoints["ph"]], // Sollwert
-                "middle" => ["x" => $labels[array_key_last($labels)], "y" => rand(8,11)], // Mittelwert
-                "upperControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 13],
-                "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 12],
-                "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 8],
-                "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 9],
+                "middle" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["ph"] -1, $setpoints["ph"] +1)], // Mittelwert
+                "upperControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["ph"]["upperControlLimit"]],
+                "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["ph"]["upperWarningLimit"]],
+                "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["ph"]["lowerControlLimit"]],
+                "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["ph"]["lowerWarningLimit"]],
                 "actuator" => $actuators["ph"]
             ]
         ],
@@ -175,13 +219,13 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(40,60)], // Aktueller Wert
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["ventilation"] -10, $setpoints["ventilation"] +10)], // Aktueller Wert
                 "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => $setpoints["ventilation"]], // Sollwert
-                "middle" => ["x" => $labels[array_key_last($labels)], "y" => rand(40,60)], // Mittelwert
-                "upperControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 90],
-                "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 80],
-                "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 10],
-                "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 20],
+                "middle" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["ventilation"] -1, $setpoints["ventilation"] +1)], // Mittelwert
+                "upperControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["ventilation"]["upperControlLimit"]],
+                "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["ventilation"]["upperWarningLimit"]],
+                "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["ventilation"]["lowerControlLimit"]],
+                "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["ventilation"]["lowerWarningLimit"]],
                 "actuator" => $actuators["ventilation"]
             ]
         ],
@@ -190,13 +234,13 @@
                 "current" => $labels
             ],
             "data" => [
-                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand(40,60)], // Aktueller Wert
+                "current" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["brightness"] -10, $setpoints["brightness"] +10)], // Aktueller Wert
                 "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => $setpoints["brightness"]], // Sollwert
-                "middle" => ["x" => $labels[array_key_last($labels)], "y" => rand(40,60)], // Mittelwert
-                "upperControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 90],
-                "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 80],
-                "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => 10],
-                "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => 20],
+                "middle" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["brightness"] -1, $setpoints["brightness"] +1)], // Mittelwert
+                "upperControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["brightness"]["upperControlLimit"]],
+                "upperWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["brightness"]["upperWarningLimit"]],
+                "lowerControlLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["brightness"]["lowerControlLimit"]],
+                "lowerWarningLimit" => ["x" => $labels[array_key_last($labels)], "y" => $limits["brightness"]["lowerWarningLimit"]],
                 "actuator" => $actuators["brightness"]
             ]
         ]
