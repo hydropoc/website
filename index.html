@@ -103,6 +103,20 @@
                 // Hier alle Skripte ausführen, die auf DOM zugreifen sollen
                 $(".config-chart-button").click(function() {
                     $("#chartHistoryElementTitle").html($(this).attr("data-chart-title"));
+                    $("#historyTimespan").attr("data-chart", $(this).attr("data-chart"));
+                });
+                $("#historyTimespan").change(function() {
+                    $.post("history_charts_data.php", {
+                        //chart: JSON.stringify($(this).attr("data-chart")),
+                        //timestamp: JSON.stringify($(this).val())
+                        chart: $(this).attr("data-chart"),
+                        lol: $(this).val()
+                    }).done(function(response) {
+                        let data = JSON.parse(response);
+                        console.log(data);
+                    }).always(function() {
+                        //
+                    });
                 });
                 let aso = new Date();
                 $("footer").html("&copy; " + (aso.getFullYear() >= 2022 ? "2021-" + aso.getFullYear() : aso.getFullYear()) + " Deine Mutter")
@@ -1140,8 +1154,8 @@
                                 type: "line",
                                 label: "Messwert",
                                 stack: "measured",
-                                borderColor: "rgb(98, 162, 228)",
-                                backgroundColor: "rgba(98, 162, 228, 0.75)",
+                                borderColor: "rgb(219, 112, 147)",
+                                backgroundColor: "rgba(219, 112, 147, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
                                 fill: {
@@ -1151,7 +1165,7 @@
                                         if (!chart) {
                                             return;
                                         }
-                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(98, 162, 228, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(219, 112, 147, 0.5)", 1: "rgba(219, 112, 147, 0.5)"});
                                     }
                                 }
                             },
@@ -1159,9 +1173,9 @@
                                 type: "line",
                                 label: "Mittelwert",
                                 stack: "middle",
-                                borderColor: "rgb(102, 102, 153)",
-                                backgroundColor: "rgba(102, 102, 153, 0.75)",
-                                borderWidth: 1,
+                                borderColor: "rgb(0, 255, 0)",
+                                backgroundColor: "rgba(0, 255, 0, 0.75)",
+                                borderWidth: 2,
                                 pointStyle: "line"
                             },
                             {
@@ -1170,16 +1184,16 @@
                                 stack: "highest",
                                 borderColor: "rgb(220, 53, 69)",
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
-                                borderWidth: 1,
+                                borderWidth: 2,
                                 pointStyle: "line"
                             },
                             {
                                 type: "scatter",
                                 label: "Tiefstwert",
                                 stack: "lowest",
-                                borderColor: "rgb(255, 127, 39)",
-                                backgroundColor: "rgba(255, 127, 39, 0.75)",
-                                borderWidth: 1,
+                                borderColor: "rgb(72, 61, 139)",
+                                backgroundColor: "rgba(72, 61, 139, 0.75)",
+                                borderWidth: 2,
                                 pointStyle: "line"
                             }
                         ]
@@ -1197,7 +1211,7 @@
                     // "current" gilt für das Diagramm der letzten Minute, "history" ist für das Verlaufsdiagramm
                     if (!isLoadingCurrentChartData) {
                         isLoadingCurrentChartData = true;
-                        $.post("ajax.php", {
+                        $.post("current_charts_data.php", {
                             labels: JSON.stringify(charts["co2"]["current"]["data"]["labels"]),
                             actuators: JSON.stringify(actuators)
                         }).done(function(response) {
@@ -2053,10 +2067,10 @@
                             <label for="historyTimespan">Zeitraum:</label>
                             <select id="historyTimespan" class="form-select ms-2">
                                 <option value="1">Letzte Stunde</option>
-                                <option value="2">Letzte 3 Stunden</option>
-                                <option value="3">Letzte 6 Stunden</option>
-                                <option value="4">Letzte 12 Stunden</option>
-                                <option value="5">Letzte 24 Stunden</option>
+                                <option value="3">Letzte 3 Stunden</option>
+                                <option value="6">Letzte 6 Stunden</option>
+                                <option value="12">Letzte 12 Stunden</option>
+                                <option value="24">Letzte 24 Stunden</option>
                             </select>
                             <span class="spinner-border ms-2 text-primary" style="flex: 0 0 auto; width: 20px; height: 20px;"></span>
                         </div>
@@ -2065,7 +2079,7 @@
                         </section>
                     </div>
                     <div class="modal-footer">
-                      <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Schließen</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Schließen</button>
                     </div>
                 </div>
             </div>
