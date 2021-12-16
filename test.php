@@ -1,4 +1,5 @@
 <?php
-    $test = ["A" => 1, "B" => 2, "C" => 3];
-    print_r($test["A"]++);
+$a=array("red","green","blue","yellow","brown");
+$random_keys=array_rand($a);
+echo $random_keys;
 ?>

@@ -21,13 +21,16 @@
         <script>
             Chart.register("filler");
             const charts = {
-                "co2": {},
-                "temperature": {},
-                "salinity": {},
-                "ph": {},
-                "waterlevel": {},
-                "ventilation": {},
-                "brightness": {}
+                current: {
+                    co2: {},
+                    temperature: {},
+                    salinity: {},
+                    ph: {},
+                    waterlevel: {},
+                    ventilation: {},
+                    brightness: {}
+                },
+                history: {}
             };
             const dataTablesLocalization = {
                 sEmptyTable: "Keine Daten vorhanden",
@@ -54,13 +57,13 @@
             }
             // Aktorensimulation
             const actuators = {
-                "co2": {enabled: 0},
-                "temperature": {enabled: 0},
-                "salinity": {enabled: 0},
-                "ph": {enabled: 0},
-                "waterlevel": {enabled: 0},
-                "ventilation": {enabled: 0},
-                "brightness": {enabled: 0}
+                co2: {enabled: 0},
+                temperature: {enabled: 0},
+                salinity: {enabled: 0},
+                ph: {enabled: 0},
+                waterlevel: {enabled: 0},
+                ventilation: {enabled: 0},
+                brightness: {enabled: 0}
             };
             var isLoadingCurrentChartData = false;
             function switchAlert(element, type) {
@@ -68,24 +71,6 @@
                 element = $("#section-" + element)[0];
                 if (["danger", "warning", "success"].includes(type) && !Object.values(element.classList).includes(type)) {
                     $(element).removeClass("danger warning success").addClass(type);
-                    /*let section = $(element).attr("id").split("-")[1];
-                    switch (type) {
-                        case "danger":
-                            //charts[section]["current"]["data"]["datasets"][0]["fill"]["above"] = getGradient(charts[section]["current"]["ctx"], charts[section]["current"]["chartArea"], {0: getCSSVar("--chart-background-danger"), 1: "rgba(255, 255, 255, 0.5)"});
-                            charts[section]["current"]["data"]["datasets"][0]["backgroundColor"] = getCSSVar("--chart-background-danger");
-                            charts[section]["current"]["data"]["datasets"][0]["borderColor"] = getCSSVar("--chart-border-danger");
-                            break;
-                        case "warning":
-                            //charts[section]["current"]["data"]["datasets"][0]["fill"]["above"] = getGradient(charts[section]["current"]["ctx"], charts[section]["current"]["chartArea"], {0: getCSSVar("--chart-background-warning"), 1: "rgba(255, 255, 255, 0.5)"});
-                            charts[section]["current"]["data"]["datasets"][0]["backgroundColor"] = getCSSVar("--chart-background-warning");
-                            charts[section]["current"]["data"]["datasets"][0]["borderColor"] = getCSSVar("--chart-border-warning");
-                            break;
-                        case "success":
-                            //charts[section]["current"]["data"]["datasets"][0]["fill"]["above"] = getGradient(charts[section]["current"]["ctx"], charts[section]["current"]["chartArea"], {0: getCSSVar("--chart-background-success"), 1: "rgba(255, 255, 255, 0.5)"});
-                            charts[section]["current"]["data"]["datasets"][0]["backgroundColor"] = getCSSVar("--chart-background-success");
-                            charts[section]["current"]["data"]["datasets"][0]["borderColor"] = getCSSVar("--chart-border-success");
-                            break;
-                    }*/
                 }
             }
             function getCSSVar(val) {
@@ -104,19 +89,6 @@
                 $(".config-chart-button").click(function() {
                     $("#chartHistoryElementTitle").html($(this).attr("data-chart-title"));
                     $("#historyTimespan").attr("data-chart", $(this).attr("data-chart"));
-                });
-                $("#historyTimespan").change(function() {
-                    $.post("history_charts_data.php", {
-                        //chart: JSON.stringify($(this).attr("data-chart")),
-                        //timestamp: JSON.stringify($(this).val())
-                        chart: $(this).attr("data-chart"),
-                        lol: $(this).val()
-                    }).done(function(response) {
-                        let data = JSON.parse(response);
-                        console.log(data);
-                    }).always(function() {
-                        //
-                    });
                 });
                 let aso = new Date();
                 $("footer").html("&copy; " + (aso.getFullYear() >= 2022 ? "2021-" + aso.getFullYear() : aso.getFullYear()) + " Deine Mutter")
@@ -183,69 +155,8 @@
                         });
                     }
                 });
-
-                // Verlauf
-                /*
-                let a = new Chart($("#co2-chart-history")[0].getContext("2d"), {
-                    options: {
-                        scales: {
-                            x: {
-                                type: "timeseries",
-                                time: {
-                                    displayFormats: {
-                                        second: "HH:mm:ss"
-                                    },
-                                    unit: "hour",
-                                    stepSize: 1 // Innerhalb einer Min. alle 5 Sek. Daten einfügen 
-                                }
-                            },
-                            y: { // defining min and max so hiding the dataset does not change scale range
-                                min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100
-                            }
-                        },
-                        elements: {
-                            line: {
-                                borderWidth: 1
-                            }
-                        }
-                    },
-                    type: "line",
-                    data: {
-                        datasets: [
-                            {
-                                label: "Höchster Wert",
-                                backgroundColor: "rgba(255, 0, 0, 0.5)",
-                                borderColor : "rgb(255, 0, 0, 0.75)",
-                                data: []
-                            },
-                            {
-                                label: "Letzter Wert",
-                                fill: {
-                                    target: "start",
-                                    above: "rgba(153, 102, 255, 0.25)"
-                                },
-                                backgroundColor: "rgba(153, 102, 255, 0.5)",
-                                borderColor: 'rgba(153, 102, 255, 0.75)',
-                                data: []
-                            },
-                            {
-                                label: "Niedrigster Wert",
-                                backgroundColor: "rgba(54, 162, 235, 0.5)",
-                                borderColor : "rgba(54, 162, 235, 0.75)",
-                                data: []
-                            },
-                            {
-                                label: "Durchschnitt",
-                                backgroundColor: "rgba(102, 102, 153, 0.5)",
-                                borderColor : "rgba(102, 102, 153, 0.75)",
-                                data: []
-                            }
-                        ]
-                    }
-                });*/
                 // Aktuell
-                charts["co2"]["current"] = new Chart($("#co2-chart-current")[0].getContext("2d"), {
+                charts["current"]["co2"] = new Chart($("#co2-chart-current")[0].getContext("2d"), {
                     options: {
                         plugins: {
                             legend: {
@@ -277,7 +188,7 @@
                             x: {
                                 ticks: {
                                     callback: function(val, index) {
-                                        return index % 4 === 0 ? charts["co2"]["current"]["data"]["labels"][index] : "";
+                                        return index % 4 === 0 ? charts["current"]["co2"]["data"]["labels"][index] : "";
                                     }
                                 }
                             },
@@ -370,7 +281,7 @@
                         ]
                     }
                 });
-                charts["temperature"]["current"] = new Chart($("#temperature-chart-current")[0].getContext("2d"), {
+                charts["current"]["temperature"] = new Chart($("#temperature-chart-current")[0].getContext("2d"), {
                     options: {
                         plugins: {
                             legend: {
@@ -402,7 +313,7 @@
                             x: {
                                 ticks: {
                                     callback: function(val, index) {
-                                        return index % 4 === 0 ? charts["temperature"]["current"]["data"]["labels"][index] : "";
+                                        return index % 4 === 0 ? charts["current"]["temperature"]["data"]["labels"][index] : "";
                                     }
                                 }
                             },
@@ -495,7 +406,7 @@
                         ]
                     }
                 });
-                charts["salinity"]["current"] = new Chart($("#salinity-chart-current")[0].getContext("2d"), {
+                charts["current"]["salinity"] = new Chart($("#salinity-chart-current")[0].getContext("2d"), {
                     options: {
                         plugins: {
                             legend: {
@@ -527,7 +438,7 @@
                             x: {
                                 ticks: {
                                     callback: function(val, index) {
-                                        return index % 4 === 0 ? charts["salinity"]["current"]["data"]["labels"][index] : "";
+                                        return index % 4 === 0 ? charts["current"]["salinity"]["data"]["labels"][index] : "";
                                     }
                                 }
                             },
@@ -620,7 +531,7 @@
                         ]
                     }
                 });
-                charts["waterlevel"]["current"] = new Chart($("#waterlevel-chart-current")[0].getContext("2d"), {
+                charts["current"]["waterlevel"] = new Chart($("#waterlevel-chart-current")[0].getContext("2d"), {
                     options: {
                         plugins: {
                             legend: {
@@ -652,7 +563,7 @@
                             x: {
                                 ticks: {
                                     callback: function(val, index) {
-                                        return index % 4 === 0 ? charts["waterlevel"]["current"]["data"]["labels"][index] : "";
+                                        return index % 4 === 0 ? charts["current"]["waterlevel"]["data"]["labels"][index] : "";
                                     }
                                 }
                             },
@@ -745,7 +656,7 @@
                         ]
                     }
                 });
-                charts["ph"]["current"] = new Chart($("#ph-chart-current")[0].getContext("2d"), {
+                charts["current"]["ph"] = new Chart($("#ph-chart-current")[0].getContext("2d"), {
                     options: {
                         plugins: {
                             legend: {
@@ -777,7 +688,7 @@
                             x: {
                                 ticks: {
                                     callback: function(val, index) {
-                                        return index % 4 === 0 ? charts["ph"]["current"]["data"]["labels"][index] : "";
+                                        return index % 4 === 0 ? charts["current"]["ph"]["data"]["labels"][index] : "";
                                     }
                                 }
                             },
@@ -870,7 +781,7 @@
                         ]
                     }
                 });
-                charts["ventilation"]["current"] = new Chart($("#ventilation-chart-current")[0].getContext("2d"), {
+                charts["current"]["ventilation"] = new Chart($("#ventilation-chart-current")[0].getContext("2d"), {
                     options: {
                         plugins: {
                             legend: {
@@ -902,7 +813,7 @@
                             x: {
                                 ticks: {
                                     callback: function(val, index) {
-                                        return index % 4 === 0 ? charts["ventilation"]["current"]["data"]["labels"][index] : "";
+                                        return index % 4 === 0 ? charts["current"]["ventilation"]["data"]["labels"][index] : "";
                                     }
                                 }
                             },
@@ -995,7 +906,7 @@
                         ]
                     }
                 });
-                charts["brightness"]["current"] = new Chart($("#brightness-chart-current")[0].getContext("2d"), {
+                charts["current"]["brightness"] = new Chart($("#brightness-chart-current")[0].getContext("2d"), {
                     options: {
                         plugins: {
                             legend: {
@@ -1027,7 +938,7 @@
                             x: {
                                 ticks: {
                                     callback: function(val, index) {
-                                        return index % 4 === 0 ? charts["brightness"]["current"]["data"]["labels"][index] : "";
+                                        return index % 4 === 0 ? charts["current"]["brightness"]["data"]["labels"][index] : "";
                                     }
                                 }
                             },
@@ -1121,6 +1032,7 @@
                     }
                 });
                 charts["history"] = new Chart($("#charts-history")[0].getContext("2d"), {
+                    type: "line",
                     options: {
                         plugins: {
                             legend: {
@@ -1138,7 +1050,7 @@
                             x: {
                                 ticks: {
                                     callback: function(val, index) {
-                                        return index % 4 === 0 ? charts["ph"]["current"]["data"]["labels"][index] : "";
+                                        return index % 4 === 0 ? charts["history"]["data"]["labels"][index] : "";
                                     }
                                 }
                             },
@@ -1151,7 +1063,6 @@
                     data: {
                         datasets: [
                             {
-                                type: "line",
                                 label: "Messwert",
                                 stack: "measured",
                                 borderColor: "rgb(219, 112, 147)",
@@ -1170,7 +1081,6 @@
                                 }
                             },
                             {
-                                type: "line",
                                 label: "Mittelwert",
                                 stack: "middle",
                                 borderColor: "rgb(0, 255, 0)",
@@ -1179,22 +1089,20 @@
                                 pointStyle: "line"
                             },
                             {
-                                type: "scatter",
                                 label: "Höchstwert",
                                 stack: "highest",
                                 borderColor: "rgb(220, 53, 69)",
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
-                                pointStyle: "line"
+                                pointStyle: "circle"
                             },
                             {
-                                type: "scatter",
                                 label: "Tiefstwert",
                                 stack: "lowest",
                                 borderColor: "rgb(72, 61, 139)",
                                 backgroundColor: "rgba(72, 61, 139, 0.75)",
                                 borderWidth: 2,
-                                pointStyle: "line"
+                                pointStyle: "circle"
                             }
                         ]
                     }
@@ -1205,38 +1113,61 @@
                         $(this).children("i:last-of-type").css("transform", ($(this).attr("aria-expanded") == "true" ? "rotate(180deg)" : "rotate(0deg)"));
                     });
                 }
-
+                $("#historyTimespan").change(function() {
+                    $(this).attr("disabled", "disabled").after("<span class='spinner-border ms-2 text-primary kreiselchen' data-processing='true'></span>");
+                    $.post("history_charts_data.php", {
+                        chart: $(this).attr("data-chart"),
+                        lol: $(this).val()
+                    }).done(function(response) {
+                        let data = JSON.parse(response);
+                        charts["history"]["data"]["labels"] = data["labels"];
+                        let charts_ = Object.keys(data["data"]);
+                        for (chart of charts_) {
+                            let index = charts["history"]["data"]["datasets"].findIndex(key => key.stack === chart);
+                            if (index >= 0 && data["data"][chart] !== null) {
+                                Object.assign(charts["history"]["data"]["datasets"][index]["data"], data["data"][chart]);
+                                charts["history"]["options"]["scales"]["x"]["min"] = data["labels"][0];
+                                charts["history"]["options"]["scales"]["x"]["max"] = data["labels"][data["labels"].length -1];
+                            }
+                        }
+                        charts["history"].update("none");
+                    }).always(function() {
+                        $("[data-processing='true']").remove();
+                        $("#historyTimespan").removeAttr("disabled");
+                    });
+                });
                 // Neue Daten vom Server laden
                 setInterval(function() {
                     // "current" gilt für das Diagramm der letzten Minute, "history" ist für das Verlaufsdiagramm
                     if (!isLoadingCurrentChartData) {
                         isLoadingCurrentChartData = true;
                         $.post("current_charts_data.php", {
-                            labels: JSON.stringify(charts["co2"]["current"]["data"]["labels"]),
+                            labels: JSON.stringify(charts["current"]["co2"]["data"]["labels"]),
                             actuators: JSON.stringify(actuators)
                         }).done(function(response) {
                             let data = JSON.parse(response);
                             let items = Object.keys(data);
                             // item = Sensor, z.B. co2
                             for (item of items) {
-                                if (charts.hasOwnProperty(item)) {
+                                if (charts["current"].hasOwnProperty(item)) {
                                     // chart z.B. "current"
-                                    charts[item]["current"]["data"]["labels"] = data[item]["labels"]["current"];
+                                    Object.assign(charts["current"][item]["data"]["labels"], data[item]["labels"]);
                                     let charts_ = Object.keys(data[item]["data"]); // current, setpoint, mean
                                     for (chart of charts_) {
-                                        let index = charts[item]["current"]["data"]["datasets"].findIndex(key => key.stack === chart);
+                                        let index = charts["current"][item]["data"]["datasets"].findIndex(key => key.stack === chart);
                                         if (index >= 0 && data[item]["data"][chart] !== null) {
 
                                             // Aktorenaktionen
                                             if (chart == "actuator" && data[item]["data"]["actuator"]["enabled"] == 1) {
-                                                currentIndex = charts[item]["current"]["data"]["datasets"].findIndex(key => key.stack === "current");
-                                                if (charts[item]["current"]["data"]["datasets"][index]["data"].length >= 13) {
-                                                    charts[item]["current"]["data"]["datasets"][index]["data"].shift();
+                                                currentIndex = charts["current"][item]["data"]["datasets"].findIndex(key => key.stack === "current");
+                                                if (charts["current"][item]["data"]["datasets"][index]["data"].length >= 13) {
+                                                    charts["current"][item]["data"]["datasets"][index]["data"].shift();
                                                 }
-                                                let lastXPosition = charts[item]["current"]["data"]["datasets"][currentIndex]["data"].length -1;
-                                                let lastXValue = charts[item]["current"]["data"]["datasets"][currentIndex]["data"][lastXPosition]["x"];
+                                                let lastXPosition = charts["current"][item]["data"]["datasets"][currentIndex]["data"].length -1;
+                                                let lastXValue = charts["current"][item]["data"]["datasets"][currentIndex]["data"][lastXPosition]["x"];
                                                 if (lastXValue == data[item]["data"]["actuator"]["data"]["x"]) {
-                                                    charts[item]["current"]["data"]["datasets"][currentIndex]["data"].splice(lastXPosition, 1);
+                                                    // Letztes Element löschen, damit nicht zwei gleiche X-Werte angezeigt werden
+                                                    charts["current"][item]["data"]["datasets"][currentIndex]["data"].splice(lastXPosition, 1);
                                                 }
                                                 // Damit Objekte wirklich zugewiesen werden, statt als Referenz!
                                                 Object.assign(actuators[item], data[item]["data"]["actuator"]);
@@ -1244,16 +1175,16 @@
                                                 if (data[item]["data"]["actuator"]["count"] == 0) {
                                                     actuators[item]["enabled"] = 0;
                                                 }
-                                                charts[item]["current"]["data"]["datasets"][index]["data"].push(data[item]["data"]["actuator"]["data"]);
-                                                charts[item]["current"]["data"]["datasets"][currentIndex]["data"].push(data[item]["data"]["actuator"]["data"]);
+                                                charts["current"][item]["data"]["datasets"][index]["data"].push(data[item]["data"]["actuator"]["data"]);
+                                                charts["current"][item]["data"]["datasets"][currentIndex]["data"].push(data[item]["data"]["actuator"]["data"]);
                                             }
                                             else {
-                                                if (charts[item]["current"]["data"]["datasets"][index]["data"].length >= 13) {
-                                                    charts[item]["current"]["data"]["datasets"][index]["data"].shift();
+                                                if (charts["current"][item]["data"]["datasets"][index]["data"].length >= 13) {
+                                                    charts["current"][item]["data"]["datasets"][index]["data"].shift();
                                                 }
-                                                charts[item]["current"]["data"]["datasets"][index]["data"].push(data[item]["data"][chart]);
-                                                charts[item]["current"]["options"]["scales"]["x"]["min"] = data[item]["labels"]["current"][0];
-                                                charts[item]["current"]["options"]["scales"]["x"]["max"] = data[item]["labels"]["current"][data[item]["labels"]["current"].length -1];
+                                                charts["current"][item]["data"]["datasets"][index]["data"].push(data[item]["data"][chart]);
+                                                charts["current"][item]["options"]["scales"]["x"]["min"] = data[item]["labels"][0];
+                                                charts["current"][item]["options"]["scales"]["x"]["max"] = data[item]["labels"][data[item]["labels"].length -1];
                                                 // Wenn Wert kleiner gleich Warnwert
                                                 if ((Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["data"]["lowerControlLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["upperControlLimit"]["y"]))) {
                                                     switchAlert(item, "warning");
@@ -1268,7 +1199,7 @@
                                             }
                                         }
                                     }
-                                    charts[item]["current"].update("none"); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
+                                    charts["current"][item].update("none"); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
                                     $("#section-" + item + "> canvas").css("visibility", "visible");
                                     $("#section-" + item + "> div ").css("display", "none");
                                     $("#section-" + item + "> button.config-chart-button ").css("display", "block");
@@ -1666,6 +1597,11 @@
                 z-index: 3;
                 width: 100%;
                 height: 100%
+            }
+            .kreiselchen {
+                flex: 0 0 auto;
+                width: 20px;
+                height: 20px
             }
         </style>
 	</head>
@@ -2072,7 +2008,6 @@
                                 <option value="12">Letzte 12 Stunden</option>
                                 <option value="24">Letzte 24 Stunden</option>
                             </select>
-                            <span class="spinner-border ms-2 text-primary" style="flex: 0 0 auto; width: 20px; height: 20px;"></span>
                         </div>
                         <section id="history" class="w-100" style="height:60vh">
                             <canvas id="charts-history"></canvas>

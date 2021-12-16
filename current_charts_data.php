@@ -7,7 +7,7 @@
         "co2" => 60,
         "temperature" => 33,
         "salinity" => 20,
-        "waterlevel" => 10,
+        "waterlevel" => 40,
         "ventilation" => 50,
         "ph" => 30,
         "brightness" => 50
@@ -105,7 +105,7 @@
             }
             else {
                 // Wennn Simulation nicht läuft, zufallsbedingt starten
-                if (random_int(0, 8) == 1) {
+                if (random_int(0, 10) == 7) {
                     // Zufallsbedingte Dauer des Aktors festlegen (Spanne von N Label, steigende Aktorleistung parallel mit steigendem aktuellen Wert)
                     $actuators[$key]["enabled"] = 1;
                     $actuatorDuration = random_int(5, 10); //soll auch länger dauern können als anzahl label
@@ -140,9 +140,7 @@
     }
     $data = [
         "co2" => [
-            "labels" => [
-                "current" => $labels
-            ],
+            "labels" => $labels,
             "data" => [
                 "current" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["co2"] -10, $setpoints["co2"] +10)], // Aktueller Wert
                 "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => $setpoints["co2"]], // Sollwert
@@ -155,9 +153,7 @@
             ]
         ],
         "temperature" => [
-            "labels" => [
-                "current" => $labels
-            ],
+            "labels" => $labels,
             "data" => [
                 "current" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["temperature"] -10, $setpoints["temperature"] +10)], // Aktueller Wert
                 "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => $setpoints["temperature"]], // Sollwert
@@ -170,9 +166,7 @@
             ]
         ],
         "salinity" => [
-            "labels" => [
-                "current" => $labels
-            ],
+            "labels" => $labels,
             "data" => [
                 "current" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["salinity"] -10, $setpoints["salinity"] +10)], // Aktueller Wert
                 "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => $setpoints["salinity"]], // Sollwert
@@ -185,9 +179,7 @@
             ]
         ],
         "waterlevel" => [
-            "labels" => [
-                "current" => $labels
-            ],
+            "labels" => $labels,
             "data" => [
                 "current" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["waterlevel"] -10, $setpoints["waterlevel"] +10)], // Aktueller Wert
                 "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => $setpoints["waterlevel"]], // Sollwert
@@ -200,9 +192,7 @@
             ]
         ],
         "ph" => [
-            "labels" => [
-                "current" => $labels
-            ],
+            "labels" => $labels,
             "data" => [
                 "current" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["ph"] -10, $setpoints["ph"] +10)], // Aktueller Wert
                 "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => $setpoints["ph"]], // Sollwert
@@ -215,9 +205,7 @@
             ]
         ],
         "ventilation" => [
-            "labels" => [
-                "current" => $labels
-            ],
+            "labels" => $labels,
             "data" => [
                 "current" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["ventilation"] -10, $setpoints["ventilation"] +10)], // Aktueller Wert
                 "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => $setpoints["ventilation"]], // Sollwert
@@ -230,9 +218,7 @@
             ]
         ],
         "brightness" => [
-            "labels" => [
-                "current" => $labels
-            ],
+            "labels" => $labels,
             "data" => [
                 "current" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["brightness"] -10, $setpoints["brightness"] +10)], // Aktueller Wert
                 "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => $setpoints["brightness"]], // Sollwert
