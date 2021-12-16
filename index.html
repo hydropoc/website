@@ -12,8 +12,8 @@
         <link rel="stylesheet" href="css/fontawesome.css">
         <link rel="stylesheet" href="css/dataTables.bootstrap5.min.css">
         <link rel="stylesheet" href="css/bootstrap4-toggle.min.css">
-        <script src="js/bootstrap.bundle.min.js"></script>
         <script src="js/jquery-3.6.0.min.js"></script>
+        <script src="js/bootstrap.bundle.min.js"></script>
         <script src="js/datatables.min.js"></script>
         <script src="js/dataTables.bootstrap5.min.js"></script>
         <script src="js/chart.min.js"></script>
@@ -163,27 +163,20 @@
                                 display: false,
                                 labels: {
                                     usePointStyle: true,
-                                    pointStyle: "rect"
-                                }
-                            },
-                            title: {
-                                text: "Co²-Gehalt (ppm)",
-                                display: true,
-                                font: {
-                                    size: 14
-                                },
-                                padding: {
-                                    top: 5,
-                                    bottom: 10
+                                    pointStyle: "rect",
+                                    font: {
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                    }
                                 }
                             }
                         },
                         maintainAspectRatio: false,
+                        /*
                         layout: {
                             padding: {
-                                top: 10
+                                top: 40
                             }
-                        },
+                        },*/
                         scales: {
                             x: {
                                 ticks: {
@@ -1068,7 +1061,7 @@
                                 borderColor: "rgb(219, 112, 147)",
                                 backgroundColor: "rgba(219, 112, 147, 0.75)",
                                 borderWidth: 1,
-                                pointStyle: "line",
+                                pointStyle: "circle",
                                 fill: {
                                     target: "start",
                                     above: function(context) {
@@ -1200,9 +1193,9 @@
                                         }
                                     }
                                     charts["current"][item].update("none"); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
-                                    $("#section-" + item + "> canvas").css("visibility", "visible");
-                                    $("#section-" + item + "> div ").css("display", "none");
-                                    $("#section-" + item + "> button.config-chart-button ").css("display", "block");
+                                    //$("#section-" + item + "> canvas").css("visibility", "visible");
+                                    //$("#section-" + item + "> div ").css("display", "none");
+                                    //$("#section-" + item + "> button.config-chart-button ").css("display", "block");
                                 }
                             }
                         }).always(function() {
@@ -1339,22 +1332,23 @@
 	    	section.lol {
                 border: 2px solid var(--bs-gray-300, #dee2e6)
 		    }
-	    	section.lol > canvas {
-                visibility: hidden;
+	    	section.lol > div:first-of-type > span:first-of-type {
+                font-weight: bold;
+                font-size: 1rem
             }
-            section.lol > div > h2 {
+            .chart-overlay > h2 {
                 color: var(--bs-gray-500);
                 margin: 0
             }
-            section.lol > div {
+            .chart-overlay {
                 position: absolute;
+                z-index: 2;
                 width: 100%;
                 height: 100%;
-                display: flex;
                 align-items: center;
                 align-content: center;
                 justify-content: center;
-                z-index: 10;
+                display: flex
             }
             section.lol.warning {
                 background-color: var(--alert-background-warning);
@@ -1587,16 +1581,9 @@
             }
             .config-chart-button {
                 right: 15px;
-                top: 8px;
-                position: absolute;
-                z-index: 2;
-                display: none;
-            }
-            .chart-overlay {
+                top: 0px;
                 position: absolute;
                 z-index: 3;
-                width: 100%;
-                height: 100%
             }
             .kreiselchen {
                 flex: 0 0 auto;
@@ -1659,12 +1646,17 @@
                                 </select>
                             </div>
                             <div id="overview-panel">
-                                <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-co2">
-                                    <div class="chart-overlay">
-                                        <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
+                                <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-co2">
+                                    <div class="position-relative w-100 text-center" style="flex: 0 0 28px">
+                                        <span>Co²-Gehalt</span>
+                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="co2" data-chart-title="Co²" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     </div>
-                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="co2" data-chart-title="Co²" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
-                                    <canvas id="co2-chart-current"></canvas>
+                                    <div class="position-relative w-100 h-100">
+                                        <div class="chart-overlay">
+                                            <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
+                                        </div>
+                                        <canvas id="co2-chart-current"></canvas>
+                                    </div>
                                 </section>
                                 <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-temperature">
                                     <div class="chart-overlay">
