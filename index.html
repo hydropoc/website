@@ -171,15 +171,12 @@
                             }
                         },
                         maintainAspectRatio: false,
-                        /*
-                        layout: {
-                            padding: {
-                                top: 40
-                            }
-                        },*/
                         scales: {
                             x: {
                                 ticks: {
+                                    font: {
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                    },
                                     callback: function(val, index) {
                                         return index % 4 === 0 ? charts["current"]["co2"]["data"]["labels"][index] : "";
                                     }
@@ -187,7 +184,12 @@
                             },
                             y: { // defining min and max so hiding the dataset does not change scale range
                                 min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100
+                                max: 100,
+                                ticks: {
+                                    font: {
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                    }
+                                }
                             }
                         }
                     },
@@ -284,16 +286,14 @@
                                     pointStyle: "rect"
                                 }
                             },
-                            title: {
-                                text: "Temperatur (°C)",
-                                display: true,
-                                font: {
-                                    size: 14
+                            tooltip: {
+                                titleFont: {
+                                    family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
                                 },
-                                padding: {
-                                    top: 5,
-                                    bottom: 10
-                                }
+                                bodyFont: {
+                                    family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                },
+                                boxPadding: 3
                             }
                         },
                         maintainAspectRatio: false,
@@ -305,6 +305,9 @@
                         scales: {
                             x: {
                                 ticks: {
+                                    font: {
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                    },
                                     callback: function(val, index) {
                                         return index % 4 === 0 ? charts["current"]["temperature"]["data"]["labels"][index] : "";
                                     }
@@ -312,7 +315,12 @@
                             },
                             y: { // defining min and max so hiding the dataset does not change scale range
                                 min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100
+                                max: 100,
+                                ticks: {
+                                    font: {
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                    }
+                                }
                             }
                         }
                     },
@@ -409,16 +417,14 @@
                                     pointStyle: "rect"
                                 }
                             },
-                            title: {
-                                text: "Salzgehalt (g/kg)",
-                                display: true,
-                                font: {
-                                    size: 14
+                            tooltip: {
+                                titleFont: {
+                                    family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
                                 },
-                                padding: {
-                                    top: 5,
-                                    bottom: 10
-                                }
+                                bodyFont: {
+                                    family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                },
+                                boxPadding: 3
                             }
                         },
                         maintainAspectRatio: false,
@@ -430,6 +436,9 @@
                         scales: {
                             x: {
                                 ticks: {
+                                    font: {
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                    },
                                     callback: function(val, index) {
                                         return index % 4 === 0 ? charts["current"]["salinity"]["data"]["labels"][index] : "";
                                     }
@@ -437,7 +446,12 @@
                             },
                             y: { // defining min and max so hiding the dataset does not change scale range
                                 min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100
+                                max: 100,
+                                ticks: {
+                                    font: {
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                    }
+                                }
                             }
                         }
                     },
@@ -534,16 +548,14 @@
                                     pointStyle: "rect"
                                 }
                             },
-                            title: {
-                                text: "Wasserstand",
-                                display: true,
-                                font: {
-                                    size: 14
+                            tooltip: {
+                                titleFont: {
+                                    family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
                                 },
-                                padding: {
-                                    top: 5,
-                                    bottom: 10
-                                }
+                                bodyFont: {
+                                    family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                },
+                                boxPadding: 3
                             }
                         },
                         maintainAspectRatio: false,
@@ -555,6 +567,9 @@
                         scales: {
                             x: {
                                 ticks: {
+                                    font: {
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                    },
                                     callback: function(val, index) {
                                         return index % 4 === 0 ? charts["current"]["waterlevel"]["data"]["labels"][index] : "";
                                     }
@@ -562,7 +577,12 @@
                             },
                             y: { // defining min and max so hiding the dataset does not change scale range
                                 min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100
+                                max: 100,
+                                ticks: {
+                                    font: {
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                    }
+                                }
                             }
                         }
                     },
@@ -659,16 +679,14 @@
                                     pointStyle: "rect"
                                 }
                             },
-                            title: {
-                                text: "pH-Wert",
-                                display: true,
-                                font: {
-                                    size: 14
+                            tooltip: {
+                                titleFont: {
+                                    family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
                                 },
-                                padding: {
-                                    top: 5,
-                                    bottom: 10
-                                }
+                                bodyFont: {
+                                    family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                },
+                                boxPadding: 3
                             }
                         },
                         maintainAspectRatio: false,
@@ -680,6 +698,9 @@
                         scales: {
                             x: {
                                 ticks: {
+                                    font: {
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                    },
                                     callback: function(val, index) {
                                         return index % 4 === 0 ? charts["current"]["ph"]["data"]["labels"][index] : "";
                                     }
@@ -687,7 +708,12 @@
                             },
                             y: { // defining min and max so hiding the dataset does not change scale range
                                 min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100
+                                max: 100,
+                                ticks: {
+                                    font: {
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                    }
+                                }
                             }
                         }
                     },
@@ -784,16 +810,14 @@
                                     pointStyle: "rect"
                                 }
                             },
-                            title: {
-                                text: "Belüftung",
-                                display: true,
-                                font: {
-                                    size: 14
+                            tooltip: {
+                                titleFont: {
+                                    family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
                                 },
-                                padding: {
-                                    top: 5,
-                                    bottom: 10
-                                }
+                                bodyFont: {
+                                    family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                },
+                                boxPadding: 3
                             }
                         },
                         maintainAspectRatio: false,
@@ -805,6 +829,9 @@
                         scales: {
                             x: {
                                 ticks: {
+                                    font: {
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                    },
                                     callback: function(val, index) {
                                         return index % 4 === 0 ? charts["current"]["ventilation"]["data"]["labels"][index] : "";
                                     }
@@ -812,7 +839,12 @@
                             },
                             y: { // defining min and max so hiding the dataset does not change scale range
                                 min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100
+                                max: 100,
+                                ticks: {
+                                    font: {
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                    }
+                                }
                             }
                         }
                     },
@@ -909,16 +941,14 @@
                                     pointStyle: "rect"
                                 }
                             },
-                            title: {
-                                text: "Beleuchtung",
-                                display: true,
-                                font: {
-                                    size: 14
+                            tooltip: {
+                                titleFont: {
+                                    family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
                                 },
-                                padding: {
-                                    top: 5,
-                                    bottom: 10
-                                }
+                                bodyFont: {
+                                    family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                },
+                                boxPadding: 3
                             }
                         },
                         maintainAspectRatio: false,
@@ -930,6 +960,9 @@
                         scales: {
                             x: {
                                 ticks: {
+                                    font: {
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                    },
                                     callback: function(val, index) {
                                         return index % 4 === 0 ? charts["current"]["brightness"]["data"]["labels"][index] : "";
                                     }
@@ -1033,15 +1066,28 @@
                                     usePointStyle: true,
                                     pointStyle: "rect",
                                     font: {
-                                        size: 14
+                                        size: 14,
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
                                     }
                                 }
+                            },
+                            tooltip: {
+                                titleFont: {
+                                    family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                },
+                                bodyFont: {
+                                    family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                },
+                                boxPadding: 3
                             }
                         },
                         maintainAspectRatio: false,
                         scales: {
                             x: {
                                 ticks: {
+                                    font: {
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                    },
                                     callback: function(val, index) {
                                         return index % 4 === 0 ? charts["history"]["data"]["labels"][index] : "";
                                     }
@@ -1049,7 +1095,12 @@
                             },
                             y: {
                                 min: 0,
-                                max: 100
+                                max: 100,
+                                ticks: {
+                                    font: {
+                                        family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
+                                    }
+                                }
                             }
                         }
                     },
@@ -1179,7 +1230,7 @@
                                                 charts["current"][item]["options"]["scales"]["x"]["min"] = data[item]["labels"][0];
                                                 charts["current"][item]["options"]["scales"]["x"]["max"] = data[item]["labels"][data[item]["labels"].length -1];
                                                 // Wenn Wert kleiner gleich Warnwert
-                                                if ((Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["data"]["lowerControlLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["upperControlLimit"]["y"]))) {
+                                                /*if ((Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["data"]["lowerControlLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["upperControlLimit"]["y"]))) {
                                                     switchAlert(item, "warning");
                                                 }
                                                 else if ((Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperControlLimit"]["y"]) && Number(data[item]["data"]["current"]["y"]) > Number(data[item]["data"]["upperWarningLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerControlLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["lowerWarningLimit"]["y"]))) {
@@ -1188,13 +1239,13 @@
                                                 }
                                                 else {
                                                     switchAlert(item, "success");
-                                                }
+                                                }*/
                                             }
                                         }
                                     }
-                                    charts["current"][item].update("none"); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
-                                    //$("#section-" + item + "> canvas").css("visibility", "visible");
-                                    //$("#section-" + item + "> div ").css("display", "none");
+                                    charts["current"][item].update(); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
+                                    $("#section-" + item + "> div:last-of-type > canvas").css("visibility", "visible");
+                                    $("#section-" + item + "> div:last-of-type > .chart-overlay ").css("display", "none");
                                     //$("#section-" + item + "> button.config-chart-button ").css("display", "block");
                                 }
                             }
@@ -1332,9 +1383,17 @@
 	    	section.lol {
                 border: 2px solid var(--bs-gray-300, #dee2e6)
 		    }
+            section.lol div:first-of-type {
+                flex: 0 0 28px
+            }
 	    	section.lol > div:first-of-type > span:first-of-type {
                 font-weight: bold;
-                font-size: 1rem
+                font-size: 1rem;
+                vertical-align: middle;
+                color: var(--bs-gray-600, #6c757d)
+            }
+            canvas[id$="-chart-current"] {
+                visibility: hidden
             }
             .chart-overlay > h2 {
                 color: var(--bs-gray-500);
@@ -1468,22 +1527,22 @@
                 border-top-right-radius: 2px;
             }
             table > thead > tr > th {
-                border-left: 1px solid var(--bs-gray-300) !important;
-                border-top: 1px solid var(--bs-gray-300) !important;
-                border-bottom: 2px solid var(--bs-gray-300) !important;
+                border-left: 1px solid var(--bs-gray-300, #dee2e6) !important;
+                border-top: 1px solid var(--bs-gray-300, #dee2e6) !important;
+                border-bottom: 2px solid var(--bs-gray-300, #dee2e6) !important;
                 background-color: #f7f7f7 !important
             }
             table > thead > tr > th:last-of-type {
-                border-right: 1px solid var(--bs-gray-300) !important
+                border-right: 1px solid var(--bs-gray-300, #dee2e6) !important
             }
             table > tbody > tr > td {
-                border-left: 1px solid var(--bs-gray-300) !important
+                border-left: 1px solid var(--bs-gray-300, #dee2e6) !important
             }
             table > tbody > tr > td:last-of-type {
-                border-right: 1px solid var(--bs-gray-300) !important
+                border-right: 1px solid var(--bs-gray-300, #dee2e6) !important
             }
             table > tbody > tr:last-of-type > td {
-                border-bottom: 1px solid var(--bs-gray-300) !important
+                border-bottom: 1px solid var(--bs-gray-300, #dee2e6) !important
             }
             table > tbody > tr:last-of-type > td:first-of-type {
                 border-bottom-left-radius: 2px
@@ -1581,7 +1640,6 @@
             }
             .config-chart-button {
                 right: 15px;
-                top: 0px;
                 position: absolute;
                 z-index: 3;
             }
@@ -1647,7 +1705,7 @@
                             </div>
                             <div id="overview-panel">
                                 <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-co2">
-                                    <div class="position-relative w-100 text-center" style="flex: 0 0 28px">
+                                    <div class="position-relative w-100 text-center pt-2">
                                         <span>Co²-Gehalt</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="co2" data-chart-title="Co²" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     </div>
@@ -1658,47 +1716,77 @@
                                         <canvas id="co2-chart-current"></canvas>
                                     </div>
                                 </section>
-                                <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-temperature">
-                                    <div class="chart-overlay">
-                                        <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
+                                <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-temperature">
+                                    <div class="position-relative w-100 text-center pt-2">
+                                        <span>Temperatur</span>
+                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="temperature" data-chart-title="Temperatur" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     </div>
-                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="temperature" data-chart-title="Temperatur" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
-                                    <canvas id="temperature-chart-current"></canvas>
+                                    <div class="position-relative w-100 h-100">
+                                        <div class="chart-overlay">
+                                            <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
+                                        </div>
+                                        <canvas id="temperature-chart-current"></canvas>
+                                    </div>
                                 </section>
-                                <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-salinity">
-                                    <div class="chart-overlay">
-                                        <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
+                                <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-salinity">
+                                    <div class="position-relative w-100 text-center pt-2">
+                                        <span>Salzgehalt</span>
+                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="salinity" data-chart-title="Salzgehalt" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     </div>
-                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="salinity" data-chart-title="Salzgehalt" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
-                                    <canvas id="salinity-chart-current"></canvas>
+                                    <div class="position-relative w-100 h-100">
+                                        <div class="chart-overlay">
+                                            <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
+                                        </div>
+                                        <canvas id="salinity-chart-current"></canvas>
+                                    </div>
                                 </section>
-                                <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-ph">
-                                    <div class="chart-overlay">
-                                        <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
+                                <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-ph">
+                                    <div class="position-relative w-100 text-center pt-2">
+                                        <span>pH-Wert</span>
+                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ph" data-chart-title="pH-Wert" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     </div>
-                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ph" data-chart-title="pH-Wert" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
-                                    <canvas id="ph-chart-current"></canvas>
+                                    <div class="position-relative w-100 h-100">
+                                        <div class="chart-overlay">
+                                            <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
+                                        </div>
+                                        <canvas id="ph-chart-current"></canvas>
+                                    </div>
                                 </section>
-                                <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-waterlevel">
-                                    <div class="chart-overlay">
-                                        <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
+                                <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-waterlevel">
+                                    <div class="position-relative w-100 text-center pt-2">
+                                        <span>Wasserstand</span>
+                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="waterlevel" data-chart-title="Wasserstand" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     </div>
-                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="waterlevel" data-chart-title="Wasserstand" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
-                                    <canvas id="waterlevel-chart-current"></canvas>
+                                    <div class="position-relative w-100 h-100">
+                                        <div class="chart-overlay">
+                                            <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
+                                        </div>
+                                        <canvas id="waterlevel-chart-current"></canvas>
+                                    </div>
                                 </section>
-                                <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-ventilation">
-                                    <div class="chart-overlay">
-                                        <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
+                                <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-ventilation">
+                                    <div class="position-relative w-100 text-center pt-2">
+                                        <span>Belüftung</span>
+                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ventilation" data-chart-title="Belüftung" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     </div>
-                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ventilation" data-chart-title="Belüftung" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
-                                    <canvas id="ventilation-chart-current"></canvas>
+                                    <div class="position-relative w-100 h-100">
+                                        <div class="chart-overlay">
+                                            <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
+                                        </div>
+                                        <canvas id="ventilation-chart-current"></canvas>
+                                    </div>
                                 </section>
-                                <section class="rounded-3 lol d-flex align-items-center align-content-center position-relative" id="section-brightness">
-                                    <div class="chart-overlay">
-                                        <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
+                                <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-brightness">
+                                    <div class="position-relative w-100 text-center pt-2">
+                                        <span>Beleuchtung</span>
+                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="brightness" data-chart-title="Beleuchtung" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                    </div>   
+                                    <div class="position-relative w-100 h-100">
+                                        <div class="chart-overlay">
+                                            <h2><i class="fas fa-info-circle"></i> Noch keine Daten</h2>
+                                        </div>
+                                        <canvas id="brightness-chart-current"></canvas>
                                     </div>
-                                    <button class="btn btn-xs btn-secondary config-chart-button" data-chart="brightness" data-chart-title="Beleuchtung" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
-                                    <canvas id="brightness-chart-current"></canvas>
                                 </section>
                             </div>
                         </div>

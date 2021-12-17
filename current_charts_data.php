@@ -105,7 +105,7 @@
             }
             else {
                 // Wennn Simulation nicht läuft, zufallsbedingt starten
-                if (random_int(0, 12) == 1) {
+                if (random_int(0, 20) == 9) {
                     // Zufallsbedingte Dauer des Aktors festlegen (Spanne von N Label, steigende Aktorleistung parallel mit steigendem aktuellen Wert)
                     $actuators[$key]["enabled"] = 1;
                     $actuatorDuration = random_int(5, 10); //soll auch länger dauern können als anzahl label
