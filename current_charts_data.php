@@ -1,12 +1,17 @@
 <?php
     date_default_timezone_set("Europe/Berlin");
+    function randomizer() {
+        $numbers = range(1, 30);
+        shuffle($numbers);
+        return array_rand($numbers);
+    }
     $labels = json_decode($_POST["labels"], true);
     $actuators = json_decode($_POST["actuators"], true);
     // Sollwerte
     $setpoints = [
         "co2" => 60,
         "temperature" => 33,
-        "salinity" => 20,
+        "salinity" => 35,
         "waterlevel" => 40,
         "ventilation" => 50,
         "ph" => 30,
@@ -105,16 +110,16 @@
             }
             else {
                 // Wennn Simulation nicht läuft, zufallsbedingt starten
-                if (random_int(0, 20) == 9) {
+                if (randomizer() == 1) {
                     // Zufallsbedingte Dauer des Aktors festlegen (Spanne von N Label, steigende Aktorleistung parallel mit steigendem aktuellen Wert)
                     $actuators[$key]["enabled"] = 1;
-                    $actuatorDuration = random_int(5, 10); //soll auch länger dauern können als anzahl label
+                    $actuatorDuration = rand(5, 10); //soll auch länger dauern können als anzahl label
                     $currentValues = [];
                     $actuators[$key]["count"] = $actuatorDuration; // Muss immer weiter sinken pro Serveranfrage
                     // Zu hohen Wert normalisieren (80+)
-                    if (random_int(0, 1) == 1) {
+                    if (rand(0, 1) == 1) {
                         // Muss für jedes Diagramm gemacht werden (co2, temperature...)
-                        $wtf = random_int($limits[$key]["upperControlLimit"], 100);
+                        $wtf = rand($limits[$key]["upperControlLimit"], 100);
                         $difference = $wtf - $value; // Differenz zwischen Sollwert und Zufallswert
                         // wtf müssen immer weiter sinken
                         $lol = $difference / $actuatorDuration; // Ermitteln, um wie viel der Wert pro Label sinken wird
@@ -125,7 +130,7 @@
                     }
                     // Zu niedrigen Wert normalisieren (20-)
                     else {
-                        $wtf = random_int(0, $limits[$key]["lowerControlLimit"]);
+                        $wtf = rand(0, $limits[$key]["lowerControlLimit"]);
                         $difference = $value - $wtf; // Differenz zwischen Sollwert und Zufallswert
                         // wtf müssen immer weiter sinken
                         $lol = $difference / $actuatorDuration; // Ermitteln, um wie viel der Wert pro Label sinken wird
@@ -141,6 +146,7 @@
     $data = [
         "co2" => [
             "labels" => $labels,
+            "test" => randomizer(),
             "data" => [
                 "current" => ["x" => $labels[array_key_last($labels)], "y" => rand($setpoints["co2"] -10, $setpoints["co2"] +10)], // Aktueller Wert
                 "setpoint" => ["x" => $labels[array_key_last($labels)], "y" => $setpoints["co2"]], // Sollwert
