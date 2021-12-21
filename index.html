@@ -66,6 +66,7 @@
                 brightness: {enabled: 0}
             };
             var isLoadingCurrentChartData = false;
+            var currentChartPlant = null; // Aktuell gewählte Pflanze für Diagramme
             function switchAlert(element, type) {
                 type = type.toLowerCase();
                 element = $("#section-" + element)[0];
@@ -89,6 +90,15 @@
                 $(".config-chart-button").click(function() {
                     $("#chartHistoryElementTitle").html($(this).attr("data-chart-title"));
                     $("#historyTimespan").attr("data-chart", $(this).attr("data-chart"));
+                });
+                $.get("dataTables_test.php", {type: "plants"}).done(function(response) {
+                    let data = JSON.parse(response);
+                    let plants = data["data"][0];
+                    for (plant of plants) {
+                        $("#plantSelection").append("<option value='" + plant + "'>" + plant + "</option>");
+                    }
+                    $("#plantSelection").val(plants[0]);
+                    currentChartPlant = plants[0];
                 });
                 let aso = new Date();
                 $("footer").html("&copy; " + (aso.getFullYear() >= 2022 ? "2021-" + aso.getFullYear() : aso.getFullYear()) + " Deine Mutter")
@@ -132,28 +142,28 @@
                             orderFixed: [1, "asc"],
                             rowGroup: {
                                 dataSrc: "plant",
-                                className: "text-primary", 
+                                className: "bg-gray-200", 
                                 /*function() {
                                     return "font-weight-bold " + this.textContent.toLowerCase();
                                 }*/
                             },
                             columns: [
                                 { name: "plant", data: "plant", visible: false },
-                                { name: "description", data: "description" }
-                            ]/*,
+                                { name: "name", data: "name" },
+                                { name: "description", data: "description" },
+                                { name: "actions", data: "actions" }
+                            ],
                             ajax: {
-                                url: "{{ url('api/people/admin/manageUsers/datatables/facets') }}",
+                                url: "dataTables_test.php",
                                 type: 'GET',
+                                data: {
+                                    type: "plantsprograms"
+                                },
                                 dataSrc: function(response) {
-                                    keys = Object.getOwnPropertyNames(response["sections"]);
-                                    keys.sort();
-                                    $("#group").empty();
-                                    for (key of keys) {
-                                        $("#group").append("<option value='" + key + "'>" + response["sections"][key] +  "</option>");
-                                    }
-                                    return response.data;
+                                    console.log(response["data"]);
+                                    return response["data"];
                                 }
-                            }*/
+                            }
                         });
                     }
                 });
@@ -1693,6 +1703,10 @@
                 width: 20px;
                 height: 20px
             }
+            .bg-gray-200 {
+                background-color: var(--bs-gray-200, #e9ecef);
+                font-weight: 600;
+            }
         </style>
 	</head>
     <body class="m-0 p-0">
@@ -1703,8 +1717,10 @@
                 </a>
                 <ul class="navbar-nav" id="first-navbar">
                     <li class="nav-item">
-                        <a class="nav-link rounded-3" href="#" data-bs-toggle="modal"
-                            data-bs-target="#systemStatsModal">Systemstatus</a>
+                        <a class="nav-link rounded-3" href="#" data-bs-toggle="modal" data-bs-target="#staffModal"><i class="fas fa-users"></i> Mitwirkende</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link rounded-3" href="#" data-bs-toggle="modal" data-bs-target="#systemStatsModal"><i class="fas fa-hdd"></i> Systeminformationen</a>
                     </li>
                 </ul>
                 <!--
@@ -1753,12 +1769,13 @@
                             <div class="d-inline-flex align-items-center mb-3">
                                 <label for="plantSelection">Pflanze:</label>
                                 <select class="form-select ms-2 w-auto" id="plantSelection">
-                                    <option value="wtf">Riesenrafflesie</option>
                                 </select>
                                 <label for="plantProgramSelection" class="ms-2">Programm:</label>
                                 <select class="form-select ms-2 w-auto" id="plantProgramSelection">
                                     <option value="wtf">Aba heidschi bumbeidschi</option>
                                 </select>
+                                <button type="button" class="btn btn-success ms-2"><i class="fas fa-play"></i></button>
+                                <!--<button type="button" class="btn btn-warning ms-2"><i class="fas fa-pause"></i></button>-->
                             </div>
                             <div id="overview-panel">
                                 <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-co2">
@@ -1874,15 +1891,6 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <tr>
-                                                        <td>Riesenrafflesie</td>
-                                                        <td>Aba heidschi bumbeidschi</td>
-                                                        <td>Frischer Dünger von glücklichen Kühen</td>
-                                                        <td>
-                                                            <button type="button" class="btn btn-sm btn-primary" style="width: 32px"><i class="fas fa-pen"></i></button>
-                                                            <button type="button" class="btn btn-sm btn-danger" style="width: 32px"><i class="fas fa-times"></i></button>
-                                                        </td>
-                                                    </tr>
                                                 </tbody>
                                             </table>
                                         </div>
@@ -2293,10 +2301,10 @@
             </div>
         </div>
         <div class="modal fade" id="systemStatsModal">
-            <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">lol</h4>
+                        <h4 class="modal-title">Systeminformationen</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
@@ -2308,6 +2316,102 @@
                                 </tr>
                             </thead>
                             <tbody id="systemStatsTable">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Schließen</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="staffModal">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Mitwirkende</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table-borderless">
+                            <thead></thead>
+                            <tbody>
+                                <tr>
+                                    <td class="align-text-top pe-3">Projektleitung</td>
+                                    <td>
+                                        Luca Israel
+                                        <br>
+                                        Jessica Gerken
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="align-text-top pe-3">Konstruktion</td>
+                                    <td>
+                                        Ali Fikdusimir
+                                        <br>
+                                        Mahatma Buddah Meimuddah
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="align-text-top pe-3">Materialbeschaffung</td>
+                                    <td>
+                                        Mario Nette
+                                        <br>
+                                        Peter Silie
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="align-text-top pe-3">Backend-Entwicklung</td>
+                                    <td>
+                                        Paul Jongmanns
+                                        <br>
+                                        Lars Friedrich
+                                        <br>
+                                        Fabian
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="align-text-top pe-3">Datenbankentwicklung</td>
+                                    <td>
+                                        Lars
+                                        <br>
+                                        Kevin Müller
+                                        <br>
+                                        Jan
+                                        <br>
+                                        Deon
+                                        <br>
+                                        Emanuel
+                                        <br>
+                                        René
+                                        <br>
+                                        Milan
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="align-text-top pe-3">Frontend-Entwicklung</td>
+                                    <td>
+                                        Milan Kola
+                                        <br>
+                                        Christian Sander
+                                        <br>
+                                        Jan Bremen
+                                        <br>
+                                        Deon Gulbinat
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="align-text-top pe-3">Elektronik</td>
+                                    <td>
+                                        Matties
+                                        <br>
+                                        Tristan
+                                        <br>
+                                        Marvin
+                                        <br>
+                                        Calvin
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
