@@ -124,7 +124,39 @@
                         });
                     }
                 });
-
+                $("#plants-programs-accordion").on("shown.bs.collapse", function() {
+                    if (!DataTable.isDataTable("#adminPlantsProgramsTableTable")) {
+                        var logTable = $("#adminPlantsProgramsTable").DataTable({
+                            order: [1, "asc"],
+                            language: dataTablesLocalization,
+                            orderFixed: [1, "asc"],
+                            rowGroup: {
+                                dataSrc: "plant",
+                                className: "text-primary", 
+                                /*function() {
+                                    return "font-weight-bold " + this.textContent.toLowerCase();
+                                }*/
+                            },
+                            columns: [
+                                { name: "plant", data: "plant", visible: false },
+                                { name: "description", data: "description" }
+                            ]/*,
+                            ajax: {
+                                url: "{{ url('api/people/admin/manageUsers/datatables/facets') }}",
+                                type: 'GET',
+                                dataSrc: function(response) {
+                                    keys = Object.getOwnPropertyNames(response["sections"]);
+                                    keys.sort();
+                                    $("#group").empty();
+                                    for (key of keys) {
+                                        $("#group").append("<option value='" + key + "'>" + response["sections"][key] +  "</option>");
+                                    }
+                                    return response.data;
+                                }
+                            }*/
+                        });
+                    }
+                });
                 // DataTable für Logs
                 $("#collapse-logs-actions").on("shown.bs.collapse", function() {
                     if (!DataTable.isDataTable("#logTable")) {
@@ -1243,7 +1275,7 @@
                                             }
                                         }
                                     }
-                                    charts["current"][item].update(); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
+                                    charts["current"][item].update("none"); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
                                     $("#section-" + item + "> div:last-of-type > canvas").css("visibility", "visible");
                                     $("#section-" + item + "> div:last-of-type > .chart-overlay ").css("display", "none");
                                     //$("#section-" + item + "> button.config-chart-button ").css("display", "block");
@@ -1254,6 +1286,17 @@
                         });
                     }
                 }, 5000);
+                /*
+                var source = new EventSource("");
+                source.onmessage = function (event) {
+                    console.log(event.data);
+                    let statsText = "";
+                    let keys = Object.keys(event.data);
+                    for (key of keys) {
+                        statsText += "<tr><td>" + key + "</td><td>" + event.data[key] + "</td></tr>";
+                    }
+                    $("#systemStatsTable").html(statsText);
+                };*/
             });
         </script>
         <style>
@@ -1326,11 +1369,11 @@
 			    display: flex;
     			align-items: flex-start;
                 justify-content: center;
-                padding: 0 10%;
+                padding: 0 5%;
             }
             main > div.row:first-of-type {
-                flex: 1 0 auto;
-                max-width: 1790px;
+                flex: 0 1 100%;
+                /*max-width: 1790px;*/
             }
             header {
                 grid-column: 1 / 3;
@@ -1658,8 +1701,13 @@
                 <a class="navbar-brand ms-3 mb-0" href="#">
                     <div id="logo"></div>
                 </a>
-                <!--
                 <ul class="navbar-nav" id="first-navbar">
+                    <li class="nav-item">
+                        <a class="nav-link rounded-3" href="#" data-bs-toggle="modal"
+                            data-bs-target="#systemStatsModal">Systemstatus</a>
+                    </li>
+                </ul>
+                <!--
                     <li class="nav-item">
                         <a class="nav-link active rounded-3" href="#" id="randomizeData">Active</a>
                     </li>
@@ -1696,13 +1744,20 @@
                           <a class="nav-link" data-bs-toggle="tab" href="#administration">Administration</a>
                           <!-- class="nav-link disabled" -->
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#about">About</a>
+                        </li>
                     </ul>
                     <div class="tab-content p-4 border">
                         <div class="tab-pane active" id="overview">
                             <div class="d-inline-flex align-items-center mb-3">
                                 <label for="plantSelection">Pflanze:</label>
-                                <select class="form-select ms-2" id="plantSelection">
+                                <select class="form-select ms-2 w-auto" id="plantSelection">
                                     <option value="wtf">Riesenrafflesie</option>
+                                </select>
+                                <label for="plantProgramSelection" class="ms-2">Programm:</label>
+                                <select class="form-select ms-2 w-auto" id="plantProgramSelection">
+                                    <option value="wtf">Aba heidschi bumbeidschi</option>
                                 </select>
                             </div>
                             <div id="overview-panel">
@@ -1793,7 +1848,48 @@
                             </div>
                         </div>
                         <div class="tab-pane fade" id="administration">
-                            <section id="plants-actions-accordion" class="mb-3">
+                            <section id="plants-programs-accordion" class="mb-3">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-plants-programs-actions">
+                                            <h4 class="ms-0 mt-auto me-auto mb-auto"><i class="fas fa-cubes"></i> Pflanzenprogramme</h4>
+                                            <i class="fas fa-chevron-down ms-auto mt-auto me-2 mb-auto"></i>
+                                        </a>
+                                    </div>
+                                    <div id="collapse-plants-programs-actions" class="collapse hide" data-bs-parent="#plants-programs-actions-accordion">
+                                        <div class="card-body">
+                                            <div class="d-inline-flex align-items-center mb-3">
+                                                <label for="adminPlantSelection">Pflanze:</label>
+                                                <select class="form-select ms-2 w-auto" id="adminPlantSelection">
+                                                    <option value="wtf">Riesenrafflesie</option>
+                                                </select>
+                                            </div>
+                                            <table class="table table-sm w-100" id="adminPlantsProgramsTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="w-25">Zielpflanze</th>
+                                                        <th>Name</th>
+                                                        <th>Beschreibung</th>
+                                                        <th>Aktionen</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Riesenrafflesie</td>
+                                                        <td>Aba heidschi bumbeidschi</td>
+                                                        <td>Frischer Dünger von glücklichen Kühen</td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-sm btn-primary" style="width: 32px"><i class="fas fa-pen"></i></button>
+                                                            <button type="button" class="btn btn-sm btn-danger" style="width: 32px"><i class="fas fa-times"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section id="plants-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
                                         <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-plants-actions">
@@ -1801,27 +1897,36 @@
                                             <i class="fas fa-chevron-down ms-auto mt-auto me-2 mb-auto"></i>
                                         </a>
                                     </div>
-                                    <div id="collapse-plants-actions" class="collapse hide" data-bs-parent="#actuator-plants-accordion">
+                                    <div id="collapse-plants-actions" class="collapse hide" data-bs-parent="#plants-accordion">
                                         <div class="card-body">
-                                            <table class="table table-sm" id="plantsTable">
+                                            <table class="table table-sm w-100" id="plantsTable">
                                                 <thead>
                                                     <tr>
                                                         <th>Name</th>
-                                                        <th>pH-Wert</th>
-                                                        <th>Temperatur</th>
-                                                        <th>Wasserstand</th>
-                                                        <th>Luftfeuchtigkeit</th>
-                                                        <th>Beleuchtung</th>
+                                                        <th>Soll-Co²-Gehalt (ppm)</th>
+                                                        <th>Solltemperatur (°C)</th>
+                                                        <th>Sollsalzgehalt (g/Kg)</th>
+                                                        <th>Soll-pH-Wert</th>
+                                                        <th>Sollwasserstand (Liter)</th>
+                                                        <th>Sollbelüftung ()</th>
+                                                        <th>Sollbeleuchtung (Lux)</th>
+                                                        <th>Aktionen</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <tr>
                                                         <td>Riesenrafflesie</td>
-                                                        <td>14</td>
                                                         <td>40</td>
-                                                        <td>3</td>
-                                                        <td>70</td>
-                                                        <td>Ja</td>
+                                                        <td>300</td>
+                                                        <td>10</td>
+                                                        <td>14</td>
+                                                        <td>0,7</td>
+                                                        <td>70%</td>
+                                                        <td>1000</td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-sm btn-primary" style="width: 32px"><i class="fas fa-pen"></i></button>
+                                                            <button type="button" class="btn btn-sm btn-danger" style="width: 32px"><i class="fas fa-times"></i></button>
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -1839,21 +1944,27 @@
                                     </div>
                                     <div id="collapse-pump-actions" class="collapse hide" data-bs-parent="#pump-actions-accordion">
                                         <div class="card-body">
-                                        2 Wasserpumpen, 5 Schlauchpumpen
                                         <table class="table-borderless">
-                                            <thead></thead>
+                                            <thead>
+                                            </thead>
                                             <tbody>
                                                 <tr>
-                                                    <td class="">Pumpe 1</td>
-                                                    <td class=""><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
+                                                    <td>Pumpe 1a</td>
+                                                    <td class="ps-1"><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
+                                                    <td class="ps-2">Pumpe 1b</td>
+                                                    <td class="ps-1"><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="">Pumpe 2</td>
-                                                    <td class=""><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
-                                                </tr>  
+                                                    <td>Pumpe 2a</td>
+                                                    <td class="ps-1"><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
+                                                    <td class="ps-2">Pumpe 2b</td>
+                                                    <td class="ps-1"><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
+                                                </tr>
                                                 <tr>
-                                                    <td class="">Pumpe 3</td>
-                                                    <td class=""><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
+                                                    <td>Pumpe 3a</td>
+                                                    <td class="ps-1"><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
+                                                    <td class="ps-2">Pumpe 3b</td>
+                                                    <td class="ps-1"><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
                                                 </tr>
                                             </tbody>
                                             </table>
@@ -1861,6 +1972,7 @@
                                     </div>
                                 </div>
                             </section>
+                            <!--
                             <section id="self-test-actions-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
@@ -1875,7 +1987,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </section>
+                            </section>-->
                             <section id="user-actions-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
@@ -2030,6 +2142,32 @@
                                 </div>
                             </section>
                         </div>
+                        <div class="tab-pane fade" id="about">
+                            <h2>Impressum für das Schulprojekt HydroPoc der IN20 der BSDGG Bremerhaven</h2>
+                            <h3>HydroPoc</h3>
+                            <ul>
+                                <li>
+                                    <!-- <p>Lehrer: Volker Trimkowski</p> -->
+                                    <p>Die Klasse IN20 der BSDGG</p>
+                                </li>
+    
+                                <li>
+                                    <p>BSDGG
+                                        Berufliche Schule für Dienstleistung, Gewerbe und Gestaltung</p>
+                                    <p>Georg-Büchner-Str. 13
+                                        27574 Bremerhaven</p>
+                                </li>
+                                <li>
+                                    <p>Kontakt: Telefon: 04713094650</p>
+                                    <p>Web: <a href="https://www.bsdgg.de/">BSDGG</a></p>
+                                </li>
+                                <li>
+                                    <p>Projektleitung: Luca Israel</p>
+    
+                                    <p>Stellvtr. Projektleitung: Jessica Gerken</p>
+                                </li>
+                            </ul>
+                        </div>    
                     </div>
                 </div>
             </div>
@@ -2147,6 +2285,31 @@
                                 <h2>Ja spinnt der Beppi!</h2>
                             </div>
                         </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Schließen</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="systemStatsModal">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">lol</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="tabel-sm w-100">
+                            <thead>
+                                <tr>
+                                    <th>Eigenschaft</th>
+                                    <th>Wert</th>
+                                </tr>
+                            </thead>
+                            <tbody id="systemStatsTable">
+                            </tbody>
+                        </table>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Schließen</button>
