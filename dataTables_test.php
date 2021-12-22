@@ -30,4 +30,5 @@
             break;
     }
     echo json_encode(["data" => $data]);
+    return;
 ?>

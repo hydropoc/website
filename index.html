@@ -100,8 +100,8 @@
                     $("#plantSelection").val(plants[0]);
                     currentChartPlant = plants[0];
                 });
-                let aso = new Date();
-                $("footer").html("&copy; " + (aso.getFullYear() >= 2022 ? "2021-" + aso.getFullYear() : aso.getFullYear()) + " Deine Mutter")
+                let date = new Date();
+                $("footer").html("&copy; " + (date.getFullYear() >= 2022 ? "2021-" + date.getFullYear() : date.getFullYear()) + " BSDGG/IN20")
                 // DataTable für Benutzerkonten
                 $("#user-actions-accordion").on("shown.bs.collapse", function() {
                     if (!DataTable.isDataTable("#usersTable")) {
@@ -135,8 +135,8 @@
                     }
                 });
                 $("#plants-programs-accordion").on("shown.bs.collapse", function() {
-                    if (!DataTable.isDataTable("#adminPlantsProgramsTableTable")) {
-                        var logTable = $("#adminPlantsProgramsTable").DataTable({
+                    if (!DataTable.isDataTable("#adminPlantsProgramsTable")) {
+                        var adminPlantsProgramsTable = $("#adminPlantsProgramsTable").DataTable({
                             order: [1, "asc"],
                             language: dataTablesLocalization,
                             orderFixed: [1, "asc"],
@@ -165,6 +165,9 @@
                                 }
                             }
                         });
+                    }
+                    else {
+                        adminPlantsProgramsTable.DataTable().ajax.reload();
                     }
                 });
                 // DataTable für Logs
@@ -1400,10 +1403,11 @@
             }
             #logo {
                 background-image: url("img/logo.png");
-                background-size: 115px 32px;
+                background-size: 114px 32px;
                 background-repeat: no-repeat;
-                width: 115px;
+                width: 114px;
                 height: 32px;
+                filter: drop-shadow(0 1px black);
             }
             footer {
                 height: 50px;
@@ -1545,11 +1549,11 @@
             nav {
                 flex: 1 0 100%;
             }
-            #first-navbar > li:not(:first-of-type, :last-of-type) {
-                margin-left: 8px;
+            #first-navbar > li:not(:last-of-type) {
+                margin-right: 0.25rem;
             }
             #second-navbar > li:not(:first-of-type, :last-of-type) {
-                margin-right: 8px;
+                margin-right: 0.25rem;
             }
             #navigation > ul > li > a:not(.disabled), #navigation > ul > li > a:not(.disabled):visited {
                 color: white;
@@ -1559,7 +1563,7 @@
             }
             #navigation > ul > li > a:not(.disabled):hover, #navigation > ul > li > a:not(.disabled):active, #navigation > ul > li > a.active {
                 color: black !important;
-                background-color: #fbfbfb;
+                background-color: #f6ffff;
                 box-shadow: 0 1px 1px 0px rgba(0, 0, 0, 0.5);
                 text-shadow: 0 0 0 transparent
             }
@@ -1875,12 +1879,6 @@
                                     </div>
                                     <div id="collapse-plants-programs-actions" class="collapse hide" data-bs-parent="#plants-programs-actions-accordion">
                                         <div class="card-body">
-                                            <div class="d-inline-flex align-items-center mb-3">
-                                                <label for="adminPlantSelection">Pflanze:</label>
-                                                <select class="form-select ms-2 w-auto" id="adminPlantSelection">
-                                                    <option value="wtf">Riesenrafflesie</option>
-                                                </select>
-                                            </div>
                                             <table class="table table-sm w-100" id="adminPlantsProgramsTable">
                                                 <thead>
                                                     <tr>
@@ -2000,7 +1998,7 @@
                                 <div class="card">
                                     <div class="card-header">
                                         <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-user-actions">
-                                            <h4 class="ms-0 mt-auto me-auto mb-auto"><i class="fas fa-users"></i> Benutzerkonten</h4>
+                                            <h4 class="ms-0 mt-auto me-auto mb-auto"><i class="fas fa-user-circle"></i> Benutzerkonten</h4>
                                             <i class="fas fa-chevron-down ms-auto mt-auto me-2 mb-auto"></i>
                                         </a>
                                     </div>
