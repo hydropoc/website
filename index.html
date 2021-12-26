@@ -32,7 +32,7 @@
                 },
                 history: {}
             };
-            const dataTablesLocalization = {
+            const dataTablesLocalisation = {
                 sEmptyTable: "Keine Daten vorhanden",
                 sInfo: "_START_ bis _END_ von _TOTAL_ Einträgen",
                 sInfoEmpty: "0 bis 0 von 0 Einträgen",
@@ -85,8 +85,239 @@
                 }
                 return gradient;
             }
+            // Wird verwendet, um Funktionen innerhalb von Objekten auszuführen
+            function achso(callback, args) {
+                callback.apply(this, args);
+            }
+            class Modal {
+                /*
+                data: {
+                    modal: {
+                        size: sm|default|lg|xl,
+                        static: bool
+                    },
+                    title: {
+                        text: string
+                    },
+                    content: {
+                        text: string
+                        options: {
+                            scroll: bool
+                        }
+                    },
+                    footer: {
+                        buttons: {
+                            default: {
+                                text: string,
+                                class: array,
+                                display: bool
+                            }
+                            // Eigene
+                            custom: [
+                                {
+                                    text: string,
+                                    class: string,
+                                    actions: [{
+                                        click: [
+                                            {
+                                                function: string,
+                                                args: []
+                                            },
+                                            {
+                                                function: string,
+                                                args: []
+                                            }
+                                        ]
+                                    }]
+                                }]
+                            }
+                        }
+                    }
+                }
+                */
+                static create(data = {}) {
+                    if ($("#mainModal").hasClass("show")) {
+                        $("#mainModal").hide();
+                    }
+                    $("#mainModal > div:first-of-type").removeClass("modal-sm modal-lg modal-xl modal-dialog-scrollable");
+                    $("#mainModal > div:first-of-type").removeAttr("data-bs-backdrop data-bs-keyboard");
+                    $("#mainModal .modal-header > h4").empty();
+                    $("#mainModal .modal-body").empty();
+                    $("#mainModal .modal-footer").empty();
+                    if (data.hasOwnProperty("modal")) {
+                        if (data["modal"].hasOwnProperty("size") && ["sm", "lg", "xl"].includes(data["modal"]["size"])) {
+                            $("#mainModal > div:first-of-type").addClass("modal-" + data["modal"]["size"]);
+                        }
+                        if (data["modal"].hasOwnProperty("static") && data["modal"]["static"]) {
+                            $("#mainModal > div:first-of-type").attr("data-bs-backdrop", "static").attr("data-bs-keyboard", "false");
+                        }
+                    }
+                    if (data.hasOwnProperty("title")) {
+                        if (data["title"].hasOwnProperty("text") && !["undefined", undefined, null].includes(data["title"]["text"])) {
+                            $("#mainModal .modal-header > h4").html(data["title"]["text"]);
+                        }
+                    }
+                    if (data.hasOwnProperty("content")) {
+                        if (data["content"].hasOwnProperty("options")) {
+                            if (data["content"]["options"].hasOwnProperty("scroll") && data["content"]["options"]["scroll"]) {
+                                $("#mainModal > div:first-of-type").addClass("modal-dialog-scrollable");
+                            }
+                        }
+                        if (data["content"].hasOwnProperty("text") && !["undefined", undefined, null].includes(data["content"]["text"])) {
+                            $("#mainModal .modal-body").html(data["content"]["text"]);
+                        }
+                    }
+                    if (data.hasOwnProperty("footer")) {
+                        if (data["footer"].hasOwnProperty("buttons")) {
+                            if (data["footer"]["buttons"].hasOwnProperty("default")) {
+                                if (data["footer"]["buttons"].hasOwnProperty("display") && data["footer"]["buttons"]["display"]) {
+                                    if (data["footer"]["buttons"]["default"].hasOwnProperty("text") && !["undefined", undefined, null].includes(data["footer"]["buttons"]["default"]["text"])) {
+                                        let defaultButtonText = data["footer"]["buttons"]["text"];
+                                    }
+                                    else {
+                                        let defaultButtonText = "Schließen";
+                                    }
+                                }
+                                if (data["footer"]["buttons"]["default"].hasOwnProperty("class") && !["undefined", undefined, null].includes(data["footer"]["buttons"]["default"]["class"])) {
+                                    let defaultButtonClass = data["footer"]["buttons"]["default"]["class"];
+                                }
+                                else {
+                                    let defaultButtonClass = "btn-secondary";
+                                }
+                                $("#mainModal .modal-footer").append("<button type='button' class='btn " + defaultButtonClass + "' data-bs-dismiss='modal'>" + defaultButtonText + "</button>");
+                            }
+                            else {
+                                $("#mainModal .modal-footer").append("<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Schließen</button>");
+                            }
+                            if (data["footer"]["buttons"].hasOwnProperty("custom")) {
+                                let customButtons = data["footer"]["buttons"]["custom"];
+                                for (let customButton of customButtons) {
+                                    if (customButton.hasOwnProperty("text") && !["undefined", undefined, null].includes(customButton["text"]) /*&& customButton.hasOwnProperty("actions") && !["undefined", undefined, null].includes(customButton["actions"])*/) {
+                                        let currentButton = $("<button type='button' class='btn'>" + customButton["text"] + "</button>");
+                                        if (customButton.hasOwnProperty("class") && !["undefined", undefined, null].includes(customButton["class"])) {
+                                            $(currentButton).addClass(customButton["class"]);
+                                        }
+                                        else {
+                                            $(currentButton).addClass("btn-primary");
+                                        }
+                                        for (let action of customButton["actions"]) {
+                                            let events = Object.getOwnPropertyNames(action);
+                                            for (event of events) {
+                                                for (let func of action[event]) {
+                                                    $(currentButton).on(event, function() {
+                                                        achso(func["function"], func["args"]);
+                                                    });
+                                                }
+                                            }
+                                        }
+                                        $("#mainModal .modal-footer").prepend(currentButton);
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            $("#mainModal .modal-footer").append("<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Schließen</button>");
+                        }
+                    }
+                    else {
+                        $("#mainModal .modal-footer").append("<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Schließen</button>");
+                    }
+                    new bootstrap.Modal($("#mainModal")).show();
+                }
+            }
             document.addEventListener("DOMContentLoaded", function(event) {
                 // Hier alle Skripte ausführen, die auf DOM zugreifen sollen
+                $("a[href='#systemStats']").click(function() {
+                    let content = "<table class='table-sm w-100'>";
+                    content += "<thead>";
+                    content += "<tr>";
+                    content += "<th>Eigenschaft</th>";
+                    content +=" <th>Wert</th>";
+                    content += "</tr>";
+                    content += "</thead>";
+                    content += "<tbody id='systemStatsTable'>";
+                    content += "</tbody>";
+                    content += "</table>";
+                    let data = {
+                            title: {
+                                text: "Systemstatistiken"
+                            },
+                            content: {
+                                text: content
+                            }
+                        };
+                    Modal.create(data);
+                });
+                $("a[href='#staff']").click(function() {
+                    let content = "<table class='table-borderless'><thead></thead><tbody><tr><td class='align-text-top pe-3'>Projektleitung</td><td>Luca Israel<br>Jessica Gerken</td></tr>";
+                    content += "<tr><td class='align-text-top pe-3'>Konstruktion</td><td>Ali Fikdusimir<br>Mahatma Buddah Meimuddah</td></tr><tr><td class='align-text-top pe-3'>Materialbeschaffung</td>";
+                    content += "<td>Mario Nette<br>Peter Silie</td></tr><tr><td class='align-text-top pe-3'>Backend-Entwicklung</td><td>Paul Jongmanns<br>Lars Friedrich<br>Fabian</td></tr>";
+                    content += "<tr><td class='align-text-top pe-3'>Datenbankentwicklung</td><td>Lars<br>Kevin Müller<br>Jan<br>Deon<br>Emanuel<br>René<br>Milan</td></tr><tr><td class='align-text-top pe-3'>Frontend-Entwicklung</td>";
+                    content += "<td>Milan Kola<br>Christian Sander<br>Jan Bremen<br>Deon Gulbinat</td></tr><tr><td class='align-text-top pe-3'>Elektronik</td><td>Matties<br>Tristan<br>Marvin<br>";
+                    content += "Calvin</td></tr></tbody></table>";
+                    let data = {
+                            title: {
+                                text: "Mitwirkende"
+                            },
+                            content: {
+                                options: {
+                                    scroll: true
+                                },
+                                text: content
+                            }
+                        };
+                    Modal.create(data);
+                });
+                $("a[href='#about']").click(function() {
+                    let content = "<img src='img/logo_large.png' id='hydroPocLogo'><p>&quot;HydroPoc&quot;, ein hydroponisches System, ist ein Ganzjahresschulprojekt von der gesamten Klasse der IN20 an der BSDGG.</p>";
+                    content += "<h4>Anschrift</h4><p>Berufliche Schule für Dienstleistung, Gewerbe und Gestaltung<br>Georg-Büchner-Str. 13<br>27574 Bremerhaven</p>";
+                    content += "<h4>Kontakt</h4><p>Telefon: (0471) 30 94 650<br>Web: <a href='https://www.bsdgg.de'>https://www.bsdgg.de</a></p>";
+                    let data = {
+                            modal: {
+                                size: "lg"
+                            },
+                            title: {
+                                text: "Über"
+                            },
+                            content: {
+                                text: content
+                            }
+                        };
+                    Modal.create(data);
+                    $("#hydroPocLogo").on("click", function() {
+                        $(this).addClass("contract");
+                    }).on("animationend", function(wtf) {
+                        if (wtf["originalEvent"]["animationName"] == "contract") {
+                            $(this).removeClass("contract").addClass("boing");
+                        }
+                        else {
+                            $(this).removeClass("boing");
+                            this.offsetWidth;
+                        }
+                    });
+                });
+                $("a[href='#login']").click(function() {
+                    let content = "<div><label for='username' class='form-label'>Benutzername:</label>";
+                    content += "<input type='text' class='form-control' id='username' placeholder='Benutzernamen eingeben'></div>";
+                    content += "<div class='mt-3'><label for='password' class='form-label'>Passwort:</label>";
+                    content += "<input type='password' class='form-control' id='password' placeholder='Passwort eingeben'></div>";
+                    content += "<div class='d-flex mt-3 justify-content-between align-items-center'><button class='btn btn-primary'>Anmelden";
+                    content += "</button><a href='#'>Ich habe mein Passwort vergessen!</a></div>";
+                    let data = {
+                            title: {
+                                text: "Anmelden"
+                            },
+                            content: {
+                                text: content
+                            }
+                        };
+                    Modal.create(data);
+                });
+                $("#mainModal").on("hide.bs.modal", function() {
+                    if ($("#hydroPocLogo") !== undefined) {
+                        $("#hydroPocLogo").off("click animationend");
+                    }
+                });
                 $(".config-chart-button").click(function() {
                     $("#chartHistoryElementTitle").html($(this).attr("data-chart-title"));
                     $("#historyTimespan").attr("data-chart", $(this).attr("data-chart"));
@@ -104,45 +335,45 @@
                 $("footer").html("&copy; " + (date.getFullYear() >= 2022 ? "2021-" + date.getFullYear() : date.getFullYear()) + " BSDGG/IN20")
                 // DataTable für Benutzerkonten
                 $("#user-actions-accordion").on("shown.bs.collapse", function() {
-                    if (!DataTable.isDataTable("#usersTable")) {
-                        var usersTable = $("#usersTable").DataTable({
+                    if (!DataTable.isDataTable("#userAccountsTable")) {
+                        $("#userAccountsTable").DataTable({
                             order: [1, "asc"],
-                            language: dataTablesLocalization,
+                            language: dataTablesLocalisation,
                             columns: [
-                                { name: "fullName", data: "fullName" },
-                                { name: "userName", data: "userName" },
-                                { name: "creationDate", data: "creationDate" },
+                                { name: "displayname", data: "displayname" },
+                                { name: "cn", data: "cn" },
+                                { name: "created", data: "created" },
                                 { name: "status", data: "status" },
-                                { name: "actions", data: "actions" },
-                            ]/*,
-                            columnDefs: [
-                                { className: "p-2", targets: [4] }
-                            ]
+                                { name: "options", data: "options" },
+                            ],
                             ajax: {
-                                url: "{{ url('api/people/admin/manageUsers/datatables/facets') }}",
-                                type: 'GET',
+                                url: "dataTables_test.php",
+                                type: "GET",
+                                data: {
+                                    type: "useraccounts"
+                                },
                                 dataSrc: function(response) {
-                                    keys = Object.getOwnPropertyNames(response["sections"]);
-                                    keys.sort();
-                                    $("#group").empty();
-                                    for (key of keys) {
-                                        $("#group").append("<option value='" + key + "'>" + response["sections"][key] +  "</option>");
-                                    }
-                                    return response.data;
+                                    return response["data"];
                                 }
-                            }*/
+                            }
+                        }).on("draw", function() {
+                            $("#userAccountsTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end' style='height: 40px'><button type='button' class='btn btn-primary' id='addNewUserAccountButton'><i class='fas fa-user-plus'></i> Hinzufügen...</button></div>");
                         });
                     }
                 });
                 $("#plants-programs-accordion").on("shown.bs.collapse", function() {
                     if (!DataTable.isDataTable("#adminPlantsProgramsTable")) {
-                        var adminPlantsProgramsTable = $("#adminPlantsProgramsTable").DataTable({
+                        $("#adminPlantsProgramsTable").DataTable({
                             order: [1, "asc"],
-                            language: dataTablesLocalization,
+                            language: dataTablesLocalisation,
                             orderFixed: [1, "asc"],
                             rowGroup: {
                                 dataSrc: "plant",
                                 className: "bg-gray-200", 
+                                endRender: null,
+                                startRender: function(rows, group) {
+                                                return $("<tr>").append("<td colspan='2' class='align-middle' style='color: #282828'>" + group + "</td><td><button class='btn btn-sm btn-success'><i class='fas fa-asterisk'></i> Neu...</button></td>");
+                                            }
                                 /*function() {
                                     return "font-weight-bold " + this.textContent.toLowerCase();
                                 }*/
@@ -160,22 +391,57 @@
                                     type: "plantsprograms"
                                 },
                                 dataSrc: function(response) {
-                                    console.log(response["data"]);
                                     return response["data"];
                                 }
                             }
                         });
                     }
                     else {
-                        adminPlantsProgramsTable.DataTable().ajax.reload();
+                        $("#adminPlantsProgramsTable").DataTable().ajax.reload();
+                    }
+                });
+                $("#pump-actions-accordion").on("shown.bs.collapse", function() {
+                    if (!DataTable.isDataTable("#pumpsTable")) {
+                        $("#pumpsTable").DataTable({
+                            order: [1, "asc"],
+                            language: dataTablesLocalisation,
+                            orderFixed: [1, "asc"],
+                            rowGroup: {
+                                dataSrc: "name",
+                                className: "bg-gray-200", 
+                                endRender: null,
+                                startRender: function(rows, group) {
+                                                return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + group + "</td>");
+                                            }
+                            },
+                            columns: [
+                                { name: "name", data: "name", visible: false },
+                                { name: "power", data: "power" },
+                                { name: "rpm", data: "rpm" },
+                                { name: "status", data: "status" }
+                            ],
+                            ajax: {
+                                url: "dataTables_test.php",
+                                type: 'GET',
+                                data: {
+                                    type: "pumps"
+                                },
+                                dataSrc: function(response) {
+                                    return response["data"];
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        $("#pumpsTable").DataTable().ajax.reload();
                     }
                 });
                 // DataTable für Logs
                 $("#collapse-logs-actions").on("shown.bs.collapse", function() {
                     if (!DataTable.isDataTable("#logTable")) {
-                        var logTable = $("#logTable").DataTable({
+                        $("#logTable").DataTable({
                             order: [0, "asc"],
-                            language: dataTablesLocalization,
+                            language: dataTablesLocalisation,
                             columns: [
                                 { name: "timestamp", data: "timestamp" },
                                 { name: "message", data: "message" }
@@ -1429,12 +1695,9 @@
             #overview-panel {
                 display: grid;
                 /* Höhe */
-                /*grid-auto-rows: 350px;*/
                 grid-auto-rows: minmax(350px, auto);
                 grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
                 /* Breite */ 
-                /*grid-template-columns: repeat(auto-fit, minmax(0, min(100%/2, max(350px, 100%/5))));*/
-                /*repeat(auto-fill, 350px)*/
                 grid-gap: 10px;
                 align-content: flex-start;
                 justify-content: space-between
@@ -1613,13 +1876,39 @@
                 color: var(--alert-color-danger);
                 text-shadow: 0 0 3px var(--alert-color-danger);
             }
+            /*
             .section-header > h3 > i:first-of-type {
                 vertical-align: top;
                 font-size: larger;
             }
+            */
             i.user-online {
                 color: var(--alert-color-success);
                 text-shadow: 0 0 3px var(--alert-background-success);
+            }
+            #hydroPocLogo {
+                width: 287px;
+                height: 80px;
+            }
+            .contract {
+                animation: contract 1s ease-in-out 0s 1;
+            }
+            .boing {
+                animation: boing 2s ease-in-out 0s 1;
+            }
+            @keyframes contract {
+                0% { width: 287px }
+                100% { width: 50px }
+            }
+            @keyframes boing {
+                0% { width: 50px }
+                14% { width: 287px }
+                28% { width: 257px }
+                42% { width: 287px }
+                56% { width: 267px }
+                70% { width: 287px }
+                84% { width: 277px }
+                100% { width: 287px }
             }
             @keyframes flashing {
                 0% { opacity: 0; }
@@ -1675,14 +1964,14 @@
             table.dataTable thead .sorting_asc::after {
                 background-image: url("img/iconmonstr-sort-4.svg") !important
             }
-            .dataTables_scrollHeadInner {
+            div.dataTables_scrollHeadInner {
                 padding-right: 0 !important;
                 width: 100% !important
             }
-            .dataTables_scrollBody > table th {
+            div.dataTables_scrollBody > table th {
                 border-width: 0 !important
             }
-            .dataTables_wrapper > .row:last-of-type {
+            div.dataTables_wrapper > .row:last-of-type {
                 margin-top: 24px
             }
             .table-responsive {
@@ -1711,6 +2000,9 @@
                 background-color: var(--bs-gray-200, #e9ecef);
                 font-weight: 600;
             }
+            div.dataTables_wrapper > div.row:last-of-type {
+                margin-top: 1rem !important;
+            }
         </style>
 	</head>
     <body class="m-0 p-0">
@@ -1721,30 +2013,18 @@
                 </a>
                 <ul class="navbar-nav" id="first-navbar">
                     <li class="nav-item">
-                        <a class="nav-link rounded-3" href="#" data-bs-toggle="modal" data-bs-target="#staffModal"><i class="fas fa-users"></i> Mitwirkende</a>
+                        <a class="nav-link rounded-3" href="#systemStats"><i class="fas fa-hdd"></i> Systeminformationen</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link rounded-3" href="#" data-bs-toggle="modal" data-bs-target="#systemStatsModal"><i class="fas fa-hdd"></i> Systeminformationen</a>
+                        <a class="nav-link rounded-3" href="#staff"><i class="fas fa-users"></i> Mitwirkende</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link rounded-3" href="#about"><i class="fas fa-info-circle"></i> Über</a>
                     </li>
                 </ul>
-                <!--
-                    <li class="nav-item">
-                        <a class="nav-link active rounded-3" href="#" id="randomizeData">Active</a>
-                    </li>
-                   <li class="nav-item">
-                      <a class="nav-link rounded-3" href="#">Link</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link rounded-3" href="#"></a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link disabled rounded-3" href="#">Disabled</a>
-                    </li>
-                </ul>
-            -->
                 <ul class="navbar-nav mt-auto me-2 mb-auto ms-auto" id="second-navbar">
                     <li class="nav-item">
-                        <a class="nav-link rounded-3" href="#" data-bs-toggle="modal" data-bs-target="#loginModal"><i class="fas fa-sign-in-alt"></i> Anmelden</a>
+                        <a class="nav-link rounded-3" href="#login"><i class="fas fa-sign-in-alt"></i> Anmelden</a>
                     </li>
                     <!-- Es darf immer nur eine Aktion möglich sein -->
                     <li class="nav-item d-none">
@@ -1844,7 +2124,7 @@
                                 </section>
                                 <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-ventilation">
                                     <div class="position-relative w-100 text-center pt-2">
-                                        <span>Belüftung</span>
+                                        <span>Belüftung oder Luftfeuchtigkeit?</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ventilation" data-chart-title="Belüftung" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
@@ -1885,7 +2165,7 @@
                                                         <th class="w-25">Zielpflanze</th>
                                                         <th>Name</th>
                                                         <th>Beschreibung</th>
-                                                        <th>Aktionen</th>
+                                                        <th>Optionen</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -1909,14 +2189,14 @@
                                                 <thead>
                                                     <tr>
                                                         <th>Name</th>
-                                                        <th>Soll-Co²-Gehalt (ppm)</th>
-                                                        <th>Solltemperatur (°C)</th>
-                                                        <th>Sollsalzgehalt (g/Kg)</th>
-                                                        <th>Soll-pH-Wert</th>
-                                                        <th>Sollwasserstand (Liter)</th>
-                                                        <th>Sollbelüftung ()</th>
-                                                        <th>Sollbeleuchtung (Lux)</th>
-                                                        <th>Aktionen</th>
+                                                        <th>Co²-Gehalt</th>
+                                                        <th>Temperatur</th>
+                                                        <th>Salzgehalt</th>
+                                                        <th>pH-Wert</th>
+                                                        <th>Wasserstand</th>
+                                                        <th>Luftfeuchtigkeit</th>
+                                                        <th>Lichtstärke</th>
+                                                        <th>Optionen</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -1950,10 +2230,17 @@
                                     </div>
                                     <div id="collapse-pump-actions" class="collapse hide" data-bs-parent="#pump-actions-accordion">
                                         <div class="card-body">
-                                        <table class="table-borderless">
+                                        <table class="table table-sm w-100" id="pumpsTable">
                                             <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Leistung</th>
+                                                    <th>UPM</th>
+                                                    <th>Status</th>
+                                                </tr>
                                             </thead>
                                             <tbody>
+                                                <!--
                                                 <tr>
                                                     <td>Pumpe 1a</td>
                                                     <td class="ps-1"><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
@@ -1972,7 +2259,7 @@
                                                     <td class="ps-2">Pumpe 3b</td>
                                                     <td class="ps-1"><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
                                                 </tr>
-                                            </tbody>
+                                            </tbody>-->
                                             </table>
                                         </div>
                                     </div>
@@ -2005,14 +2292,14 @@
                                     <div id="collapse-user-actions" class="collapse hide" data-bs-parent="#actuator-user-accordion">
                                         <div class="card-body">
                                             <div class="table-responsive pe-3">
-                                                <table class="table table-sm w-100" id="usersTable">
+                                                <table class="table table-sm w-100" id="userAccountsTable">
                                                     <thead>
                                                         <tr>
                                                             <th>Vollständiger Name</th>
                                                             <th>Benutzername</th>
                                                             <th>Hinzugefügt</th>
                                                             <th>Status</th>
-                                                            <th>Aktionen</th>
+                                                            <th>Optionen</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -2020,36 +2307,17 @@
                                                     Oder sollen Administratoren andere Administratoren bearbeiten
                                                     können, wie sie wollen?
                                                 -->
-                                                        <tr>
-                                                            <td><i class="fas fa-chess-king project-admin"></i> Gitta Stäbe</td>
-                                                            <td>igitt</td>
-                                                            <td>01.01.1970 12:12</td>
-                                                            <td><i class="fas fa-dot-circle user-offline"></i> Offline (Letzte Aktivität: 10.10.2000 13:37)</td>
-                                                            <td>
-                                                                <button type="button" class="btn btn-primary"><i class="fas fa-user-edit"></i> Bearbeiten...</button>
-                                                                <button type="button" class="btn btn-danger"><i class="fas fa-user-alt-slash"></i> Entfernen</button>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><i class="fas fa-chess-rook site-admin"></i> Gitta Stäbe</td>
-                                                            <td>igitt</td>
-                                                            <td>01.01.1970 12:12</td>
-                                                            <td><i class="fas fa-dot-circle user-online"></i> Online</td>
-                                                            <td>
-                                                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUserModal"><i class="fas fa-user-edit"></i> Bearbeiten...</button>
-                                                                <button type="button" class="btn btn-danger"><i class="fas fa-user-alt-slash"></i> Entfernen</button>
-                                                            </td>
-                                                        </tr>
                                                     </tbody>
                                                 </table>
                                             </div>
+                                            <!--
                                             <div class="d-flex align-items-start mt-3">
                                                 <div>
                                                     <div><i class="fas fa-chess-king project-admin"></i> Projektadministrator</div>
                                                     <div><i class="fas fa-chess-rook site-admin"></i> Seitenadministrator</div>
                                                 </div>
-                                                <button type="button" class="btn btn-primary mt-0 me-0 mb-auto ms-auto"><i class="fas fa-user-plus"></i> Hinzufügen...</button>
                                             </div>
+                                        -->
                                         </div>
                                     </div>
                                 </div>
@@ -2064,7 +2332,35 @@
                                     </div>
                                     <div id="collapse-events-actions" class="collapse hide" data-bs-parent="#events-accordion">
                                         <div class="card-body">
-                                          Lorem ipsum..
+                                            <div class="d-inline-flex align-items-center mb-3">
+                                                <label for="eventsCategoySelection">Kategorie:</label>
+                                                <select class="form-select ms-2 w-auto" id="eventsCategoySelection">
+                                                    <option value="0">Allgemein</option>
+                                                    <option value="1">Pflanzen</option>
+                                                    <option value="3">Pumpen</option>
+                                                </select>
+                                            </div>
+                                            <table class="table table-sm w-100" id="eventsTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Attribut</th>
+                                                        <th>Beidingung</th>
+                                                        <th>Aktion</th>
+                                                        <th>Optionen</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Leistung</td>
+                                                        <td>&le; 50</td>
+                                                        <td>lol</td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-sm btn-primary" style="width: 32px"><i class="fas fa-pen"></i></button>
+                                                            <button type="button" class="btn btn-sm btn-danger" style="width: 32px"><i class="fas fa-times"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -2298,123 +2594,16 @@
                 </div>
             </div>
         </div>
-        <div class="modal fade" id="systemStatsModal">
+        <div class="modal fade" id="mainModal">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Systeminformationen</h4>
+                        <h4 class="modal-title"></h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <table class="tabel-sm w-100">
-                            <thead>
-                                <tr>
-                                    <th>Eigenschaft</th>
-                                    <th>Wert</th>
-                                </tr>
-                            </thead>
-                            <tbody id="systemStatsTable">
-                            </tbody>
-                        </table>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Schließen</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="staffModal">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Mitwirkende</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <table class="table-borderless">
-                            <thead></thead>
-                            <tbody>
-                                <tr>
-                                    <td class="align-text-top pe-3">Projektleitung</td>
-                                    <td>
-                                        Luca Israel
-                                        <br>
-                                        Jessica Gerken
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="align-text-top pe-3">Konstruktion</td>
-                                    <td>
-                                        Ali Fikdusimir
-                                        <br>
-                                        Mahatma Buddah Meimuddah
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="align-text-top pe-3">Materialbeschaffung</td>
-                                    <td>
-                                        Mario Nette
-                                        <br>
-                                        Peter Silie
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="align-text-top pe-3">Backend-Entwicklung</td>
-                                    <td>
-                                        Paul Jongmanns
-                                        <br>
-                                        Lars Friedrich
-                                        <br>
-                                        Fabian
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="align-text-top pe-3">Datenbankentwicklung</td>
-                                    <td>
-                                        Lars
-                                        <br>
-                                        Kevin Müller
-                                        <br>
-                                        Jan
-                                        <br>
-                                        Deon
-                                        <br>
-                                        Emanuel
-                                        <br>
-                                        René
-                                        <br>
-                                        Milan
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="align-text-top pe-3">Frontend-Entwicklung</td>
-                                    <td>
-                                        Milan Kola
-                                        <br>
-                                        Christian Sander
-                                        <br>
-                                        Jan Bremen
-                                        <br>
-                                        Deon Gulbinat
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="align-text-top pe-3">Elektronik</td>
-                                    <td>
-                                        Matties
-                                        <br>
-                                        Tristan
-                                        <br>
-                                        Marvin
-                                        <br>
-                                        Calvin
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Schließen</button>
                     </div>
                 </div>
             </div>
