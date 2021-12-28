@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-		<meta charset="utf-8">
+        <meta charset="utf-8">
         <title>Hydropoc</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="verdammt">
@@ -67,6 +67,7 @@
             };
             var isLoadingCurrentChartData = false;
             var currentChartPlant = null; // Aktuell gewählte Pflanze für Diagramme
+            var systemInfosEventSource = null;
             function switchAlert(element, type) {
                 type = type.toLowerCase();
                 element = $("#section-" + element)[0];
@@ -85,6 +86,101 @@
                 }
                 return gradient;
             }
+            function login(wtf) {
+                if ($("#mainModal").hasClass("show") && $("#mainModal").attr("data-name") == "login") {
+                    if ($("#body-overlay").length == 0) {
+                        $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
+                    }
+                    if ($(wtf).find("[data-processing='true']").length == 0) {
+                        $(wtf).attr("disabled", "disabled").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
+                    }
+                    $("#mainModal .modal-footer > [data-bs-dismiss='modal']").attr("disabled", "disabled");
+                    $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
+                    $("#mainModal .modal-body > .alert").remove();
+                    $.post("lol", {
+                        username: $("#username").val(),
+                        password: $("#password").val()
+                    }).done(function(response) {
+                        //cookies setzen
+                        //anmeldeknopf durch abmeldeknopf ersetzen
+                    }).fail(function(response) {
+                        $("#mainModal .modal-body").prepend("<div class='alert alert-danger'><i class='fas fa-exclamation-circle' style='font-size: x-large; vertical-align: sub'></i> " + response["status"] + ": " + response["statusText"] + "</div>");
+                    }).always(function() {
+                        $(wtf).find("[data-processing='true']").remove();
+                        $(wtf).removeAttr("disabled");
+                        $("#body-overlay").remove();
+                        $("#mainModal .modal-footer > [data-bs-dismiss='modal']").removeAttr("disabled");
+                        $("#mainModal .modal-header > [data-bs-dismiss='modal']").removeAttr("disabled");
+                    });
+                }
+            }
+            function logout(wtf) {
+                //cookies löschen
+            }
+            Number.prototype.duration = function() {
+                let sec_num = parseInt(this, 10);
+                let days = Math.floor((sec_num / 3600) / 24);
+                let hours = Math.floor((sec_num / 3600) % 24);
+                let minutes = Math.floor((sec_num / 60) % 60);
+                let seconds = sec_num % 60;
+                let duration = "";
+                if (days >= 1) {
+                    duration += days + (days >= 2 ? " Tage, " : " Tag, ");
+                }
+                if (hours >= 1) {
+                    duration += hours + (hours >= 2 ? " Stunden, " : " Stunde, ");
+                }
+                if (minutes >= 1) {
+                    duration += minutes + (minutes >= 2 ? " Minuten, " : " Minute, ");
+                }
+                if (seconds >= 1) {
+                    duration += seconds + (seconds >= 2 ? " Sekunden, " : " Sekunde, ");
+                }
+                return duration.substr(0, duration.length -2);
+            }
+            function updatesystemInfos() {
+                if (systemInfosEventSource === null) {
+                    systemInfosEventSource = new EventSource("sse_test.php");
+                    systemInfosEventSource.onmessage = function(event) {
+                        if ($("#mainModal").attr("data-name") == "systemInfos") {
+                            let data = JSON.parse(event["data"]);
+                            console.log(data);
+                            let statsText = "";
+                            if (data.hasOwnProperty("osname")) {
+                                statsText += "<tr><td>Kernelversion</td><td>" + data["osname"] + "</td></tr>";
+                            }
+                            if (data.hasOwnProperty("arch")) {
+                                statsText += "<tr><td>Architektur</td><td>" + data["arch"] + "</td></tr>";
+                            }
+                            if (data.hasOwnProperty("cpus")) {
+                                statsText += "<tr><td class='align-top'>CPU</td><td>" + data["cpus"][0]["model"];
+                                for (let [index, cpu] of data["cpus"].entries()) {
+                                    statsText += "<div>CPU #" + index + ":<div class='ps-3'>Takt: " + cpu["speed"] + "MHz</div></div>";
+                                }
+                                statsText += "</td></tr>";
+                            }
+                            if (data.hasOwnProperty("freememory") && data.hasOwnProperty("totalmemory")) {
+                                statsText += "<tr><td>Speicher</td><td>" + data["freememory"] + " MB/" + data["totalmemory"] + " MB (" + Math.floor(((data["freememory"] / data["totalmemory"]) *100)) + " %)</td></tr>";
+                            }
+                            if (data.hasOwnProperty("hostname")) {
+                                statsText += "<tr><td>Host</td><td>" + data["hostname"] + "</td></tr>";
+                            }
+                            if (data.hasOwnProperty("uptime")) {
+                                statsText += "<tr><td>Laufzeit</td><td>" + data["uptime"].duration() + "</td></tr>";
+                            }
+                            /*let keys = Object.getOwnPropertyNames(data);
+                            for (key of keys) {
+                                statsText += "<tr><td>" + key + "</td><td>" + data[key] + "</td></tr>";
+                            }*/
+                            $("#systemInfosTable").html(statsText);
+                        }
+                        else {
+                            systemInfosEventSource.close();
+                            systemInfosEventSource = null;
+                        }
+                    };
+                }
+            }
             // Wird verwendet, um Funktionen innerhalb von Objekten auszuführen
             function achso(callback, args) {
                 callback.apply(this, args);
@@ -94,7 +190,8 @@
                 data: {
                     modal: {
                         size: sm|default|lg|xl,
-                        static: bool
+                        static: bool,
+                        name: string
                     },
                     title: {
                         text: string
@@ -144,90 +241,101 @@
                     $("#mainModal .modal-header > h4").empty();
                     $("#mainModal .modal-body").empty();
                     $("#mainModal .modal-footer").empty();
-                    if (data.hasOwnProperty("modal")) {
+                    if (data.hasOwnProperty("modal") && data["modal"].hasOwnProperty("name") && !["undefined", "", undefined, null].includes(data["title"]["text"])) {
+                        $("#mainModal").attr("data-name", data["modal"]["name"]);
                         if (data["modal"].hasOwnProperty("size") && ["sm", "lg", "xl"].includes(data["modal"]["size"])) {
                             $("#mainModal > div:first-of-type").addClass("modal-" + data["modal"]["size"]);
                         }
                         if (data["modal"].hasOwnProperty("static") && data["modal"]["static"]) {
-                            $("#mainModal > div:first-of-type").attr("data-bs-backdrop", "static").attr("data-bs-keyboard", "false");
+                            $("#mainModal > div:first-of-type").attr({"data-bs-backdrop":"static", "data-bs-keyboard":"false"});
                         }
-                    }
-                    if (data.hasOwnProperty("title")) {
-                        if (data["title"].hasOwnProperty("text") && !["undefined", undefined, null].includes(data["title"]["text"])) {
-                            $("#mainModal .modal-header > h4").html(data["title"]["text"]);
-                        }
-                    }
-                    if (data.hasOwnProperty("content")) {
-                        if (data["content"].hasOwnProperty("options")) {
-                            if (data["content"]["options"].hasOwnProperty("scroll") && data["content"]["options"]["scroll"]) {
-                                $("#mainModal > div:first-of-type").addClass("modal-dialog-scrollable");
+                        if (data.hasOwnProperty("title")) {
+                            if (data["title"].hasOwnProperty("text") && !["undefined", "", undefined, null].includes(data["title"]["text"])) {
+                                $("#mainModal .modal-header > h4").html(data["title"]["text"]);
                             }
                         }
-                        if (data["content"].hasOwnProperty("text") && !["undefined", undefined, null].includes(data["content"]["text"])) {
-                            $("#mainModal .modal-body").html(data["content"]["text"]);
+                        if (data.hasOwnProperty("content")) {
+                            if (data["content"].hasOwnProperty("options")) {
+                                if (data["content"]["options"].hasOwnProperty("scroll") && data["content"]["options"]["scroll"]) {
+                                    $("#mainModal > div:first-of-type").addClass("modal-dialog-scrollable");
+                                }
+                            }
+                            if (data["content"].hasOwnProperty("text") && !["undefined", "", undefined, null].includes(data["content"]["text"])) {
+                                $("#mainModal .modal-body").html(data["content"]["text"]);
+                            }
                         }
-                    }
-                    if (data.hasOwnProperty("footer")) {
-                        if (data["footer"].hasOwnProperty("buttons")) {
-                            if (data["footer"]["buttons"].hasOwnProperty("default")) {
-                                if (data["footer"]["buttons"].hasOwnProperty("display") && data["footer"]["buttons"]["display"]) {
-                                    if (data["footer"]["buttons"]["default"].hasOwnProperty("text") && !["undefined", undefined, null].includes(data["footer"]["buttons"]["default"]["text"])) {
-                                        let defaultButtonText = data["footer"]["buttons"]["text"];
+                        if (data.hasOwnProperty("footer")) {
+                            if (data["footer"].hasOwnProperty("buttons")) {
+                                if (data["footer"]["buttons"].hasOwnProperty("default")) {
+                                    if (data["footer"]["buttons"].hasOwnProperty("display") && data["footer"]["buttons"]["display"]) {
+                                        if (data["footer"]["buttons"]["default"].hasOwnProperty("text") && !["undefined", "", undefined, null].includes(data["footer"]["buttons"]["default"]["text"])) {
+                                            let defaultButtonText = data["footer"]["buttons"]["text"];
+                                        }
+                                        else {
+                                            let defaultButtonText = "Schließen";
+                                        }
+                                    }
+                                    if (data["footer"]["buttons"]["default"].hasOwnProperty("class") && !["undefined", "", undefined, null].includes(data["footer"]["buttons"]["default"]["class"])) {
+                                        let defaultButtonClass = data["footer"]["buttons"]["default"]["class"];
                                     }
                                     else {
-                                        let defaultButtonText = "Schließen";
+                                        let defaultButtonClass = "btn-secondary";
                                     }
-                                }
-                                if (data["footer"]["buttons"]["default"].hasOwnProperty("class") && !["undefined", undefined, null].includes(data["footer"]["buttons"]["default"]["class"])) {
-                                    let defaultButtonClass = data["footer"]["buttons"]["default"]["class"];
+                                    $("#mainModal .modal-footer").append("<button type='button' class='btn " + defaultButtonClass + "' data-bs-dismiss='modal'>" + defaultButtonText + "</button>");
                                 }
                                 else {
-                                    let defaultButtonClass = "btn-secondary";
+                                    $("#mainModal .modal-footer").append("<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Schließen</button>");
                                 }
-                                $("#mainModal .modal-footer").append("<button type='button' class='btn " + defaultButtonClass + "' data-bs-dismiss='modal'>" + defaultButtonText + "</button>");
+                                if (data["footer"]["buttons"].hasOwnProperty("custom")) {
+                                    let customButtons = data["footer"]["buttons"]["custom"];
+                                    for (let customButton of customButtons) {
+                                        if (customButton.hasOwnProperty("text") && !["undefined", "", undefined, null].includes(customButton["text"]) /*&& customButton.hasOwnProperty("actions") && !["undefined", undefined, null].includes(customButton["actions"])*/) {
+                                            let currentButton = $("<button type='button' class='btn'>" + customButton["text"] + "</button>");
+                                            if (customButton.hasOwnProperty("class") && !["undefined", "", undefined, null].includes(customButton["class"])) {
+                                                $(currentButton).addClass(customButton["class"]);
+                                            }
+                                            else {
+                                                $(currentButton).addClass("btn-primary");
+                                            }
+                                            for (let action of customButton["actions"]) {
+                                                let events = Object.getOwnPropertyNames(action);
+                                                for (event of events) {
+                                                    for (let func of action[event]) {
+                                                        $(currentButton).on(event, function() {
+                                                            achso(func["function"], func["args"]);
+                                                        });
+                                                    }
+                                                }
+                                            }
+                                            $("#mainModal .modal-footer").prepend(currentButton);
+                                        }
+                                    }
+                                }
                             }
                             else {
                                 $("#mainModal .modal-footer").append("<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Schließen</button>");
-                            }
-                            if (data["footer"]["buttons"].hasOwnProperty("custom")) {
-                                let customButtons = data["footer"]["buttons"]["custom"];
-                                for (let customButton of customButtons) {
-                                    if (customButton.hasOwnProperty("text") && !["undefined", undefined, null].includes(customButton["text"]) /*&& customButton.hasOwnProperty("actions") && !["undefined", undefined, null].includes(customButton["actions"])*/) {
-                                        let currentButton = $("<button type='button' class='btn'>" + customButton["text"] + "</button>");
-                                        if (customButton.hasOwnProperty("class") && !["undefined", undefined, null].includes(customButton["class"])) {
-                                            $(currentButton).addClass(customButton["class"]);
-                                        }
-                                        else {
-                                            $(currentButton).addClass("btn-primary");
-                                        }
-                                        for (let action of customButton["actions"]) {
-                                            let events = Object.getOwnPropertyNames(action);
-                                            for (event of events) {
-                                                for (let func of action[event]) {
-                                                    $(currentButton).on(event, function() {
-                                                        achso(func["function"], func["args"]);
-                                                    });
-                                                }
-                                            }
-                                        }
-                                        $("#mainModal .modal-footer").prepend(currentButton);
-                                    }
-                                }
                             }
                         }
                         else {
                             $("#mainModal .modal-footer").append("<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Schließen</button>");
                         }
+                        new bootstrap.Modal($("#mainModal")).show();
                     }
                     else {
-                        $("#mainModal .modal-footer").append("<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Schließen</button>");
+                        alert("Fehler: Es muss ein gültiger Name für den Dialog angegeben werden.");
                     }
-                    new bootstrap.Modal($("#mainModal")).show();
                 }
             }
-            document.addEventListener("DOMContentLoaded", function(event) {
-                // Hier alle Skripte ausführen, die auf DOM zugreifen sollen
-                $("a[href='#systemStats']").click(function() {
+            window.addEventListener("load", function() {
+                $("#body-overlay").empty();
+                $("#body-overlay").css("opacity", 0).on("transitionend", function() {
+                    $(this).remove();
+                    $("body").removeClass("overflow-hidden");
+                });
+            });
+            document.addEventListener("DOMContentLoaded", function() {
+                // Hier alle Skripte ausführen, die auf DOM zugreifen sollen, bevor Bilder und Ähnliches geladen wurden 
+                $("a[href='#systemInfos']").click(function() {
                     let content = "<table class='table-sm w-100'>";
                     content += "<thead>";
                     content += "<tr>";
@@ -235,18 +343,25 @@
                     content +=" <th>Wert</th>";
                     content += "</tr>";
                     content += "</thead>";
-                    content += "<tbody id='systemStatsTable'>";
+                    content += "<tbody id='systemInfosTable'>";
                     content += "</tbody>";
                     content += "</table>";
                     let data = {
-                            title: {
-                                text: "Systemstatistiken"
-                            },
-                            content: {
-                                text: content
+                        modal: {
+                            name: "systemInfos"
+                        },
+                        title: {
+                            text: "Systeminformationen"
+                        },
+                        content: {
+                            text: content,
+                            options: {
+                                scroll: true
                             }
-                        };
+                        }
+                    };
                     Modal.create(data);
+                    updatesystemInfos();
                 });
                 $("a[href='#staff']").click(function() {
                     let content = "<table class='table-borderless'><thead></thead><tbody><tr><td class='align-text-top pe-3'>Projektleitung</td><td>Luca Israel<br>Jessica Gerken</td></tr>";
@@ -256,33 +371,37 @@
                     content += "<td>Milan Kola<br>Christian Sander<br>Jan Bremen<br>Deon Gulbinat</td></tr><tr><td class='align-text-top pe-3'>Elektronik</td><td>Matties<br>Tristan<br>Marvin<br>";
                     content += "Calvin</td></tr></tbody></table>";
                     let data = {
-                            title: {
-                                text: "Mitwirkende"
+                        modal: {
+                            name: "staff"
+                        },
+                        title: {
+                            text: "Mitwirkende"
+                        },
+                        content: {
+                            options: {
+                                scroll: true
                             },
-                            content: {
-                                options: {
-                                    scroll: true
-                                },
-                                text: content
-                            }
-                        };
+                            text: content
+                        }
+                    };
                     Modal.create(data);
                 });
                 $("a[href='#about']").click(function() {
                     let content = "<img src='img/logo_large.png' id='hydroPocLogo'><p>&quot;HydroPoc&quot;, ein hydroponisches System, ist ein Ganzjahresschulprojekt von der gesamten Klasse der IN20 an der BSDGG.</p>";
                     content += "<h4>Anschrift</h4><p>Berufliche Schule für Dienstleistung, Gewerbe und Gestaltung<br>Georg-Büchner-Str. 13<br>27574 Bremerhaven</p>";
-                    content += "<h4>Kontakt</h4><p>Telefon: (0471) 30 94 650<br>Web: <a href='https://www.bsdgg.de'>https://www.bsdgg.de</a></p>";
+                    content += "<h4>Kontakt</h4><p>Telefon: (0471) 30 94 650<br>Web: <a href='https://www.bsdgg.de' target='_blank'>https://www.bsdgg.de</a></p>";
                     let data = {
-                            modal: {
-                                size: "lg"
-                            },
-                            title: {
-                                text: "Über"
-                            },
-                            content: {
-                                text: content
-                            }
-                        };
+                        modal: {
+                            size: "lg",
+                            name: "about"
+                        },
+                        title: {
+                            text: "Über"
+                        },
+                        content: {
+                            text: content
+                        }
+                    };
                     Modal.create(data);
                     $("#hydroPocLogo").on("click", function() {
                         $(this).addClass("contract");
@@ -301,19 +420,23 @@
                     content += "<input type='text' class='form-control' id='username' placeholder='Benutzernamen eingeben'></div>";
                     content += "<div class='mt-3'><label for='password' class='form-label'>Passwort:</label>";
                     content += "<input type='password' class='form-control' id='password' placeholder='Passwort eingeben'></div>";
-                    content += "<div class='d-flex mt-3 justify-content-between align-items-center'><button class='btn btn-primary'>Anmelden";
+                    content += "<div class='d-flex mt-3 justify-content-between align-items-center'><button onclick='login(this)' class='btn btn-primary'>Anmelden";
                     content += "</button><a href='#'>Ich habe mein Passwort vergessen!</a></div>";
                     let data = {
-                            title: {
-                                text: "Anmelden"
-                            },
-                            content: {
-                                text: content
-                            }
-                        };
+                        modal: {
+                            name: "login"
+                        },
+                        title: {
+                            text: "Anmelden"
+                        },
+                        content: {
+                            text: content
+                        }
+                    };
                     Modal.create(data);
                 });
                 $("#mainModal").on("hide.bs.modal", function() {
+                    $(this).removeAttr("data-name");
                     if ($("#hydroPocLogo") !== undefined) {
                         $("#hydroPocLogo").off("click animationend");
                     }
@@ -430,6 +553,8 @@
                                     return response["data"];
                                 }
                             }
+                        }).on("draw", function() {
+                            $("#pumpsTable > tbody [type='checkbox']").bootstrapToggle();
                         });
                     }
                     else {
@@ -1469,7 +1594,7 @@
                     });
                 }
                 $("#historyTimespan").change(function() {
-                    $(this).attr("disabled", "disabled").after("<span class='spinner-border ms-2 text-primary kreiselchen' data-processing='true'></span>");
+                    $(this).attr("disabled", "disabled").after("<span class='spinner-border ms-2 text-primary kreiselchen' style='flex: 0 0 auto' data-processing='true'></span>");
                     $.post("history_charts_data.php", {
                         chart: $(this).attr("data-chart"),
                         lol: $(this).val()
@@ -1487,6 +1612,7 @@
                         }
                         charts["history"].update("none");
                     }).always(function() {
+                        // Fehler: Entfernt ALLE Kreiselchen!
                         $("[data-processing='true']").remove();
                         $("#historyTimespan").removeAttr("disabled");
                     });
@@ -1565,17 +1691,6 @@
                         });
                     }
                 }, 5000);
-                /*
-                var source = new EventSource("");
-                source.onmessage = function (event) {
-                    console.log(event.data);
-                    let statsText = "";
-                    let keys = Object.keys(event.data);
-                    for (key of keys) {
-                        statsText += "<tr><td>" + key + "</td><td>" + event.data[key] + "</td></tr>";
-                    }
-                    $("#systemStatsTable").html(statsText);
-                };*/
             });
         </script>
         <style>
@@ -1641,6 +1756,19 @@
                 background-image: url("img/moo.png");
                 background-repeat: repeat;
                 background-blend-mode: color;
+            }
+            #body-overlay {
+                position: absolute;
+                z-index: 9999;
+                width: 100%;
+                height: 100%;
+                opacity: 1;
+                background-color: #ffffff;
+                transition: opacity 1s;
+                display: flex;
+                align-content: center;
+                align-items: center;
+                justify-content: center;
             }
             main {
                 grid-column: 1 / 3;
@@ -1717,7 +1845,7 @@
             canvas[id$="-chart-current"] {
                 visibility: hidden
             }
-            .chart-overlay > h2 {
+            .chart-overlay > h2, #body-overlay > h1 {
                 color: var(--bs-gray-500);
                 margin: 0
             }
@@ -1876,12 +2004,6 @@
                 color: var(--alert-color-danger);
                 text-shadow: 0 0 3px var(--alert-color-danger);
             }
-            /*
-            .section-header > h3 > i:first-of-type {
-                vertical-align: top;
-                font-size: larger;
-            }
-            */
             i.user-online {
                 color: var(--alert-color-success);
                 text-shadow: 0 0 3px var(--alert-background-success);
@@ -1894,7 +2016,7 @@
                 animation: contract 1s ease-in-out 0s 1;
             }
             .boing {
-                animation: boing 2s ease-in-out 0s 1;
+                animation: boing 1s ease-in-out 0s 1;
             }
             @keyframes contract {
                 0% { width: 287px }
@@ -1902,12 +2024,10 @@
             }
             @keyframes boing {
                 0% { width: 50px }
-                14% { width: 287px }
-                28% { width: 257px }
-                42% { width: 287px }
-                56% { width: 267px }
-                70% { width: 287px }
-                84% { width: 277px }
+                20% { width: 287px }
+                40% { width: 277px }
+                60% { width: 287px }
+                80% { width: 282px }
                 100% { width: 287px }
             }
             @keyframes flashing {
@@ -1992,7 +2112,6 @@
                 z-index: 3;
             }
             .kreiselchen {
-                flex: 0 0 auto;
                 width: 20px;
                 height: 20px
             }
@@ -2005,7 +2124,10 @@
             }
         </style>
 	</head>
-    <body class="m-0 p-0">
+    <body class="m-0 p-0 overflow-hidden">
+        <div id="body-overlay">
+            <div class="spinner-border mr-2" style="border-width: 5px; color: var(--bs-gray-500)"></div>
+        </div>
         <header>
             <nav class="navbar navbar-expand-sm p-0" id="navigation">
                 <a class="navbar-brand ms-3 mb-0" href="#">
@@ -2013,7 +2135,7 @@
                 </a>
                 <ul class="navbar-nav" id="first-navbar">
                     <li class="nav-item">
-                        <a class="nav-link rounded-3" href="#systemStats"><i class="fas fa-hdd"></i> Systeminformationen</a>
+                        <a class="nav-link rounded-3" href="#systemInfos"><i class="fas fa-hdd"></i> Systeminformationen</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link rounded-3" href="#staff"><i class="fas fa-users"></i> Mitwirkende</a>
@@ -2044,9 +2166,9 @@
                           <a class="nav-link" data-bs-toggle="tab" href="#administration">Administration</a>
                           <!-- class="nav-link disabled" -->
                         </li>
-                        <li class="nav-item">
+                        <!--<li class="nav-item">
                             <a class="nav-link" data-bs-toggle="tab" href="#about">About</a>
-                        </li>
+                        </li>-->
                     </ul>
                     <div class="tab-content p-4 border">
                         <div class="tab-pane active" id="overview">
@@ -2391,8 +2513,8 @@
                                                 <table class="table table-sm w-100" id="logTable">
                                                     <thead>
                                                         <tr>
-                                                            <th class="">Zeitpunkt</th>
-                                                            <th class="">Nachricht</th>
+                                                            <th>Zeitpunkt</th>
+                                                            <th>Nachricht</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -2444,12 +2566,13 @@
                                 </div>
                             </section>
                         </div>
+                        <!--
                         <div class="tab-pane fade" id="about">
                             <h2>Impressum für das Schulprojekt HydroPoc der IN20 der BSDGG Bremerhaven</h2>
                             <h3>HydroPoc</h3>
                             <ul>
                                 <li>
-                                    <!-- <p>Lehrer: Volker Trimkowski</p> -->
+                                    <p>Lehrer: Volker Trimkowski</p>
                                     <p>Die Klasse IN20 der BSDGG</p>
                                 </li>
     
@@ -2469,7 +2592,7 @@
                                     <p>Stellvtr. Projektleitung: Jessica Gerken</p>
                                 </li>
                             </ul>
-                        </div>    
+                        </div>-->
                     </div>
                 </div>
             </div>
