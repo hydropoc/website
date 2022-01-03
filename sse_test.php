@@ -6,7 +6,7 @@
         $data = [
             "arch" => "arm64",
             "osname" => 1,
-            "uptime" => date_timestamp_get(date_create()),
+            "uptime" => date_timestamp_get(date_create()) - date_timestamp_get(date_create("2021-11-11 00:00:00")),
             "freememory" => rand(0, 1337),
             "totalmemory" => 8192,
             "hostname" => "127.0.0.1",

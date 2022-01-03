@@ -55,6 +55,273 @@
                     sSortDescending: ": aktivieren, um Spalte absteigend zu sortieren"
                 }
             }
+            const dataTablesAdminOptions = {
+                userAccounts: {
+                    order: [1, "asc"],
+                    language: dataTablesLocalisation,
+                    scrollY: "400px",
+                    scrollCollapse: true,
+                    scroller: true,
+                    columns: [
+                        { 
+                            name: "displayname",
+                            data: "displayname"
+                        },
+                        {
+                            name: "cn",
+                            data: "cn"
+                        },
+                        {
+                            name: "created",
+                            data: "created"
+                        },
+                        {
+                            name: "status",
+                            data: "status"
+                        },
+                        {
+                            name: "options",
+                            data: "options"
+                        },
+                        {
+                            name: "lol",
+                            sorting: false,
+                            data: null,
+                            orderable: false,
+                            defaultContent: "",
+                            className: "TintengefrorenerTiefenfrisch"
+                        }
+                    ],
+                    ajax: {
+                        url: "dataTables_test.php",
+                        type: "GET",
+                        data: {
+                            type: "useraccounts"
+                        }
+                    },
+                    drawCallback: function(settings) {
+                        let cells = $("#userAccountsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)");
+                        for (cell of cells) {
+                            $(cell).attr("colspan", "2");
+                        }
+                        if ($("#addNewUserAccountButton").length == 0) {
+                            $("#userAccountsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end' style='height: 40px'><button type='button' class='btn btn-success' onclick='addNewUser()' id='addNewUserAccountButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
+                        }
+                    }
+                },
+                plantsPrograms: {
+                    order: [1, "asc"],
+                    language: dataTablesLocalisation,
+                    scrollY: "400px",
+                    scrollCollapse: true,
+                    scroller: true,
+                    orderFixed: [1, "asc"],
+                    columns: [
+                        {
+                            name: "plant",
+                            data: "plant",
+                            visible: false
+                        },
+                        {
+                            name: "name",
+                            data: "name"
+                        },
+                        {
+                            name: "description",
+                            data: "description"
+                        },
+                        {
+                            name: "options",
+                            data: "options"
+                        },
+                        {
+                            name: "lol",
+                            sorting: false,
+                            data: null,
+                            orderable: false,
+                            defaultContent: "",
+                            className: "TintengefrorenerTiefenfrisch"
+                        }
+                    ],
+                    ajax: {
+                        url: "dataTables_test.php",
+                        type: 'GET',
+                        data: {
+                            type: "plantsprograms"
+                        }
+                    },
+                    drawCallback: function(settings) {
+                        let cells = $("#plantsProgramsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)");
+                        for (cell of cells) {
+                            $(cell).attr("colspan", "2");
+                        }
+                    }
+                },
+                pumps: {
+                    order: [1, "asc"],
+                    language: dataTablesLocalisation,
+                    scrollY: "400px",
+                    scrollCollapse: true,
+                    scroller: true,
+                    orderFixed: [1, "asc"],
+                    rowGroup: {
+                        dataSrc: "name",
+                        className: "bg-gray-200", 
+                        endRender: null,
+                        startRender: function(rows, group) {
+                                        return $("<tr>").append("<td colspan='4' class='align-middle' style='color: #282828'>" + group + "</td>");
+                                    }
+                    },
+                    columns: [
+                        {
+                            name: "name",
+                            data: "name",
+                            visible: false
+                        },
+                        {
+                            name: "power",
+                            data: "power"
+                        },
+                        {
+                            name: "rpm",
+                            data: "rpm"
+                        },
+                        {
+                            name: "status",
+                            data: "status"
+                        },
+                        {
+                            name: "lol",
+                            sorting: false,
+                            data: null,
+                            orderable: false,
+                            defaultContent: "",
+                            className: "TintengefrorenerTiefenfrisch"
+                        }
+                    ],
+                    ajax: {
+                        url: "dataTables_test.php",
+                        type: 'GET',
+                        data: {
+                            type: "pumps"
+                        }
+                    },
+                    drawCallback: function(settings) {
+                        let cells = $("#pumpsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)");
+                        for (cell of cells) {
+                            $(cell).attr("colspan", "2");
+                        }
+                        // checkboxen müssen IDs haben!
+                        $("#pumpsAdminTable > tbody [type='checkbox']").bootstrapToggle();
+                    }
+                },
+                events: {
+                    order: [1, "asc"],
+                    language: dataTablesLocalisation,
+                    scrollY: "200px",
+                    scrollCollapse: false,
+                    deferRender: true,
+                    scroller: true,
+                    columns: [
+                        {
+                            name: "category",
+                            data: "category",
+                            visible: false
+                        },
+                        {
+                            name: "attribute",
+                            data: "attribute"
+                        },
+                        {
+                            name: "condition",
+                            data: "condition"
+                        },
+                        {
+                            name: "action",
+                            data: "action"
+                        },
+                        {
+                            name: "options",
+                            data: "options"
+                        },
+                        {
+                            name: "lol",
+                            sorting: false,
+                            data: null,
+                            orderable: false,
+                            defaultContent: "",
+                            className: "TintengefrorenerTiefenfrisch"
+                        }
+                    ],
+                    ajax: {
+                        url: "dataTables_test.php",
+                        type: 'GET',
+                        data: {
+                            type: "events"
+                        }
+                    },
+                    drawCallback: function(settings) {
+                        let cells = $("#eventsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)");
+                        for (cell of cells) {
+                            $(cell).attr("colspan", "2");
+                        }
+                    }
+                },
+                logs: {
+                    order: [0, "asc"],
+                    language: dataTablesLocalisation,
+                    scrollY: "400px",
+                    scrollCollapse: true,
+                    scroller: true,
+                    columns: [
+                        {
+                            name: "timestamp",
+                            data: "timestamp",
+                            width: "25%"
+                        },
+                        {
+                            name: "message",
+                            data: "message",
+                            width: "75%"
+                        },
+                        {
+                            name: "lol",
+                            sorting: false,
+                            data: null,
+                            orderable: false,
+                            defaultContent: "",
+                            className: "TintengefrorenerTiefenfrisch"
+                        }
+                    ],
+                    ajax: {
+                        url: "dataTables_test.php",
+                        type: "GET",
+                        data: {
+                            type: "logs"
+                        }
+                    },
+                    drawCallback: function(settings) {
+                        let cells = $("#logsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)");
+                        for (cell of cells) {
+                            $(cell).attr("colspan", "2");
+                        }
+                    }
+                }
+            };
+            const dataTablesRowGroupStrings = {
+                logs: {
+                    actors: "Aktoren",
+                    pumps: "Pumpen",
+                    events: "Ereignisse",
+                    users: "Benutzeraktivitäten"
+                },
+                pumps: {
+                    //
+                },
+                events: {
+                    //
+                }
+            };
             // Aktorensimulation
             const actuators = {
                 co2: {enabled: 0},
@@ -71,7 +338,7 @@
             function switchAlert(element, type) {
                 type = type.toLowerCase();
                 element = $("#section-" + element)[0];
-                if (["danger", "warning", "success"].includes(type) && !Object.values(element.classList).includes(type)) {
+                if (["danger", "warning", "success"].includes(type) && !$(element).hasClass(type)) {
                     $(element).removeClass("danger warning success").addClass(type);
                 }
             }
@@ -99,7 +366,7 @@
                     $("#mainModal .modal-body > .alert").remove();
                     $.post("lol", {
                         username: $("#username").val(),
-                        password: $("#password").val()
+                        password: $("#password").val() // verschlüsseln?
                     }).done(function(response) {
                         //cookies setzen
                         //anmeldeknopf durch abmeldeknopf ersetzen
@@ -116,14 +383,19 @@
             }
             function logout(wtf) {
                 //cookies löschen
+                //abmeldeknopf durch anmeldeknopf ersetzen
             }
             Number.prototype.duration = function() {
                 let sec_num = parseInt(this, 10);
-                let days = Math.floor((sec_num / 3600) / 24);
+                let weeks = Math.floor((sec_num / 3600 / 24) / 7);
+                let days = Math.floor((sec_num / 3600 / 24) % 7);
                 let hours = Math.floor((sec_num / 3600) % 24);
                 let minutes = Math.floor((sec_num / 60) % 60);
                 let seconds = sec_num % 60;
                 let duration = "";
+                if (weeks >= 1) {
+                    duration += weeks + (weeks >= 2 ? " Wochen, " : " Woche, ");
+                }
                 if (days >= 1) {
                     duration += days + (days >= 2 ? " Tage, " : " Tag, ");
                 }
@@ -138,19 +410,18 @@
                 }
                 return duration.substr(0, duration.length -2);
             }
-            function updatesystemInfos() {
-                if (systemInfosEventSource === null) {
+            function updateSystemInfos() {
+                if (systemInfosEventSource === null || systemInfosEventSource["readyState"] == 2) {
                     systemInfosEventSource = new EventSource("sse_test.php");
                     systemInfosEventSource.onmessage = function(event) {
                         if ($("#mainModal").attr("data-name") == "systemInfos") {
                             let data = JSON.parse(event["data"]);
-                            console.log(data);
                             let statsText = "";
                             if (data.hasOwnProperty("osname")) {
-                                statsText += "<tr><td>Kernelversion</td><td>" + data["osname"] + "</td></tr>";
+                                statsText += "<tr><td class='align-top'>Kernelversion</td><td>" + data["osname"] + "</td></tr>";
                             }
                             if (data.hasOwnProperty("arch")) {
-                                statsText += "<tr><td>Architektur</td><td>" + data["arch"] + "</td></tr>";
+                                statsText += "<tr><td class='align-top'>Architektur</td><td>" + data["arch"] + "</td></tr>";
                             }
                             if (data.hasOwnProperty("cpus")) {
                                 statsText += "<tr><td class='align-top'>CPU</td><td>" + data["cpus"][0]["model"];
@@ -160,18 +431,14 @@
                                 statsText += "</td></tr>";
                             }
                             if (data.hasOwnProperty("freememory") && data.hasOwnProperty("totalmemory")) {
-                                statsText += "<tr><td>Speicher</td><td>" + data["freememory"] + " MB/" + data["totalmemory"] + " MB (" + Math.floor(((data["freememory"] / data["totalmemory"]) *100)) + " %)</td></tr>";
+                                statsText += "<tr><td class='align-top'>Speicher</td><td>" + data["freememory"] + " MB/" + data["totalmemory"] + " MB (" + Math.floor(((data["freememory"] / data["totalmemory"]) *100)) + " %)</td></tr>";
                             }
                             if (data.hasOwnProperty("hostname")) {
-                                statsText += "<tr><td>Host</td><td>" + data["hostname"] + "</td></tr>";
+                                statsText += "<tr><td class='align-top'>Host</td><td>" + data["hostname"] + "</td></tr>";
                             }
                             if (data.hasOwnProperty("uptime")) {
-                                statsText += "<tr><td>Laufzeit</td><td>" + data["uptime"].duration() + "</td></tr>";
+                                statsText += "<tr><td class='align-top'>Laufzeit</td><td>" + data["uptime"].duration() + "</td></tr>";
                             }
-                            /*let keys = Object.getOwnPropertyNames(data);
-                            for (key of keys) {
-                                statsText += "<tr><td>" + key + "</td><td>" + data[key] + "</td></tr>";
-                            }*/
                             $("#systemInfosTable").html(statsText);
                         }
                         else {
@@ -206,7 +473,7 @@
                         buttons: {
                             default: {
                                 text: string,
-                                class: array,
+                                class: string,
                                 display: bool
                             }
                             // Eigene
@@ -267,19 +534,21 @@
                         if (data.hasOwnProperty("footer")) {
                             if (data["footer"].hasOwnProperty("buttons")) {
                                 if (data["footer"]["buttons"].hasOwnProperty("default")) {
-                                    if (data["footer"]["buttons"].hasOwnProperty("display") && data["footer"]["buttons"]["display"]) {
+                                    let defaultButtonText = "";
+                                    let defaultButtonClass = "";
+                                    if ((data["footer"]["buttons"].hasOwnProperty("display") && data["footer"]["buttons"]["display"]) || !data["footer"]["buttons"].hasOwnProperty("display")) {
                                         if (data["footer"]["buttons"]["default"].hasOwnProperty("text") && !["undefined", "", undefined, null].includes(data["footer"]["buttons"]["default"]["text"])) {
-                                            let defaultButtonText = data["footer"]["buttons"]["text"];
+                                            defaultButtonText = data["footer"]["buttons"]["default"]["text"];
                                         }
                                         else {
-                                            let defaultButtonText = "Schließen";
+                                            defaultButtonText = "Schließen";
                                         }
                                     }
                                     if (data["footer"]["buttons"]["default"].hasOwnProperty("class") && !["undefined", "", undefined, null].includes(data["footer"]["buttons"]["default"]["class"])) {
-                                        let defaultButtonClass = data["footer"]["buttons"]["default"]["class"];
+                                        defaultButtonClass = data["footer"]["buttons"]["default"]["class"];
                                     }
                                     else {
-                                        let defaultButtonClass = "btn-secondary";
+                                        defaultButtonClass = "btn-secondary";
                                     }
                                     $("#mainModal .modal-footer").append("<button type='button' class='btn " + defaultButtonClass + "' data-bs-dismiss='modal'>" + defaultButtonText + "</button>");
                                 }
@@ -326,6 +595,47 @@
                     }
                 }
             }
+            function addNewUser() {
+                let content = "<div><label for='usernameInput' class='form-label'>Benutzername:</label><input type='text' class='form-control' id='usernameInput' placeholder='Benutzername eingeben'></div>";
+                content += "<div class='mt-3'><label for='usernameSurnameInput' class='form-label'>Nachname:</label><input type='text' class='form-control' id='usernameSurnameInput' placeholder='Nachnamen eingeben'></div>";
+                content += "<div class='mt-3'><label for='usernameFornameInput' class='form-label'>Vorname:</label><input type='text' class='form-control' id='usernameFornameInput' placeholder='Vornamen eingeben'></div>";
+                let data = {
+                    modal: {
+                        name: "addNewUser"
+                    },
+                    title: {
+                        text: "Neuen Benutzer erstellen"
+                    },
+                    content: {
+                        text: content
+                    },
+                    footer: {
+                        buttons: {
+                            default: {
+                                text: "Abbrechen",
+                                class: "btn-danger"
+                            },
+                            custom: [
+                                {
+                                    text: "Speichern",
+                                    class: "btn-primary",
+                                    actions: [
+                                        {
+                                            click: [
+                                                {
+                                                    function: console.log,
+                                                    args: ["lol"]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                };
+                Modal.create(data);
+            }
             window.addEventListener("load", function() {
                 $("#body-overlay").empty();
                 $("#body-overlay").css("opacity", 0).on("transitionend", function() {
@@ -339,7 +649,7 @@
                     let content = "<table class='table-sm w-100'>";
                     content += "<thead>";
                     content += "<tr>";
-                    content += "<th>Eigenschaft</th>";
+                    content += "<th class='w-25'>Eigenschaft</th>";
                     content +=" <th>Wert</th>";
                     content += "</tr>";
                     content += "</thead>";
@@ -361,7 +671,7 @@
                         }
                     };
                     Modal.create(data);
-                    updatesystemInfos();
+                    updateSystemInfos();
                 });
                 $("a[href='#staff']").click(function() {
                     let content = "<table class='table-borderless'><thead></thead><tbody><tr><td class='align-text-top pe-3'>Projektleitung</td><td>Luca Israel<br>Jessica Gerken</td></tr>";
@@ -450,145 +760,183 @@
                     let plants = data["data"][0];
                     for (plant of plants) {
                         $("#plantSelection").append("<option value='" + plant + "'>" + plant + "</option>");
+                        $("#plantsProgramsAdminPlantSelection").append("<option value='" + plant + "'>" + plant + "</option>");
+                        
                     }
                     $("#plantSelection").val(plants[0]);
                     currentChartPlant = plants[0];
                 });
                 let date = new Date();
-                $("footer").html("&copy; " + (date.getFullYear() >= 2022 ? "2021-" + date.getFullYear() : date.getFullYear()) + " BSDGG/IN20")
-                // DataTable für Benutzerkonten
+                $("footer").html("&copy; " + (date.getFullYear() >= 2022 ? "2021-" + date.getFullYear() : date.getFullYear()) + " BSDGG/IN20");
+                $("#eventsAdminCategorySelection").change(function() {
+                    // Wenn nur eine Kategorie ausgewählt war und nun alle Kategorien aufgelistet werden sollen
+                    let options = {};
+                    Object.assign(options, dataTablesAdminOptions["events"]);
+                    options["ajax"]["dataSrc"] = function(response) {
+                        // hier können die Daten noch weiterverwendet werden
+                        return response["data"];
+                    };
+                    if ($(this).attr("data-old") != "0" && $(this).val() == "0") {
+                        options["rowGroup"] = {
+                            dataSrc: "category",
+                            className: "bg-gray-200",
+                            // render ist nur nötig, wenn in der Gruppe noch eigene Elemente stehen sollen
+                            endRender: null,
+                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + group + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
+                        };
+                        options["orderFixed"] = [1, "asc"];
+                    }
+                    options["destroy"] = true;
+                    options["ajax"]["data"]["category"] = $(this).val();
+                    $(this).attr("data-old", $(this).val());
+                    $("#eventsAdminTable").DataTable(options);
+                });
+                $("#plantsProgramsAdminPlantSelection").change(function() {
+                    let options = {};
+                    Object.assign(options, dataTablesAdminOptions["plantsPrograms"]);
+                    options["ajax"]["dataSrc"] = function(response) {
+                        // hier können die Daten noch weiterverwendet werden
+                        return response["data"];
+                    };
+                    if ($(this).attr("data-old") != "0" && $(this).val() == "0") {
+                        options["rowGroup"] = {
+                            dataSrc: "plant",
+                            className: "bg-gray-200",
+                            // render ist nur nötig, wenn in der Gruppe noch eigene Elemente stehen sollen
+                            endRender: null,
+                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='2' class='align-middle' style='color: #282828'>" + group + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
+                        };
+                        options["orderFixed"] = [1, "asc"];
+                    }
+                    options["destroy"] = true;
+                    options["ajax"]["data"]["category"] = $(this).val();
+                    $(this).attr("data-old", $(this).val());
+                    $("#plantsProgramsAdminTable").DataTable(options);
+                });
+                $("#logsAdminCategorySelection").change(function() {
+                    let options = {};
+                    Object.assign(options, dataTablesAdminOptions["logs"]);
+                    options["ajax"]["dataSrc"] = function(response) {
+                        // hier können die Daten noch weiterverwendet werden
+                        return response["data"];
+                    };
+                    if ($(this).attr("data-old") != "0" && $(this).val() == "0") {
+                        options["rowGroup"] = {
+                            dataSrc: "category",
+                            className: "bg-gray-200",
+                            endRender: null,
+                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + dataTablesRowGroupStrings["logs"][group] + "</td>"); }
+                        };
+                        options["orderFixed"] = [1, "asc"];
+                    }
+                    options["destroy"] = true;
+                    options["ajax"]["data"]["category"] = $(this).val();
+                    $(this).attr("data-old", $(this).val());
+                    $("#logsAdminTable").DataTable(options);
+                });
                 $("#user-actions-accordion").on("shown.bs.collapse", function() {
-                    if (!DataTable.isDataTable("#userAccountsTable")) {
-                        $("#userAccountsTable").DataTable({
-                            order: [1, "asc"],
-                            language: dataTablesLocalisation,
-                            columns: [
-                                { name: "displayname", data: "displayname" },
-                                { name: "cn", data: "cn" },
-                                { name: "created", data: "created" },
-                                { name: "status", data: "status" },
-                                { name: "options", data: "options" },
-                            ],
-                            ajax: {
-                                url: "dataTables_test.php",
-                                type: "GET",
-                                data: {
-                                    type: "useraccounts"
-                                },
-                                dataSrc: function(response) {
-                                    return response["data"];
-                                }
-                            }
-                        }).on("draw", function() {
-                            $("#userAccountsTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end' style='height: 40px'><button type='button' class='btn btn-primary' id='addNewUserAccountButton'><i class='fas fa-user-plus'></i> Hinzufügen...</button></div>");
-                        });
+                    if (!DataTable.isDataTable("#userAccountsAdminTable")) {
+                        let options = {};
+                        Object.assign(options, dataTablesAdminOptions["userAccounts"]);
+                        options["ajax"]["dataSrc"] = function(response) {
+                            return response["data"];
+                        };
+                        $("#userAccountsAdminTable").DataTable(options);
+                    }
+                    else {
+                        $("#userAccountsAdminTable").DataTable().ajax.reload();
                     }
                 });
                 $("#plants-programs-accordion").on("shown.bs.collapse", function() {
-                    if (!DataTable.isDataTable("#adminPlantsProgramsTable")) {
-                        $("#adminPlantsProgramsTable").DataTable({
-                            order: [1, "asc"],
-                            language: dataTablesLocalisation,
-                            orderFixed: [1, "asc"],
-                            rowGroup: {
-                                dataSrc: "plant",
-                                className: "bg-gray-200", 
-                                endRender: null,
-                                startRender: function(rows, group) {
-                                                return $("<tr>").append("<td colspan='2' class='align-middle' style='color: #282828'>" + group + "</td><td><button class='btn btn-sm btn-success'><i class='fas fa-asterisk'></i> Neu...</button></td>");
-                                            }
-                                /*function() {
-                                    return "font-weight-bold " + this.textContent.toLowerCase();
-                                }*/
-                            },
-                            columns: [
-                                { name: "plant", data: "plant", visible: false },
-                                { name: "name", data: "name" },
-                                { name: "description", data: "description" },
-                                { name: "actions", data: "actions" }
-                            ],
-                            ajax: {
-                                url: "dataTables_test.php",
-                                type: 'GET',
-                                data: {
-                                    type: "plantsprograms"
-                                },
-                                dataSrc: function(response) {
-                                    return response["data"];
-                                }
+                    if (!DataTable.isDataTable("#plantsProgramsAdminTable")) {
+                        let options = {};
+                        Object.assign(options, dataTablesAdminOptions["plantsPrograms"]);
+                        options["ajax"]["dataSrc"] = function(response) {
+                            // hier können die Daten noch weiterverwendet werden
+                            if (response.hasOwnProperty("type") && response["type"] == 1) {
+                                //
                             }
-                        });
+                            else {
+                                return response["data"];
+                            }
+                        };
+                        options["rowGroup"] = {
+                            dataSrc: "plant",
+                            className: "bg-gray-200",
+                            endRender: null,
+                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='2' class='align-middle' style='color: #282828'>" + group + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
+                        };
+                        options["orderFixed"] = [1, "asc"];
+                        $("#plantsProgramsAdminTable").DataTable(options);
                     }
                     else {
-                        $("#adminPlantsProgramsTable").DataTable().ajax.reload();
+                        $("#plantsProgramsAdminTable").DataTable().ajax.reload();
                     }
                 });
                 $("#pump-actions-accordion").on("shown.bs.collapse", function() {
-                    if (!DataTable.isDataTable("#pumpsTable")) {
-                        $("#pumpsTable").DataTable({
-                            order: [1, "asc"],
-                            language: dataTablesLocalisation,
-                            orderFixed: [1, "asc"],
-                            rowGroup: {
-                                dataSrc: "name",
-                                className: "bg-gray-200", 
-                                endRender: null,
-                                startRender: function(rows, group) {
-                                                return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + group + "</td>");
-                                            }
-                            },
-                            columns: [
-                                { name: "name", data: "name", visible: false },
-                                { name: "power", data: "power" },
-                                { name: "rpm", data: "rpm" },
-                                { name: "status", data: "status" }
-                            ],
-                            ajax: {
-                                url: "dataTables_test.php",
-                                type: 'GET',
-                                data: {
-                                    type: "pumps"
-                                },
-                                dataSrc: function(response) {
-                                    return response["data"];
-                                }
+                    if (!DataTable.isDataTable("#pumpsAdminTable")) {
+                        let options = {};
+                        Object.assign(options, dataTablesAdminOptions["pumps"]);
+                        options["ajax"]["dataSrc"] = function(response) {
+                            // hier können die Daten noch weiterverwendet werden
+                            if (response.hasOwnProperty("type") && response["type"] == 1) {
+                                //
                             }
-                        }).on("draw", function() {
-                            $("#pumpsTable > tbody [type='checkbox']").bootstrapToggle();
-                        });
+                            else {
+                                return response["data"];
+                            }
+                        };
+                        $("#pumpsAdminTable").DataTable(options);
                     }
                     else {
                         $("#pumpsTable").DataTable().ajax.reload();
                     }
                 });
-                // DataTable für Logs
+                $("#events-accordion").on("shown.bs.collapse", function() {
+                    if (!DataTable.isDataTable("#eventsAdminTable")) {
+                        let options = {};
+                        Object.assign(options, dataTablesAdminOptions["events"]);
+                        options["ajax"]["dataSrc"] = function(response) {
+                            // hier können die Daten noch weiterverwendet werden
+                            if (response.hasOwnProperty("type") && response["type"] == 1) {
+                                //
+                            }
+                            else {
+                                return response["data"];
+                            }
+                        };
+                        options["rowGroup"] = {
+                            dataSrc: "category",
+                            className: "bg-gray-200",
+                            endRender: null,
+                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + group + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
+                        };
+                        options["orderFixed"] = [1, "asc"];
+                        $("#eventsAdminTable").DataTable(options);
+                    }
+                    else {
+                        $("#eventAdminsTable").DataTable().ajax.reload();
+                    }
+                });
                 $("#collapse-logs-actions").on("shown.bs.collapse", function() {
-                    if (!DataTable.isDataTable("#logTable")) {
-                        $("#logTable").DataTable({
-                            order: [0, "asc"],
-                            language: dataTablesLocalisation,
-                            columns: [
-                                { name: "timestamp", data: "timestamp" },
-                                { name: "message", data: "message" }
-                            ],
-                            columnDefs: [
-                                { width: "25%", targets: [0] },
-                                { width: "75%", targets: [1] }
-                            ]/*,
-                            ajax: {
-                                url: "{{ url('api/people/admin/manageUsers/datatables/facets') }}",
-                                type: 'GET',
-                                dataSrc: function(response) {
-                                    keys = Object.getOwnPropertyNames(response["sections"]);
-                                    keys.sort();
-                                    $("#group").empty();
-                                    for (key of keys) {
-                                        $("#group").append("<option value='" + key + "'>" + response["sections"][key] +  "</option>");
-                                    }
-                                    return response.data;
-                                }
-                            }*/
-                        });
+                    if (!DataTable.isDataTable("#logsAdminTable")) {
+                        let options = {};
+                        Object.assign(options, dataTablesAdminOptions["logs"]);
+                        options["ajax"]["dataSrc"] = function(response) {
+                            // hier können die Daten noch weiterverwendet werden
+                            return response["data"];
+                        };
+                        options["rowGroup"] = {
+                            dataSrc: "category",
+                            className: "bg-gray-200",
+                            endRender: null,
+                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + dataTablesRowGroupStrings["logs"][group] + "</td>"); }
+                        };
+                        options["orderFixed"] = [1, "asc"];
+                        $("#logsAdminTable").DataTable(options);
+                    }
+                    else {
+                        $("#logsAdminTable").DataTable().ajax.reload();
                     }
                 });
                 // Aktuell
@@ -1667,7 +2015,7 @@
                                                 charts["current"][item]["options"]["scales"]["x"]["min"] = data[item]["labels"][0];
                                                 charts["current"][item]["options"]["scales"]["x"]["max"] = data[item]["labels"][data[item]["labels"].length -1];
                                                 // Wenn Wert kleiner gleich Warnwert
-                                                /*if ((Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["data"]["lowerControlLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["upperControlLimit"]["y"]))) {
+                                                if ((Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["data"]["lowerControlLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["upperControlLimit"]["y"]))) {
                                                     switchAlert(item, "warning");
                                                 }
                                                 else if ((Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperControlLimit"]["y"]) && Number(data[item]["data"]["current"]["y"]) > Number(data[item]["data"]["upperWarningLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerControlLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["lowerWarningLimit"]["y"]))) {
@@ -1676,14 +2024,13 @@
                                                 }
                                                 else {
                                                     switchAlert(item, "success");
-                                                }*/
+                                                }
                                             }
                                         }
                                     }
                                     charts["current"][item].update("none"); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
                                     $("#section-" + item + "> div:last-of-type > canvas").css("visibility", "visible");
                                     $("#section-" + item + "> div:last-of-type > .chart-overlay ").css("display", "none");
-                                    //$("#section-" + item + "> button.config-chart-button ").css("display", "block");
                                 }
                             }
                         }).always(function() {
@@ -1699,14 +2046,14 @@
                 font-style: normal;
                 font-weight: 400;
                 font-display: block;
-                src: url("font/free-fa-brands-400.woff") format("woff");
+                src: url("font/free-fa-brands-400.woff") format("woff")
             }
             @font-face {
                 font-family: "Font Awesome 5 Free";
                 font-style: normal;
                 font-weight: 400;
                 font-display: block;
-                src: url("font/free-fa-regular-400.woff") format("woff"),
+                src: url("font/free-fa-regular-400.woff") format("woff")
             }
             @font-face {
                 font-family: "Font Awesome 5 Pro";
@@ -1846,7 +2193,7 @@
                 visibility: hidden
             }
             .chart-overlay > h2, #body-overlay > h1 {
-                color: var(--bs-gray-500);
+                color: var(--bs-gray-500, #adb5bd);
                 margin: 0
             }
             .chart-overlay {
@@ -1978,27 +2325,43 @@
             }
             table > thead > tr > th {
                 border-left: 1px solid var(--bs-gray-300, #dee2e6) !important;
+            }
+            table > thead > tr > th {
                 border-top: 1px solid var(--bs-gray-300, #dee2e6) !important;
                 border-bottom: 2px solid var(--bs-gray-300, #dee2e6) !important;
                 background-color: #f7f7f7 !important
             }
-            table:not(.table-borderless) > thead > tr > th:last-of-type {
+            table > thead > tr > th:last-of-type {
+                border-right: 1px solid var(--bs-gray-300, #dee2e6) !important;
+            }
+            table.dataTable:not(.table-borderless) > thead > tr > th:last-of-type {
                 border-right: 1px solid var(--bs-gray-300, #dee2e6) !important
             }
-            table:not(.table-borderless) > tbody > tr > td {
+            table.dataTable:not(.table-borderless) > tbody > tr > td:not(.fritz) {
                 border-left: 1px solid var(--bs-gray-300, #dee2e6) !important
             }
-            table:not(.table-borderless) > tbody > tr > td:last-of-type {
+            table.dataTable:not(.table-borderless) > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2) {
                 border-right: 1px solid var(--bs-gray-300, #dee2e6) !important
             }
-            table:not(.table-borderless) > tbody > tr:last-of-type > td {
+            table.dataTable:not(.table-borderless) > tbody > tr.dtrg-start > td:nth-last-of-type(2) {
+                border-right: 1px solid transparent
+            }
+            table.dataTable:not(.table-borderless) > tbody > tr:last-of-type > td {
                 border-bottom: 1px solid var(--bs-gray-300, #dee2e6) !important
             }
-            table:not(.table-borderless) > tbody > tr:last-of-type > td:first-of-type {
+            table.dataTable:not(.table-borderless) > tbody > tr:last-of-type > td:first-of-type {
                 border-bottom-left-radius: 2px
             }
-            table:not(.table-borderless) > tbody > tr:last-of-type > td:last-of-type {
+            table.dataTable:not(.table-borderless) > tbody > tr:last-of-type > td:last-of-type {
                 border-bottom-right-radius: 2px
+            }
+            /* Normale Tabllen */
+            table:not(.table-borderless, .dataTable) > tbody > tr > td:last-of-type {
+                border-right: 1px solid var(--bs-gray-300, #dee2e6)
+            }
+            table:not(.table-borderless, .dataTable) > tbody > tr > td {
+                border-bottom: 1px solid var(--bs-gray-300, #dee2e6);
+                border-left: 1px solid var(--bs-gray-300, #dee2e6)
             }
             i.user-offline {
                 color: var(--alert-color-danger);
@@ -2088,15 +2451,31 @@
                 padding-right: 0 !important;
                 width: 100% !important
             }
+            table.dataTable > thead > tr > th {
+                box-sizing: border-box;
+            }
+            table.dataTable > thead > tr > th:nth-last-of-type(2) {
+                width: unset !important
+            }
+            table.dataTable > thead > tr > th:last-of-type {
+                width: 17px !important
+            }
+            table.dataTable > tbody > tr > td.TintengefrorenerTiefenfrisch, .dts_label {
+                display: none !important;
+            }
             div.dataTables_scrollBody > table th {
                 border-width: 0 !important
             }
+            div.dataTables_scrollBody {
+                min-height: 200px;
+                height: unset !important;
+            }
             div.dataTables_wrapper > .row:last-of-type {
                 margin-top: 24px
-            }
+            }/*
             .table-responsive {
                 max-height: 400px
-            }
+            }*/
             /* Vorladen von Sortierungssymbolen in Tabellen */
             body::after {
                 position: absolute;
@@ -2172,18 +2551,16 @@
                     </ul>
                     <div class="tab-content p-4 border">
                         <div class="tab-pane active" id="overview">
-                            <div class="d-inline-flex align-items-center mb-3">
-                                <label for="plantSelection">Pflanze:</label>
-                                <select class="form-select ms-2 w-auto" id="plantSelection">
-                                </select>
-                                <label for="plantProgramSelection" class="ms-2">Programm:</label>
-                                <select class="form-select ms-2 w-auto" id="plantProgramSelection">
-                                    <option value="wtf">Aba heidschi bumbeidschi</option>
-                                </select>
-                                <button type="button" class="btn btn-success ms-2"><i class="fas fa-play"></i></button>
-                                <!--<button type="button" class="btn btn-warning ms-2"><i class="fas fa-pause"></i></button>-->
-                            </div>
-                            <div id="overview-panel">
+                            <label for="plantSelection">Pflanze:</label>
+                            <select class="form-select ms-1 w-auto d-inline-block" id="plantSelection">
+                            </select>
+                            <label for="plantProgramSelection" class="ms-2">Programm:</label>
+                            <select class="form-select ms-1 w-auto d-inline-block" id="plantProgramSelection">
+                                <option value="wtf">Aba heidschi bumbeidschi</option>
+                            </select>
+                            <button type="button" class="btn btn-success ms-1 align-baseline"><i class="fas fa-play"></i></button>
+                            <!--<button type="button" class="btn btn-warning ms-2"><i class="fas fa-pause"></i></button>-->
+                            <div id="overview-panel" class="mt-3">
                                 <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-co2">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Co²-Gehalt</span>
@@ -2281,18 +2658,24 @@
                                     </div>
                                     <div id="collapse-plants-programs-actions" class="collapse hide" data-bs-parent="#plants-programs-actions-accordion">
                                         <div class="card-body">
-                                            <table class="table table-sm w-100" id="adminPlantsProgramsTable">
-                                                <thead>
-                                                    <tr>
-                                                        <th class="w-25">Zielpflanze</th>
-                                                        <th>Name</th>
-                                                        <th>Beschreibung</th>
-                                                        <th>Optionen</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                </tbody>
-                                            </table>
+                                            <label for="plantsProgramsAdminPlantSelection">Pflanze:</label>
+                                            <select class="form-select ms-1 w-auto d-inline-block" id="plantsProgramsAdminPlantSelection" data-old="0">
+                                                <option value="0">Alle</option>
+                                            </select>
+                                            <div class="mt-3 pt-1">
+                                                <table class="table table-sm w-100" id="plantsProgramsAdminTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="w-25">Zielpflanze</th>
+                                                            <th>Name</th>
+                                                            <th>Beschreibung</th>
+                                                            <th>Optionen</th>
+                                                            <th></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -2307,37 +2690,25 @@
                                     </div>
                                     <div id="collapse-plants-actions" class="collapse hide" data-bs-parent="#plants-accordion">
                                         <div class="card-body">
-                                            <table class="table table-sm w-100" id="plantsTable">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Name</th>
-                                                        <th>Co²-Gehalt</th>
-                                                        <th>Temperatur</th>
-                                                        <th>Salzgehalt</th>
-                                                        <th>pH-Wert</th>
-                                                        <th>Wasserstand</th>
-                                                        <th>Luftfeuchtigkeit</th>
-                                                        <th>Lichtstärke</th>
-                                                        <th>Optionen</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td>Riesenrafflesie</td>
-                                                        <td>40</td>
-                                                        <td>300</td>
-                                                        <td>10</td>
-                                                        <td>14</td>
-                                                        <td>0,7</td>
-                                                        <td>70%</td>
-                                                        <td>1000</td>
-                                                        <td>
-                                                            <button type="button" class="btn btn-sm btn-primary" style="width: 32px"><i class="fas fa-pen"></i></button>
-                                                            <button type="button" class="btn btn-sm btn-danger" style="width: 32px"><i class="fas fa-times"></i></button>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
+                                            <div class="mt-3 pt-1">
+                                                <table class="table table-sm w-100" id="plantsAdminTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Co²-Gehalt</th>
+                                                            <th>Temperatur</th>
+                                                            <th>Salzgehalt</th>
+                                                            <th>pH-Wert</th>
+                                                            <th>Wasserstand</th>
+                                                            <th>Luftfeuchtigkeit</th>
+                                                            <th>Lichtstärke</th>
+                                                            <th>Optionen</th>
+                                                            <th></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -2352,37 +2723,20 @@
                                     </div>
                                     <div id="collapse-pump-actions" class="collapse hide" data-bs-parent="#pump-actions-accordion">
                                         <div class="card-body">
-                                        <table class="table table-sm w-100" id="pumpsTable">
-                                            <thead>
-                                                <tr>
-                                                    <th>Name</th>
-                                                    <th>Leistung</th>
-                                                    <th>UPM</th>
-                                                    <th>Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <!--
-                                                <tr>
-                                                    <td>Pumpe 1a</td>
-                                                    <td class="ps-1"><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
-                                                    <td class="ps-2">Pumpe 1b</td>
-                                                    <td class="ps-1"><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Pumpe 2a</td>
-                                                    <td class="ps-1"><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
-                                                    <td class="ps-2">Pumpe 2b</td>
-                                                    <td class="ps-1"><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Pumpe 3a</td>
-                                                    <td class="ps-1"><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
-                                                    <td class="ps-2">Pumpe 3b</td>
-                                                    <td class="ps-1"><input type="checkbox" data-toggle="toggle" data-size="sm" data-on="Ein" data-off="Aus"></td>
-                                                </tr>
-                                            </tbody>-->
-                                            </table>
+                                            <div class="mt-3 pt-1 pe-3">
+                                                <table class="table table-sm w-100" id="pumpsAdminTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        <th>Leistung</th>
+                                                        <th>UPM</th>
+                                                        <th>Status</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -2413,8 +2767,8 @@
                                     </div>
                                     <div id="collapse-user-actions" class="collapse hide" data-bs-parent="#actuator-user-accordion">
                                         <div class="card-body">
-                                            <div class="table-responsive pe-3">
-                                                <table class="table table-sm w-100" id="userAccountsTable">
+                                            <div class="mt-3 pt-1">
+                                                <table class="table table-sm w-100" id="userAccountsAdminTable">
                                                     <thead>
                                                         <tr>
                                                             <th>Vollständiger Name</th>
@@ -2422,6 +2776,7 @@
                                                             <th>Hinzugefügt</th>
                                                             <th>Status</th>
                                                             <th>Optionen</th>
+                                                            <th></th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -2454,35 +2809,28 @@
                                     </div>
                                     <div id="collapse-events-actions" class="collapse hide" data-bs-parent="#events-accordion">
                                         <div class="card-body">
-                                            <div class="d-inline-flex align-items-center mb-3">
-                                                <label for="eventsCategoySelection">Kategorie:</label>
-                                                <select class="form-select ms-2 w-auto" id="eventsCategoySelection">
-                                                    <option value="0">Allgemein</option>
-                                                    <option value="1">Pflanzen</option>
-                                                    <option value="3">Pumpen</option>
-                                                </select>
+                                            <label for="eventsAdminCategorySelection">Kategorie:</label>
+                                            <select class="form-select ms-1 w-auto d-inline-block" id="eventsAdminCategorySelection" data-old="0">
+                                                <option value="0">Alles</option>
+                                                <option value="1">Pflanzen</option>
+                                                <option value="3">Pumpen</option>
+                                            </select>
+                                            <div class="mt-3 pt-1">
+                                                <table class="table table-sm w-100" id="eventsAdminTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th></th>
+                                                            <th>Attribut</th>
+                                                            <th>Bedingung</th>
+                                                            <th>Aktion</th>
+                                                            <th>Optionen</th>
+                                                            <th></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    </tbody>
+                                                </table>
                                             </div>
-                                            <table class="table table-sm w-100" id="eventsTable">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Attribut</th>
-                                                        <th>Beidingung</th>
-                                                        <th>Aktion</th>
-                                                        <th>Optionen</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td>Leistung</td>
-                                                        <td>&le; 50</td>
-                                                        <td>lol</td>
-                                                        <td>
-                                                            <button type="button" class="btn btn-sm btn-primary" style="width: 32px"><i class="fas fa-pen"></i></button>
-                                                            <button type="button" class="btn btn-sm btn-danger" style="width: 32px"><i class="fas fa-times"></i></button>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -2497,67 +2845,25 @@
                                     </div>
                                     <div id="collapse-logs-actions" class="collapse hide" data-bs-parent="#logs-accordion">
                                         <div class="card-body">
-                                            <div class="d-inline-flex">
-                                                <label for="logType" class="form-label col-form-label me-2">Aktivität:</label>
-                                                <select class="form-select" id="logType">
-                                                    <option value="0">Alles</option>
-                                                    <option value="1">Aktoren</option>
-                                                    <option value="1">Pumpen</option>
-                                                    <option value="3">Selbsttests</option>
-                                                    <option value="2">Benutzerkonten</option>
-                                                    <option value="4">Ereignisse</option>
-                                                    <option value="5">Anmeldung</option>
-                                                </select>
-                                            </div>
-                                            <div class="mt-3 pt-1 pe-3 table-responsive">
-                                                <table class="table table-sm w-100" id="logTable">
+                                            <label for="logAdminCategorySelection" class="form-label col-form-label">Kategorie:</label>
+                                            <select class="form-select w-auto d-inline-block ms-1" id="logsAdminCategorySelection" data-old="0">
+                                                <option value="0">Alles</option>
+                                                <option value="actors">Aktoren</option>
+                                                <option value="pumps">Pumpen</option>
+                                                <option value="">Selbsttests</option>
+                                                <option value="users">Benutzeraktivitäten</option>
+                                                <option value="events">Ereignisse</option>
+                                            </select>
+                                            <div class="mt-3 pt-1">
+                                                <table class="table table-sm w-100" id="logsAdminTable">
                                                     <thead>
                                                         <tr>
                                                             <th>Zeitpunkt</th>
                                                             <th>Nachricht</th>
+                                                            <th></th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <tr>
-                                                            <td>Donnerstag, XX.XX.XXXX, XX:XX:XX</td>
-                                                            <td>verdammt</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Donnerstag, XX.XX.XXXX, XX:XX:XX</td>
-                                                            <td>verdammt</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Donnerstag, XX.XX.XXXX, XX:XX:XX</td>
-                                                            <td>verdammt</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Donnerstag, XX.XX.XXXX, XX:XX:XX</td>
-                                                            <td>verdammt</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Donnerstag, XX.XX.XXXX, XX:XX:XX</td>
-                                                            <td>verdammt</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Donnerstag, XX.XX.XXXX, XX:XX:XX</td>
-                                                            <td>verdammt</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Donnerstag, XX.XX.XXXX, XX:XX:XX</td>
-                                                            <td>verdammt</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Donnerstag, XX.XX.XXXX, XX:XX:XX</td>
-                                                            <td>verdammt</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Donnerstag, XX.XX.XXXX, XX:XX:XX</td>
-                                                            <td>verdammt</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Donnerstag, XX.XX.XXXX, XX:XX:XX</td>
-                                                            <td>verdammt</td>
-                                                        </tr>
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -2598,43 +2904,6 @@
             </div>
         </main>
         <footer></footer>
-        <div class="modal fade" id="loginModal">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Anmelden</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="alert alert-danger fade show">
-                            <i class="fas fa-exclamation-circle"></i> Fehlermeldung, wenn Anmeldung fehlschlug...
-                        </div>
-                        <!-- Bei neuem Anmeldeversuch Fehlermeldung vorher ausblenden -->
-                        <div>
-                            <label for="username" class="form-label">Benutzername:</label>
-                            <input type="text" class="form-control" id="username" placeholder="Benutzernamen eingeben">
-                        </div>
-                        <div class="mt-3">
-                            <label for="password" class="form-label">Passwort:</label>
-                            <input type="password" class="form-control" id="password" placeholder="Passwort eingeben">
-                        </div>
-                        <div class="d-flex mt-3 justify-content-between align-items-center">
-                            <button class="btn btn-primary" data-processing="false">
-                                <!-- wenn true, soll kein Spinner angezeigt werden, wenn man auf Knopf drückt.
-                                Bei Klick Spinner anzeigen -->
-                                <span class="spinner-border spinner-border-sm"></span> Anmelden
-                                <!-- Knopf deaktivieren, wenn Anmeldevorgang läuft -->
-                            </button>
-                            <a href="#">Ich habe mein Passwort vergessen!</a>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Abbrechen</button>
-                        <!-- Knopf deaktivieren, wenn Anmeldevorgang läuft -->
-                    </div>
-                </div>
-            </div>
-        </div>
         <div class="modal fade" id="editUserModal">
             <div class="modal-dialog">
                 <div class="modal-content">
