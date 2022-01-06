@@ -5,35 +5,55 @@
     switch ($_GET["type"]) {
         case "plantsprograms":
             $data[] = [
-                "plant" => "Riesenrafflesie",
+                "id" => 1,
+                "plantID" => 1,
                 "name" => "Aba heidschi bumbeidschi",
                 "description" => "Frischer Dünger von glücklichen Kühen",
                 "options" => "<button type='button' class='btn btn-sm btn-primary' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px'><i class='fas fa-times'></i></button>"
             ];
             $data[] = [
-                "plant" => "Buddhas Hand",
+                "id" => 2,
+                "plantID" => 2,
                 "name" => "Geilo",
                 "description" => "So wird ein Schuh draus!",
                 "options" => "<button type='button' class='btn btn-sm btn-primary' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px'><i class='fas fa-times'></i></button>"
             ];
             $data[] = [
-                "plant" => "Verpiss-dich-Pflanze",
+                "id" => 3,
+                "plantID" => 3,
                 "name" => "Toilettentieftaucher",
                 "description" => "Uriniere dich hinfort!",
                 "options" => "<button type='button' class='btn btn-sm btn-primary' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px'><i class='fas fa-times'></i></button>"
             ];
+            if (array_key_exists("category", $_GET)) {
+                if (in_array($_GET["category"], [1, 2, 3])) {
+                    $wtf = array_rand($data);
+                    $data = [$data[$wtf]];
+                }
+                else {
+                    $data = [];
+                }
+            }
             break;
         case "plants":
-            $data[] = [
-                "Riesenrafflesie" => [],
-                "Buddhas Hand" => [],
-                "Verpiss-dich-Pflanze" => []
-            ];
+            $data[] = ["name" => "Riesenrafflesie", "id" => 1];
+            $data[] = ["name" => "Buddhas Hand", "id" => 2];
+            $data[] = ["name" => "Verpiss-dich-Pflanze", "id" => 3];
+            $data[] = ["name" => "Leberwurstbaum", "id" => 4];
+            $data[] = ["name" => "Kuheuterpflanze", "id" => 5];
+            $data[] = ["name" => "Altweiberzorn", "id" => 6];
+            break;
+        case "plantsdetails":
+            $data[] = ["id" => 1, "name" => 1, "description" => "Erster", "properties" => "<ul class='p-0 m-0' style='list-style-position: inside'><li>Co²: 150</li><li>Temperatur: 40</li><li>Salzgehalt: 20</li><li>pH-Wert: 10</li><li>Wasserstand: 1</li><li>Luftfeuchtigkeit: 70</li><li>Belichtung: 200</li></ul>", "options" => "<button type='button' class='btn btn-sm btn-primary' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px'><i class='fas fa-times'></i></button>"];
+            $data[] = ["id" => 2, "name" => 2, "description" => "Erster", "properties" => "<ul class='p-0 m-0' style='list-style-position: inside'><li>Co²: 150</li><li>Temperatur: 40</li><li>Salzgehalt: 20</li><li>pH-Wert: 10</li><li>Wasserstand: 1</li><li>Luftfeuchtigkeit: 70</li><li>Belichtung: 200</li></ul>", "options" => "<button type='button' class='btn btn-sm btn-primary' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px'><i class='fas fa-times'></i></button>"];
+            $data[] = ["id" => 3, "name" => 3, "description" => "Erster", "properties" => "<ul class='p-0 m-0' style='list-style-position: inside'><li>Co²: 150</li><li>Temperatur: 40</li><li>Salzgehalt: 20</li><li>pH-Wert: 10</li><li>Wasserstand: 1</li><li>Luftfeuchtigkeit: 70</li><li>Belichtung: 200</li></ul>", "options" => "<button type='button' class='btn btn-sm btn-primary' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px'><i class='fas fa-times'></i></button>"];
+            $data[] = ["id" => 4, "name" => 4, "description" => "Erster", "properties" => "<ul class='p-0 m-0' style='list-style-position: inside'><li>Co²: 150</li><li>Temperatur: 40</li><li>Salzgehalt: 20</li><li>pH-Wert: 10</li><li>Wasserstand: 1</li><li>Luftfeuchtigkeit: 70</li><li>Belichtung: 200</li></ul>", "options" => "<button type='button' class='btn btn-sm btn-primary' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px'><i class='fas fa-times'></i></button>"];
+            $data[] = ["id" => 5, "name" => 5, "description" => "Erster", "properties" => "<ul class='p-0 m-0' style='list-style-position: inside'><li>Co²: 150</li><li>Temperatur: 40</li><li>Salzgehalt: 20</li><li>pH-Wert: 10</li><li>Wasserstand: 1</li><li>Luftfeuchtigkeit: 70</li><li>Belichtung: 200</li></ul>", "options" => "<button type='button' class='btn btn-sm btn-primary' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px'><i class='fas fa-times'></i></button>"];
+            $data[] = ["id" => 6, "name" => 6, "description" => "Erster", "properties" => "<ul class='p-0 m-0' style='list-style-position: inside'><li>Co²: 150</li><li>Temperatur: 40</li><li>Salzgehalt: 20</li><li>pH-Wert: 10</li><li>Wasserstand: 1</li><li>Luftfeuchtigkeit: 70</li><li>Belichtung: 200</li></ul>", "options" => "<button type='button' class='btn btn-sm btn-primary' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px'><i class='fas fa-times'></i></button>"];
             break;
         case "useraccounts":
             $data[] = [
-                "displayname" =>
-                "Deine Mutter",
+                "displayname" => "Deine Mutter",
                 "cn" => "deimuddah",
                 "created" => "11.05.2000",
                 "status" => "offline",
