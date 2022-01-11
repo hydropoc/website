@@ -1,9 +1,8 @@
 <?php
     $data = [];
-    $type = 0; // 0 = einzelner Datensatz, 1 = alle möglichen Datensätze
     //echo $_GET["type"];
     switch ($_GET["type"]) {
-        case "plantsprograms":
+        case "plantPrograms":
             $data[] = [
                 "id" => 1,
                 "plantID" => 1,
@@ -43,13 +42,282 @@
             $data[] = ["name" => "Kuheuterpflanze", "id" => 5];
             $data[] = ["name" => "Altweiberzorn", "id" => 6];
             break;
-        case "plantsdetails":
-            $data[] = ["id" => 1, "name" => 1, "description" => "Erster", "properties" => "<ul class='p-0 m-0' style='list-style-position: inside'><li>Co²: 150</li><li>Temperatur: 40</li><li>Salzgehalt: 20</li><li>pH-Wert: 10</li><li>Wasserstand: 1</li><li>Luftfeuchtigkeit: 70</li><li>Belichtung: 200</li></ul>", "options" => "<button type='button' class='btn btn-sm btn-primary' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px'><i class='fas fa-times'></i></button>"];
-            $data[] = ["id" => 2, "name" => 2, "description" => "Erster", "properties" => "<ul class='p-0 m-0' style='list-style-position: inside'><li>Co²: 150</li><li>Temperatur: 40</li><li>Salzgehalt: 20</li><li>pH-Wert: 10</li><li>Wasserstand: 1</li><li>Luftfeuchtigkeit: 70</li><li>Belichtung: 200</li></ul>", "options" => "<button type='button' class='btn btn-sm btn-primary' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px'><i class='fas fa-times'></i></button>"];
-            $data[] = ["id" => 3, "name" => 3, "description" => "Erster", "properties" => "<ul class='p-0 m-0' style='list-style-position: inside'><li>Co²: 150</li><li>Temperatur: 40</li><li>Salzgehalt: 20</li><li>pH-Wert: 10</li><li>Wasserstand: 1</li><li>Luftfeuchtigkeit: 70</li><li>Belichtung: 200</li></ul>", "options" => "<button type='button' class='btn btn-sm btn-primary' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px'><i class='fas fa-times'></i></button>"];
-            $data[] = ["id" => 4, "name" => 4, "description" => "Erster", "properties" => "<ul class='p-0 m-0' style='list-style-position: inside'><li>Co²: 150</li><li>Temperatur: 40</li><li>Salzgehalt: 20</li><li>pH-Wert: 10</li><li>Wasserstand: 1</li><li>Luftfeuchtigkeit: 70</li><li>Belichtung: 200</li></ul>", "options" => "<button type='button' class='btn btn-sm btn-primary' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px'><i class='fas fa-times'></i></button>"];
-            $data[] = ["id" => 5, "name" => 5, "description" => "Erster", "properties" => "<ul class='p-0 m-0' style='list-style-position: inside'><li>Co²: 150</li><li>Temperatur: 40</li><li>Salzgehalt: 20</li><li>pH-Wert: 10</li><li>Wasserstand: 1</li><li>Luftfeuchtigkeit: 70</li><li>Belichtung: 200</li></ul>", "options" => "<button type='button' class='btn btn-sm btn-primary' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px'><i class='fas fa-times'></i></button>"];
-            $data[] = ["id" => 6, "name" => 6, "description" => "Erster", "properties" => "<ul class='p-0 m-0' style='list-style-position: inside'><li>Co²: 150</li><li>Temperatur: 40</li><li>Salzgehalt: 20</li><li>pH-Wert: 10</li><li>Wasserstand: 1</li><li>Luftfeuchtigkeit: 70</li><li>Belichtung: 200</li></ul>", "options" => "<button type='button' class='btn btn-sm btn-primary' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px'><i class='fas fa-times'></i></button>"];
+        case "plantdetails":
+            $data[] = [
+                "id" => 1,
+                "description" => "Erster",
+                "properties" => [
+                    "co2" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "salinity" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "temperature" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "ph" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "waterlevel" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "humidity" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "lighting" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ]
+                ]
+            ];
+            $data[] = [
+                "id" => 2,
+                "description" => "Erster",
+                "properties" => [
+                    "co2" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "salinity" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "temperature" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "ph" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "waterlevel" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "humidity" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "lighting" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ]
+                ]
+            ];
+            $data[] = [
+                "id" => 3,
+                "description" => "Erster",
+                "properties" => [
+                    "co2" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "salinity" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "temperature" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "ph" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "waterlevel" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "humidity" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "lighting" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ]
+                ]
+            ];
+            $data[] = [
+                "id" => 4,
+                "description" => "Erster",
+                "properties" => [
+                    "co2" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "salinity" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "temperature" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "ph" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "waterlevel" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "humidity" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "lighting" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ]
+                ]
+            ];
+            $data[] = [
+                "id" => 5,
+                "description" => "Erster",
+                "properties" => [
+                    "co2" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "salinity" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "temperature" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "ph" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "waterlevel" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "humidity" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "lighting" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ]
+                ]
+            ];
             break;
         case "useraccounts":
             $data[] = [
@@ -108,6 +376,6 @@
             $data = null;
             break;
     }
-    echo json_encode(["data" => $data, "type" => $type]);
+    echo json_encode(["data" => $data]);
     return;
 ?>

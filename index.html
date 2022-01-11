@@ -57,32 +57,53 @@
             }
             const dataTablesAdminOptions = {
                 plants: {
-                    order: [1, "asc"],
+                    order: [0, "asc"],
                     language: dataTablesLocalisation,
                     scrollY: "400px",
                     scrollCollapse: true,
                     scroller: true,
                     columns: [
                         {
-                            name: "name",
-                            data: "name",
-                            visible: false
-                        },
-                        {
                             name: "id",
                             data: "id"
                         },
                         {
                             name: "description",
-                            data: "description"
+                            data: function(row, type, set, meta) {
+                                return (plantIDs.hasOwnProperty(row["id"]) ? plantIDs[row["id"]]: "(Unbekannte ID: " + row["id"] + ")");
+                            }
                         },
                         {
                             name: "properties",
-                            data: "properties"
+                            data: function(row, type, set, meta) {
+                                let content = "";
+                                if (plantProperties.hasOwnProperty(row["id"])) {
+                                    content += "<select class='form-select w-auto' onchange='showPlantProperties(" + row["id"] + ")'>";
+                                    let props = Object.getOwnPropertyNames(plantPropertyNames);
+                                    for (property of props) {
+                                        content += "<option value='" + property + "'>" + plantPropertyNames[property] + "</option>";
+                                    }
+                                    content += "</select>";
+                                    //plantProperties[row["id"]]
+                                }
+                                else {
+                                    content = "(Keine Daten vorhanden)";
+                                }
+                                return content;
+                            }
                         },
                         {
                             name: "options",
-                            data: "options"
+                            data: function(row, type, set, meta) {
+                                let buttons = "";
+                                if (plantIDs.hasOwnProperty(row["id"])) {
+                                    buttons = "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editPlant(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px' onclick='removePlant(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
+                                }
+                                else {
+                                    buttons = "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1 disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
+                                }
+                                return buttons;
+                            }
                         },
                         {
                             name: "lol",
@@ -97,7 +118,7 @@
                         url: "dataTables_test.php",
                         type: 'GET',
                         data: {
-                            type: "plantsdetails"
+                            type: "plantdetails"
                         }
                     },
                     drawCallback: function(settings) {
@@ -113,8 +134,72 @@
                         }
                     }
                 },
+                plantsCategories: {
+                    order: [0, "asc"],
+                    language: dataTablesLocalisation,
+                    scrollY: "400px",
+                    scrollCollapse: true,
+                    scroller: true,
+                    columns: [
+                        {
+                            name: "id",
+                            data: "id"
+                        },
+                        {
+                            name: "description",
+                            data: function(row, type, set, meta) {
+                                return (plantIDs.hasOwnProperty(row["id"]) ? plantIDs[row["id"]]: "(Unbekannte ID: " + row["id"] + ")");
+                            }
+                        },
+                        {
+                            name: "properties",
+                            data: function(row, type, set, meta) {
+                                console.log(row, type, set, meta);
+                                return "lol";
+                            }
+                        },
+                        {
+                            name: "options",
+                            data: function(row, type, set, meta) {
+                                let buttons = "";
+                                if (plantIDs.hasOwnProperty(row["id"])) {
+                                    buttons = "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editPlantCategory(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px' onclick='removePlantCategory(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
+                                }
+                                else {
+                                    buttons = "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1 disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
+                                }
+                                return buttons;
+                            }
+                        },
+                        {
+                            name: "lol",
+                            sorting: false,
+                            data: null,
+                            orderable: false,
+                            defaultContent: "",
+                            className: "TintengefrorenerTiefenfrisch"
+                        }
+                    ],
+                    ajax: {
+                        url: "dataTables_test.php",
+                        type: 'GET',
+                        data: {
+                            type: "plantscategories"
+                        },
+                        dataSrc: "data",
+                    },
+                    drawCallback: function(settings) {
+                        let cells = $("#plantsCategoriesAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)");
+                        for (cell of cells) {
+                            $(cell).attr("colspan", "2");
+                        }
+                        if ($("#addNewPlantCategoryButton").length == 0) {
+                            $("#plantsCategoriesAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3' style='height: 40px'><button type='button' class='btn btn-success' onclick='addNewPlantCategory()' id='addNewPlantCategoryButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
+                        }
+                    }
+                },
                 userAccounts: {
-                    order: [1, "asc"],
+                    order: [0, "asc"],
                     language: dataTablesLocalisation,
                     scrollY: "400px",
                     scrollCollapse: true,
@@ -138,7 +223,16 @@
                         },
                         {
                             name: "options",
-                            data: "options"
+                            data: function(row, type, set, meta) {
+                                let buttons = "";
+                                if (plantIDs.hasOwnProperty(row["id"])) {
+                                    buttons = "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editUserAccount(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px' onclick='removeUserAccount(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
+                                }
+                                else {
+                                    buttons = "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1 disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
+                                }
+                                return buttons;
+                            }
                         },
                         {
                             name: "lol",
@@ -169,13 +263,12 @@
                         $("#userAccountsAdminTable_wrapper .dataTables_scrollBody").css("height", a + b + "px");
                     }
                 },
-                plantsPrograms: {
-                    order: [1, "asc"],
+                plantPrograms: {
+                    order: [0, "asc"],
                     language: dataTablesLocalisation,
                     scrollY: "400px",
                     scrollCollapse: true,
                     scroller: true,
-                    orderFixed: [1, "asc"],
                     columns: [
                         {
                             name: "plantID",
@@ -196,7 +289,16 @@
                         },
                         {
                             name: "options",
-                            data: "options"
+                            data: function(row, type, set, meta) {
+                                let buttons = "";
+                                if (plantIDs.hasOwnProperty(row["id"])) {
+                                    buttons = "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editPlantProgram(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px' onclick='removePlantProgram(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
+                                }
+                                else {
+                                    buttons = "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1 disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
+                                }
+                                return buttons;
+                            }
                         },
                         {
                             name: "lol",
@@ -211,25 +313,25 @@
                         url: "dataTables_test.php",
                         type: 'GET',
                         data: {
-                            type: "plantsprograms"
+                            type: "plantPrograms"
                         }
                     },
                     drawCallback: function(settings) {
-                        let cells = $("#plantsProgramsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)");
+                        let cells = $("#plantProgramsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)");
                         for (cell of cells) {
                             $(cell).attr("colspan", "2");
                         }
-                        let a = $("#plantsProgramsAdminTable_wrapper .dataTables_scrollHeadInner").outerHeight(true);
-                        let b = $("#plantsProgramsAdminTable").outerHeight(true);
+                        let a = $("#plantProgramsAdminTable_wrapper .dataTables_scrollHeadInner").outerHeight(true);
+                        let b = $("#plantProgramsAdminTable").outerHeight(true);
                         console.log(a,b);
-                        $("#plantsProgramsAdminTable_wrapper .dataTables_scrollBody").css("height", a + b + "px");
+                        $("#plantProgramsAdminTable_wrapper .dataTables_scrollBody").css("height", a + b + "px");
                         if (!settings.hasOwnProperty("rowGroup") && $("#addNewPlantProgramButton").length == 0) {
-                            $("#plantsProgramsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3' style='height: 40px'><button type='button' class='btn btn-success' onclick='addNewPlantProgram()' id='addNewPlantProgramButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
+                            $("#plantProgramsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3' style='height: 40px'><button type='button' class='btn btn-success' onclick='addNewPlantProgram()' id='addNewPlantProgramButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
                         }
                     }
                 },
                 pumps: {
-                    order: [1, "asc"],
+                    order: [0, "asc"],
                     language: dataTablesLocalisation,
                     scrollY: "400px",
                     scrollCollapse: true,
@@ -280,7 +382,7 @@
                     }
                 },
                 events: {
-                    order: [1, "asc"],
+                    order: [0, "asc"],
                     language: dataTablesLocalisation,
                     scrollY: "200px",
                     scrollCollapse: false,
@@ -306,7 +408,16 @@
                         },
                         {
                             name: "options",
-                            data: "options"
+                            data: function(row, type, set, meta) {
+                                let buttons = "";
+                                if (plantIDs.hasOwnProperty(row["id"])) {
+                                    buttons = "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editEvent" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px' onclick='removeEvent(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
+                                }
+                                else {
+                                    buttons = "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1 disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
+                                }
+                                return buttons;
+                            }
                         },
                         {
                             name: "lol",
@@ -402,7 +513,16 @@
                 }
             };
             const plantIDs = {};
-            const plantsPrograms = [];
+            const plantPrograms = [];
+            const plantProperties = {};
+            const plantPropertyNames = {
+                co2: "Co²-Gehalt",
+                temperature: "Temperatur",
+                salinity: "Salzgehalt",
+                ph: "pH-Wert",
+                humidity: "Luftfeuchtigkeit",
+                lighting: "Beleuchtung"
+            };
             // Aktorensimulation
             const actuators = {
                 co2: {enabled: 0},
@@ -447,7 +567,7 @@
                     $("#mainModal .modal-body > .alert").remove();
                     $.post("lol", {
                         username: $("#username").val(),
-                        password: $("#password").val() // verschlüsseln?
+                        password: $("#password").val()
                     }).done(function(response) {
                         //cookies setzen
                         //anmeldeknopf durch abmeldeknopf ersetzen
@@ -462,9 +582,76 @@
                     });
                 }
             }
+            function toggleFormState(wtf) {
+                if ($(wtf).attr("disabled") == "disabled") {
+                    $(wtf).removeAttr("disabled");
+                }
+                else {
+                    $(wtf).attr("disabled", "disabled");
+                }
+            }
+            function showPlantProperties(wtf) {
+                //
+            }
             function logout(wtf) {
                 //cookies löschen
                 //abmeldeknopf durch anmeldeknopf ersetzen
+            }
+            function addNewPlant(wtf = null) {
+                let content = "<div class='row g-2'><div class='col-3 text-end'><label class='col-form-label' for='newPlantCategorySelect'>Kategorie:</label></div><div class='col-9'><select class='form-select' id='newPlantCategorySelect'>";
+                let plants = Object.getOwnPropertyNames(plantIDs);
+                let plantsHTML = "";
+                for (plant of plants) {
+                    plantsHTML += "<option value='" + plant + "'" + (wtf == plant ? "selected" : "") + ">" + plantIDs[plant] + "</option>";
+                }
+                content += plantsHTML + "</select></div>";
+                content += "<div class='col-3 text-end'><label class='col-form-label' for='newPlantNameInput'>Bezeichnung:</label></div><div class='col-9'><input type='text' class='form-control' id='newPlantNameInput' placeholder='Bezeichnung eingeben'></div>";
+                content += "<div class='col-3 text-end'><label class='col-form-label' for='newPlantIdInput'>ID:</label></div><div class='col-6'><input type='text' class='form-control' id='newPlantIdInput' placeholder='ID eingeben' disabled='disabled'></div><div class='col-3 d-flex align-items-center align-content-center justify-content-center'><input class='form-check-input mt-0 me-1' type='checkbox' id='newPlantAutoIDCheck' value='1' checked='checked' onclick='toggleFormState(\"#newPlantIdInput\")'><label class='form-check-label' for='newPlantAutoIDCheck'>Automatisch</label></div>";
+                let data = {
+                    modal: {
+                        name: "addNewPlant"
+                    },
+                    title: {
+                        text: "Neue Pflanze erstellen"
+                    },
+                    content: {
+                        text: content,
+                        options: {
+                            scroll: true
+                        }
+                    },
+                    footer: {
+                        buttons: {
+                            default: {
+                                text: "Abbrechen",
+                                class: "btn-danger"
+                            },
+                            custom: [
+                                {
+                                    text: "Speichern",
+                                    class: "btn-primary",
+                                    actions: [
+                                        {
+                                            click: [
+                                                {
+                                                    function: console.log,
+                                                    args: ["lol"]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                };
+                Modal.create(data);
+            }
+            function addNewEvent(wtf = null) {
+                //
+            }
+            function addNewPlantProgram(wtf = null) {
+                //
             }
             Number.prototype.duration = function() {
                 let sec_num = parseInt(this, 10);
@@ -547,7 +734,8 @@
                     content: {
                         text: string
                         options: {
-                            scroll: bool
+                            scroll: bool,
+                            align: left|center|right
                         }
                     },
                     footer: {
@@ -848,11 +1036,11 @@
                     currentChartPlant = plants[0];
                 });
                 // Nur als Admin sichtbar
-                $.get("dataTables_test.php", {type: "plantsprograms"}).done(function(response) {
+                $.get("dataTables_test.php", {type: "plantPrograms"}).done(function(response) {
                     let data = JSON.parse(response);
                     let programs = data["data"];
                     for (program of programs) {
-                        plantsPrograms.push({id: program["id"], plantID: program["plantID"], name: program["name"]});
+                        plantPrograms.push({id: program["id"], plantID: program["plantID"], name: program["name"]});
                     }
                 });
                 let date = new Date();
@@ -862,7 +1050,7 @@
                         $("#plantProgramSelection").empty();
                         $(this).attr("disabled", "disabled");
                         $("#plantProgramSelection").attr("disabled", "disabled");
-                        for (program of plantsPrograms) {
+                        for (program of plantPrograms) {
                             if (program["plantID"] == $(this).val()) {
                                 $("#plantProgramSelection").append("<option value='" + program["id"] + "'>" + program["name"] + "</option>");
                             }
@@ -871,6 +1059,7 @@
                         $("#plantProgramSelection").removeAttr("disabled");
                     }
                 });
+                /*
                 $("#eventsAdminCategorySelection").change(function() {
                     // Wenn nur eine Kategorie ausgewählt war und nun alle Kategorien aufgelistet werden sollen
                     let options = {};
@@ -885,9 +1074,9 @@
                             className: "bg-gray-200",
                             // render ist nur nötig, wenn in der Gruppe noch eigene Elemente stehen sollen
                             endRender: null,
-                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + group + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
+                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + group + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success' onclick='addNewEvent(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
                         };
-                        options["orderFixed"] = [1, "asc"];
+                        options["orderFixed"] = [0, "asc"];
                     }
                     options["destroy"] = true;
                     if (value >= 1) {
@@ -899,11 +1088,11 @@
                     $(this).attr("data-old", value);
                     $("#eventsAdminTable").DataTable(options);
                 });
-                $("#plantsProgramsAdminPlantSelection").change(function() {
+                */
+                $("#plantProgramsAdminPlantSelection").change(function() {
                     let options = {};
                     let value = Number.parseInt($(this).val());
-                    console.log(value);
-                    Object.assign(options, dataTablesAdminOptions["plantsPrograms"]);
+                    Object.assign(options, dataTablesAdminOptions["plantPrograms"]);
                     options["ajax"]["dataSrc"] = function(response) {
                         return response["data"];
                     };
@@ -912,9 +1101,9 @@
                             dataSrc: "plantID",
                             className: "bg-gray-200",
                             endRender: null,
-                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + plantIDs[group] + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
+                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + plantIDs[group] + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success' onclick='addNewPlantProgram(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
                         };
-                        options["orderFixed"] = [1, "asc"];
+                        options["orderFixed"] = [0, "asc"];
                     }
                     options["destroy"] = true;
                     if (value >= 1) {
@@ -924,7 +1113,7 @@
                         delete options["ajax"]["data"]["category"];
                     }
                     $(this).attr("data-old", value);
-                    $("#plantsProgramsAdminTable").DataTable(options);
+                    $("#plantProgramsAdminTable").DataTable(options);
                 });
                 $("#logsAdminCategorySelection").change(function() {
                     let options = {};
@@ -940,7 +1129,7 @@
                             endRender: null,
                             startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + dataTablesRowGroupStrings["logs"][group] + "</td>"); }
                         };
-                        options["orderFixed"] = [1, "asc"];
+                        options["orderFixed"] = [0, "asc"];
                     }
                     options["destroy"] = true;
                     if (value >= 1) {
@@ -952,6 +1141,7 @@
                     $(this).attr("data-old", value);
                     $("#logsAdminTable").DataTable(options);
                 });
+                /*
                 $("#plantsAdminPlantSelection").change(function() {
                     let options = {};
                     let value = Number.parseInt($(this).val());
@@ -964,9 +1154,9 @@
                             dataSrc: "name",
                             className: "bg-gray-200",
                             endRender: null,
-                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + plantIDs[group] + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
+                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + plantIDs[group] + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success' onclick='addNewPlant(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
                         };
-                        options["orderFixed"] = [1, "asc"];
+                        options["orderFixed"] = [0, "asc"];
                     }
                     options["destroy"] = true;
                     if (value >= 1) {
@@ -978,6 +1168,7 @@
                     $(this).attr("data-old", value);
                     $("#plantsAdminTable").DataTable(options);
                 });
+                */
                 $("#user-actions-accordion").on("shown.bs.collapse", function() {
                     if (!DataTable.isDataTable("#userAccountsAdminTable")) {
                         let options = {};
@@ -992,9 +1183,9 @@
                     }
                 });
                 $("#plants-programs-accordion").on("shown.bs.collapse", function() {
-                    if (!DataTable.isDataTable("#plantsProgramsAdminTable")) {
+                    if (!DataTable.isDataTable("#plantProgramsAdminTable")) {
                         let options = {};
-                        Object.assign(options, dataTablesAdminOptions["plantsPrograms"]);
+                        Object.assign(options, dataTablesAdminOptions["plantPrograms"]);
                         options["ajax"]["dataSrc"] = function(response) {
                             return response["data"];
                         };
@@ -1002,17 +1193,17 @@
                             dataSrc: "plantID",
                             className: "bg-gray-200",
                             endRender: null,
-                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + plantIDs[group] + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
+                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + plantIDs[group] + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success' onclick='addNewPlantProgram(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
                         };
-                        options["orderFixed"] = [1, "asc"];
+                        options["orderFixed"] = [0, "asc"];
                         let plants = Object.getOwnPropertyNames(plantIDs);
                         for (plant of plants) {
-                            $("#plantsProgramsAdminPlantSelection").append("<option value='" + plant + "'>" + plantIDs[plant] + "</option>");
+                            $("#plantProgramsAdminPlantSelection").append("<option value='" + plant + "'>" + plantIDs[plant] + "</option>");
                         }
-                        $("#plantsProgramsAdminTable").DataTable(options);
+                        $("#plantProgramsAdminTable").DataTable(options);
                     }
                     else {
-                        $("#plantsProgramsAdminTable").DataTable().ajax.reload();
+                        $("#plantProgramsAdminTable").DataTable().ajax.reload();
                     }
                 });
                 $("#pump-actions-accordion").on("shown.bs.collapse", function() {
@@ -1039,9 +1230,9 @@
                             dataSrc: "category",
                             className: "bg-gray-200",
                             endRender: null,
-                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + group + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
+                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + group + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success' onclick='addNewEvent(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
                         };
-                        options["orderFixed"] = [1, "asc"];
+                        options["orderFixed"] = [0, "asc"];
                         $("#eventsAdminTable").DataTable(options);
                     }
                     else {
@@ -1061,7 +1252,7 @@
                             endRender: null,
                             startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + dataTablesRowGroupStrings["logs"][group] + "</td>"); }
                         };
-                        options["orderFixed"] = [1, "asc"];
+                        options["orderFixed"] = [0, "asc"];
                         $("#logsAdminTable").DataTable(options);
                     }
                     else {
@@ -1073,25 +1264,41 @@
                         let options = {};
                         Object.assign(options, dataTablesAdminOptions["plants"]);
                         options["ajax"]["dataSrc"] = function(response) {
+                            Object.assign(plantProperties, response["data"]);
                             return response["data"];
                         };
-                        options["rowGroup"] = {
-                            dataSrc: "name",
-                            className: "bg-gray-200",
-                            endRender: null,
-                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + plantIDs[group] + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
-                        };
-                        options["orderFixed"] = [1, "asc"];
+                        /*
                         let plants = Object.getOwnPropertyNames(plantIDs);
+                        $("#plantsAdminPlantSelection").empty();
+                            $("#plantsAdminPlantSelection").append("<option value='" + plant + "'>" + plantIDs[plant] + "</option>");
+
                         for (plant of plants) {
                             $("#plantsAdminPlantSelection").append("<option value='" + plant + "'>" + plantIDs[plant] + "</option>");
-                        }
+                        }*/
                         $("#plantsAdminTable").DataTable(options);
                     }
                     else {
                         $("#plantsAdminTable").DataTable().ajax.reload();
                     }
                 });
+                /*
+                $("a[href='#plantsAdminCategoriesContainer']").on("shown.bs.tab", function() {
+                    if (!DataTable.isDataTable("#plantsCategoriesAdminTable")) {
+                        let plants = Object.getOwnPropertyNames(plantIDs);
+                        $("#plantsAdminPlantSelection").empty();
+                        for (plant of plants) {
+                            $("#plantsAdminPlantSelection").append("<option value='" + plant + "'>" + plantIDs[plant] + "</option>");
+                        }
+                        $("#plantsCategoriesAdminTable").DataTable(dataTablesAdminOptions["plantsCategories"]);
+                    }
+                    else {
+                        $("#plantsCategoriesAdminTable").DataTable().ajax.reload();
+                    }
+                });
+                $("a[href='#plantsAdminOverviewContainer']").on("shown.bs.tab", function() {
+                    $("#plantsCategoriesAdminTable").DataTable().ajax.reload();
+                });
+                */
                 // Aktuell
                 charts["current"]["co2"] = new Chart($("#co2-chart-current")[0].getContext("2d"), {
                     options: {
@@ -2273,8 +2480,8 @@
             main {
                 grid-column: 1 / 3;
                 grid-row: 2 / 2;
-			    display: flex;
-    			align-items: flex-start;
+                display: flex;
+                align-items: flex-start;
                 justify-content: center;
                 padding: 0 5%;
             }
@@ -2292,7 +2499,7 @@
                 border-top: 1px solid #76a5a8;
                 border-bottom: 1px solid #76a5a8;
                 height: 50px;
-		    	color: #fff;
+                color: #fff;
                 justify-content: center;
             }
             #logo {
@@ -2330,13 +2537,13 @@
                 align-content: flex-start;
                 justify-content: space-between
             }
-	    	section.lol {
+            section.lol {
                 border: 2px solid var(--bs-gray-300, #dee2e6)
-		    }
+            }
             section.lol div:first-of-type {
                 flex: 0 0 28px
             }
-	    	section.lol > div:first-of-type > span:first-of-type {
+            section.lol > div:first-of-type > span:first-of-type {
                 font-weight: bold;
                 font-size: 1rem;
                 vertical-align: middle;
@@ -2653,8 +2860,20 @@
             div.dataTables_wrapper > div.row:last-of-type {
                 margin-top: 1rem !important;
             }
+            a[data-bs-toggle="pill"]:hover {
+                background-color: rgba(var(--bs-primary-rgb), 0.1);
+            }
+            .scroll-spy-grid {
+                grid-template-columns: 1fr 8fr;
+                grid-gap: 1rem
+            }
+            .scroll-spy-grid > div:last-of-type {
+                height: 0;
+                min-height: 100%;
+                overflow: auto
+            }
         </style>
-	</head>
+    </head>
     <body class="m-0 p-0 overflow-hidden">
         <div id="body-overlay">
             <div class="spinner-border mr-2" style="border-width: 5px; color: var(--bs-gray-500)"></div>
@@ -2808,24 +3027,202 @@
                                     </div>
                                     <div id="collapse-plants-actions" class="collapse hide" data-bs-parent="#plants-accordion">
                                         <div class="card-body">
-                                            <label for="plantsAdminPlantSelection">Pflanze:</label>
-                                            <select class="form-select ms-1 w-auto d-inline-block" id="plantsAdminPlantSelection" data-old="0">
-                                                <option value="0">Alle</option>
-                                            </select>
-                                            <div class="mt-3 pt-1">
-                                                <table class="table table-sm w-100" id="plantsAdminTable">
-                                                    <thead>
-                                                        <tr>
-                                                            <th></th>
-                                                            <th>ID</th>
-                                                            <th>Bezeichnung</th>
-                                                            <th>Eigenschaften</th>
-                                                            <th>Optionen</th>
-                                                            <th></th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody></tbody>
-                                                </table>
+                                            <ul class="nav nav-pills">
+                                                <li class="nav-item">
+                                                    <a class="nav-link active" data-bs-toggle="pill" href="#plantsAdminOverviewContainer">Übersicht</a>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <!--<a class="nav-link" data-bs-toggle="pill" href="#plantsAdminCategoriesContainer"></a>-->
+                                                    <a class="nav-link" data-bs-toggle="pill" href="#plantsAdminCreationContainer">Erstellen</a>
+                                                </li>
+                                            </ul>
+                                            <div class="tab-content pt-3 tab-content-simple">
+                                                <div class="tab-pane active" id="plantsAdminOverviewContainer">
+                                                    <button type="button" class="ms-1 btn btn-success align-top"><i class="fas fa-sync"></i></button>
+                                                    <div class="mt-3 pt-1">
+                                                        <table class="table table-sm w-100" id="plantsAdminTable">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>ID</th>
+                                                                    <th>Bezeichnung</th>
+                                                                    <th>Eigenschaften</th>
+                                                                    <th>Optionen</th>
+                                                                    <th></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody></tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="tab-pane" id="plantsAdminCreationContainer">
+                                                    <label for="plantsAdminPlantSelection">Vorlage:</label>
+                                                    <select class="form-select ms-1 w-auto d-inline-block" id="plantsAdminPlantSelection" data-old="0">
+                                                        <option value="0">Alle</option>
+                                                    </select>
+                                                    <button type="button" class="ms-1 btn btn-primary align-top"><i class="fas fa-sync"></i> Übernehmen</button>
+                                                    <div class="mt-3 pt-1">
+                                                        <label class="col-form-label" for="newPlantCategoryName">Bezeichnung:</label>
+                                                        <input type="text" class="form-control" id="newPlantCategoryName" placeholder="Bezeichnung eingeben..." aria-label="Bezeichnung" aria-describedby="newPlantCategoryName">
+                                                    </div>
+                                                    <div class="d-grid mt-3 scroll-spy-grid">
+                                                        <div id="newPlantContainer" class="list-group">
+                                                            <a class="list-group-item list-group-item-action" href="#newPlantCo2Section">Co²-Gehalt</a>
+                                                            <a class="list-group-item list-group-item-action" href="#newPlantTemperatureSection">Temperatur</a>
+                                                            <a class="list-group-item list-group-item-action" href="#newPlantphSection">pH-Wert</a>
+                                                            <a class="list-group-item list-group-item-action" href="#newPlantSalinitySection">Salzgehalt</a>
+                                                            <a class="list-group-item list-group-item-action" href="#newPlantHumiditySection">Luftfeuchtigkeit</a>
+                                                            <a class="list-group-item list-group-item-action" href="#newPlantWaterlevelSection">Wasserstand</a>
+                                                            <a class="list-group-item list-group-item-action" href="#newPlantLightingSection">Beleuchtung</a>
+                                                        </div>
+                                                        <div data-bs-spy="scroll" data-bs-target="#newPlantContainer" data-bs-offset="0" class="p-3">
+                                                            <h5 id="newPlantCo2Section">Co²-Gehalt</h5>
+                                                            css grid testen
+                                                            <table class="table-borderless">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td><label for="newPlantCategoryCo2InputMinimum" class="col-form-label pe-2">Sollwert:</label></td>
+                                                                        <td><input type="text" class="form-control w-auto d-inline-block" id="newPlantCategoryCo2InputSetpoint" placeholder="Sollwert" aria-label="Co²-Gehalt Sollwert" aria-describedby="newPlantCategoryCo2InputSetpoint"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><label for="newPlantCategoryCo2InputMinimum" class="col-form-label pe-2">Obere Eingriffsgrenze:</label></td>
+                                                                        <td><input type="text" class="form-control w-auto d-inline-block" id="newPlantCategoryCo2InputSetpoint" placeholder="Sollwert" aria-label="Co²-Gehalt Sollwert" aria-describedby="newPlantCategoryCo2InputSetpoint"></td>
+                                                                        <td><label for="newPlantCategoryCo2InputMinimum" class="col-form-label pe-2">Untere Eingriffsgrenze:</label></td>
+                                                                        <td><input type="text" class="form-control w-auto d-inline-block" id="newPlantCategoryCo2InputSetpoint" placeholder="Sollwert" aria-label="Co²-Gehalt Sollwert" aria-describedby="newPlantCategoryCo2InputSetpoint"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><label for="newPlantCategoryCo2InputMinimum" class="col-form-label pe-2">Obere Warngrenze:</label></td>
+                                                                        <td><input type="text" class="form-control w-auto d-inline-block" id="newPlantCategoryCo2InputSetpoint" placeholder="Sollwert" aria-label="Co²-Gehalt Sollwert" aria-describedby="newPlantCategoryCo2InputSetpoint"></td>
+                                                                        <td><label for="newPlantCategoryCo2InputMinimum" class="col-form-label pe-2">Untere Warngrenze:</label></td>
+                                                                        <td><input type="text" class="form-control w-auto d-inline-block" id="newPlantCategoryCo2InputSetpoint" placeholder="Sollwert" aria-label="Co²-Gehalt Sollwert" aria-describedby="newPlantCategoryCo2InputSetpoint"></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                            <h5 id="newPlantTemperatureSection">Temperatur</h5>
+                                                            <p>...</p>
+                                                            <h5 id="newPlantphSection">pH-Wert</h5>
+                                                            <p>...</p>
+                                                            <h5 id="newPlantSalinitySection">Salzgehalt</h5>
+                                                            <p>...</p>
+                                                            <h5 id="newPlantHumiditySection">Luftfeuchtigkeit</h5>
+                                                            <p>...</p>
+                                                            <h5 id="newPlantWaterlevelSection">Wasserstand</h5>
+                                                            <p>...</p>
+                                                            <h5 id="newPlantLightingSection">Beleuchtung</h5>
+                                                            <p>...</p>
+                                                        </div>
+                                                    </div>
+                                                          
+                                                        <!--
+
+                                                        <div class="col-2 text-end">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" id="newPlantCategoryCo2InputMinimum" placeholder="Mindestwert" aria-label="Co²-Gehalt Minimum" aria-describedby="newPlantCategoryCo2InputMinimum">
+                                                                <span class="input-group-text">Min.</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-2 text-end">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" id="newPlantCategoryCo2InputMaximum" placeholder="Maximalwert" aria-label="Co²-Gehalt Maximum" aria-describedby="newPlantCategoryCo2InputMaximum">
+                                                                <span class="input-group-text">Max.</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-2 text-end">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" id="newPlantCategoryCo2InputMinimum" placeholder="Mindestwert" aria-label="Co²-Gehalt Minimum" aria-describedby="newPlantCategoryCo2InputMinimum">
+                                                                <span class="input-group-text">Min.</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-2 text-end">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" id="newPlantCategoryCo2InputMaximum" placeholder="Maximalwert" aria-label="Co²-Gehalt Maximum" aria-describedby="newPlantCategoryCo2InputMaximum">
+                                                                <span class="input-group-text">Max.</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-3 text-end">
+                                                            <label for="newPlantCategoryTemperatureInputMinimum" class="col-form-label">Temperatur:</label>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" id="newPlantCategoryTemperatureInputMinimum" placeholder="Mindestwert" aria-label="Temperatur Minimum" aria-describedby="newPlantCategoryTemperatureInputMinimum">
+                                                                <span class="input-group-text">Min.</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" id="newPlantCategoryTemperatureInputMaximum" placeholder="Maximalwert" aria-label="Temperatur Maximum" aria-describedby="newPlantCategoryTemperatureInputMaximum">
+                                                                <span class="input-group-text">Max.</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-3 text-end">
+                                                            <label for="newPlantCategorySalinityInputMinimum" class="col-form-label">Salzgehalt:</label>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" id="newPlantCategorySalinityInputMinimum" placeholder="Mindestwert" aria-label="Salzgehalt Minimum" aria-describedby="newPlantCategorySalinityInputMinimum">
+                                                                <span class="input-group-text">Min.</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" id="newPlantCategorySalinityInputMaximum" placeholder="Maximalwert" aria-label="Salzgehalt Maximum" aria-describedby="newPlantCategorySalinityInputMaximum">
+                                                                <span class="input-group-text">Max.</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-3 text-end">
+                                                            <label for="newPlantCategoryPhInputMinimum" class="col-form-label">pH-Wert:</label>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" id="newPlantCategoryPhInputMinimum" placeholder="Mindestwert" aria-label="pH-Wert Minimum" aria-describedby="newPlantCategoryPhInputMinimum">
+                                                                <span class="input-group-text">Min.</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" id="newPlantCategoryPhInputMaximum" placeholder="Maximalwert" aria-label="pH-Wert Maximum" aria-describedby="newPlantCategoryPhInputMaximum">
+                                                                <span class="input-group-text">Max.</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-3 text-end">
+                                                            <label for="newPlantCategoryWaterlevelInputMinimum" class="col-form-label">Wasserstand:</label>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" id="newPlantCategoryWaterlevelInputMinimum" placeholder="Mindestwert" aria-label="Wasserlevel Minimum" aria-describedby="newPlantCategoryWaterlevelInputMinimum">
+                                                                <span class="input-group-text">Min.</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" id="newPlantCategoryWaterlevelInputMaximum" placeholder="Maximalwert" aria-label="Wasserstand Maximum" aria-describedby="newPlantCategoryWaterlevelInputMaximum">
+                                                                <span class="input-group-text">Max.</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-3 text-end">
+                                                            <label class="col-form-label" for="newPlantCategoryIdInput">ID:</label>
+                                                        </div>
+                                                        <div class="col-5">
+                                                            <input type="text" class="form-control" id="newPlantCategoryIdInput" placeholder="ID eingeben" disabled="disabled">
+                                                        </div>
+                                                        <div class="col-3 d-flex align-items-center align-content-center justify-content-center">
+                                                            <input class="form-check-input mt-0 me-1" type="checkbox" id="newPlantCategoryAutoIDCheck" value="1" checked="checked" onclick="toggleFormState('#newPlantCategoryIdInput')">
+                                                            <label class="form-check-label" for="newPlantCategoryAutoIDCheck">Automatisch</label>
+                                                        </div>-->
+                                                        <!--
+                                                        <table class="table table-sm w-100" id="plantsCreationAdminTable">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>ID</th>
+                                                                    <th>Bezeichnung</th>
+                                                                    <th>Obere Eingriffsgrenze</th>
+                                                                    <th>Optionen</th>
+                                                                    <th></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody></tbody>
+                                                        </table>
+                                                    </div>-->
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -2841,12 +3238,13 @@
                                     </div>
                                     <div id="collapse-plants-programs-actions" class="collapse hide" data-bs-parent="#plants-programs-actions-accordion">
                                         <div class="card-body">
-                                            <label for="plantsProgramsAdminPlantSelection">Pflanze:</label>
-                                            <select class="form-select ms-1 w-auto d-inline-block" id="plantsProgramsAdminPlantSelection" data-old="0">
+                                            <label for="plantProgramsAdminPlantSelection">Pflanze:</label>
+                                            <select class="form-select ms-1 w-auto d-inline-block" id="plantProgramsAdminPlantSelection" data-old="0">
                                                 <option value="0">Alle</option>
                                             </select>
+                                            <button type="button" class="ms-1 btn btn-primary align-top"><i class="fas fa-sync"></i></button>
                                             <div class="mt-3 pt-1">
-                                                <table class="table table-sm w-100" id="plantsProgramsAdminTable">
+                                                <table class="table table-sm w-100" id="plantProgramsAdminTable">
                                                     <thead>
                                                         <tr>
                                                             <th></th>
@@ -2966,6 +3364,7 @@
                                                 <option value="1">Pflanzen</option>
                                                 <option value="2">Pumpen</option>
                                             </select>
+                                            <button type="button" class="ms-1 btn btn-primary align-top"><i class="fas fa-sync"></i></button>
                                             <div class="mt-3 pt-1">
                                                 <table class="table table-sm w-100" id="eventsAdminTable">
                                                     <thead>
@@ -3005,6 +3404,7 @@
                                                 <option value="3">Benutzeraktivitäten</option>
                                                 <option value="4">Ereignisse</option>
                                             </select>
+                                            <button type="button" class="ms-1 btn btn-primary align-top"><i class="fas fa-sync"></i></button>
                                             <div class="mt-3 pt-1">
                                                 <table class="table table-sm w-100" id="logsAdminTable">
                                                     <thead>
