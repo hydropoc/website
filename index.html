@@ -130,10 +130,7 @@
                         }
                     },
                     drawCallback: function(settings) {
-                        let cells = $("#plantsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)");
-                        for (cell of cells) {
-                            $(cell).attr("colspan", "2");
-                        }
+                        $("#plantsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)").attr("colspan", "2");
                         let a = $("#plantsAdminTable_wrapper .dataTables_scrollHeadInner").outerHeight(true);
                         let b = $("#plantsAdminTable").outerHeight(true);
                         $("#plantsAdminTable_wrapper .dataTables_scrollBody").css("height", a + b + "px");
@@ -197,10 +194,7 @@
                         dataSrc: "data",
                     },
                     drawCallback: function(settings) {
-                        let cells = $("#plantsCategoriesAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)");
-                        for (cell of cells) {
-                            $(cell).attr("colspan", "2");
-                        }
+                        $("#plantsCategoriesAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)").attr("colspan", "2");
                         if ($("#addNewPlantCategoryButton").length == 0) {
                             $("#plantsCategoriesAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3' style='height: 40px'><button type='button' class='btn btn-success' onclick='addNewPlantCategory()' id='addNewPlantCategoryButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
                         }
@@ -259,10 +253,7 @@
                         }
                     },
                     drawCallback: function(settings) {
-                        let cells = $("#userAccountsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)");
-                        for (cell of cells) {
-                            $(cell).attr("colspan", "2");
-                        }
+                        $("#userAccountsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)").attr("colspan", "2");
                         if ($("#addNewUserAccountButton").length == 0) {
                             $("#userAccountsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end' style='height: 40px'><button type='button' class='btn btn-success' onclick='addNewUser()' id='addNewUserAccountButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
                         }
@@ -325,10 +316,7 @@
                         }
                     },
                     drawCallback: function(settings) {
-                        let cells = $("#plantProgramsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)");
-                        for (cell of cells) {
-                            $(cell).attr("colspan", "2");
-                        }
+                        $("#plantProgramsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)").attr("colspan", "2");
                         let a = $("#plantProgramsAdminTable_wrapper .dataTables_scrollHeadInner").outerHeight(true);
                         let b = $("#plantProgramsAdminTable").outerHeight(true);
                         console.log(a,b);
@@ -378,10 +366,7 @@
                         }
                     },
                     drawCallback: function(settings) {
-                        let cells = $("#pumpsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)");
-                        for (cell of cells) {
-                            $(cell).attr("colspan", "2");
-                        }
+                        $("#pumpsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)").attr("colspan", "2");
                         // checkboxen müssen IDs haben!
                         $("#pumpsAdminTable > tbody [type='checkbox']").bootstrapToggle();
                         let a = $("#pumpsAdminTable_wrapper .dataTables_scrollHeadInner").outerHeight(true);
@@ -444,10 +429,7 @@
                         }
                     },
                     drawCallback: function(settings) {
-                        let cells = $("#eventsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)");
-                        for (cell of cells) {
-                            $(cell).attr("colspan", "2");
-                        }
+                        $("#eventsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)").attr("colspan", "2");
                         let a = $("#eventsAdminTable_wrapper .dataTables_scrollHeadInner").outerHeight(true);
                         let b = $("#eventsAdminTable").outerHeight(true);
                         $("#eventsAdminTable_wrapper .dataTables_scrollBody").css("height", a + b + "px");
@@ -496,10 +478,7 @@
                         }
                     },
                     drawCallback: function(settings) {
-                        let cells = $("#logsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)");
-                        for (cell of cells) {
-                            $(cell).attr("colspan", "2");
-                        }
+                        $("#logsAdminTable > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)").attr("colspan", "2");
                         let a = $("#logsAdminTable_wrapper .dataTables_scrollHeadInner").outerHeight(true);
                         let b = $("#logsAdminTable").outerHeight(true);
                         $("#logsAdminTable_wrapper .dataTables_scrollBody").css("height", a + b + "px");
@@ -599,64 +578,10 @@
                     $(wtf).attr("disabled", "disabled");
                 }
             }
-            function showPlantProperties(wtf) {
-                //
-            }
             function logout(wtf) {
                 //cookies löschen
                 //abmeldeknopf durch anmeldeknopf ersetzen (auch in mobiler ansicht)
             }
-            /*
-            function addNewPlant(wtf = null) {
-                let content = "<div class='row g-2'><div class='col-3 text-end'><label class='col-form-label' for='newPlantCategorySelect'>Kategorie:</label></div><div class='col-9'><select class='form-select' id='newPlantCategorySelect'>";
-                let plants = Object.getOwnPropertyNames(plantIDs);
-                let plantsHTML = "";
-                for (plant of plants) {
-                    plantsHTML += "<option value='" + plant + "'" + (wtf == plant ? "selected" : "") + ">" + plantIDs[plant] + "</option>";
-                }
-                content += plantsHTML + "</select></div>";
-                content += "<div class='col-3 text-end'><label class='col-form-label' for='newPlantNameInput'>Bezeichnung:</label></div><div class='col-9'><input type='text' class='form-control' id='newPlantNameInput' placeholder='Bezeichnung eingeben'></div>";
-                content += "<div class='col-3 text-end'><label class='col-form-label' for='newPlantIdInput'>ID:</label></div><div class='col-6'><input type='text' class='form-control' id='newPlantIdInput' placeholder='ID eingeben' disabled='disabled'></div><div class='col-3 d-flex align-items-center align-content-center justify-content-center'><input class='form-check-input mt-0 me-1' type='checkbox' id='newPlantAutoIDCheck' value='1' checked='checked' onclick='toggleFormState(\"#newPlantIdInput\")'><label class='form-check-label' for='newPlantAutoIDCheck'>Automatisch</label></div>";
-                let data = {
-                    modal: {
-                        name: "addNewPlant"
-                    },
-                    title: {
-                        text: "Neue Pflanze erstellen"
-                    },
-                    content: {
-                        text: content,
-                        options: {
-                            scroll: true
-                        }
-                    },
-                    footer: {
-                        buttons: {
-                            default: {
-                                text: "Abbrechen",
-                                class: "btn-danger"
-                            },
-                            custom: [
-                                {
-                                    text: "Speichern",
-                                    class: "btn-primary",
-                                    actions: [
-                                        {
-                                            click: [
-                                                {
-                                                    function: console.log,
-                                                    args: ["lol"]
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    }
-                };
-                Modal.create(data);
-            }*/
             function addNewEvent(wtf = null) {
                 //
             }
@@ -727,7 +652,7 @@
                 }
             }
             // Wird verwendet, um Funktionen innerhalb von Objekten auszuführen
-            function achso(callback, args) {
+            function achso(callback, args = null) {
                 callback.apply(this, args);
             }
             class Modal {
@@ -849,9 +774,16 @@
                                                 let events = Object.getOwnPropertyNames(action);
                                                 for (event of events) {
                                                     for (let func of action[event]) {
-                                                        $(currentButton).on(event, function() {
-                                                            achso(func["function"], func["args"]);
-                                                        });
+                                                        if (func.hasOwnProperty("args") && typeof(func["function"]) === "object") {
+                                                            $(currentButton).on(event, function() {
+                                                                achso(func["function"], func["args"]);
+                                                            });
+                                                        }
+                                                        else {
+                                                            $(currentButton).on(event, function() {
+                                                                achso(func["function"]);
+                                                            });
+                                                        }
                                                     }
                                                 }
                                             }
@@ -877,13 +809,18 @@
             function editPlant(wtf) {
                 if (!isPlantEditingActive) {
                     isPlantEditingActive = true;
-                    $("#plantsAdminPlantSelection").attr("disabled", "disabled");
-                    $("#applyPlantTemplateButton").attr("disabled", "disabled");
-                    $("#saveEditedPlantButton").attr("data-plant-id", wtf);
+                    $("#savePlantButton").attr("data-plant-id", wtf);
                     //$("#discardEditedPlantButton").attr("data-plant-id", wtf);
                     let tab = $("a[href='#plantsAdminCreationContainer']")[0];
                     $("a[href='#plantsAdminOverviewContainer']").addClass("disabled");
                     $(tab).html("Bearbeitung");
+                    $("#savePlantButton").html("<i class='fas fa-save'></i> Speichern");
+                    $("#discardPlantButton").html("<i class='fas fa-times'></i> Abbrechen");
+                    $("#newPlantIdInput").attr("readonly", "readonly");
+                    $("#newPlantAutoIDCheck").prop("checked", false);
+                    $("#newPlantAutoIDCheck").attr("disabled", "disabled");
+                    $("#newPlantAutoIDCheckLabel").css("opacity", 0.50);
+                    fillPlantInputs(wtf);
                     new bootstrap.Tab(tab).show();
                 }
             }
@@ -928,21 +865,101 @@
                 };
                 Modal.create(data);
             }
-            window.addEventListener("load", function() {
+            function fillPlantInputs(wtf) {
+                let selectedPlant = Number.parseInt(wtf);
+                if (plantIDs.hasOwnProperty(selectedPlant)) {
+                    $("#newPlantIdInput").val(wtf);
+                    let index = plantProperties.findIndex(key => key["id"] === selectedPlant);
+                    if (index >= 0) {
+                        $("#newPlantDescriptionInput").val(plantProperties[index]["description"]);
+                        $("#newPlantOldDescriptionInput").val(plantProperties[index]["description"]);
+                        let properties = Object.getOwnPropertyNames(plantProperties[index]["properties"]);
+                        for (property of properties) {
+                            let propertyName = property[0].toUpperCase() + property.substring(1, property.length);
+                            let values = Object.getOwnPropertyNames(plantProperties[index]["properties"][property]);
+                            for (value of values) {
+                                let inputName = value[0].toUpperCase() + value.substring(1, value.length);
+                                let inputElement = "#newPlant" + propertyName + inputName + "Input";
+                                $(inputElement).val(plantProperties[index]["properties"][property][value]);
+                            }
+                        }
+                    }
+                }
+            }
+            function confirmation(element, options = {}) {
+                let data = {
+                    modal: {
+                        name: "confirmation"
+                    },
+                    title: {
+                        text: (options.hasOwnProperty("title") ? options["title"] : "Bestätigung")
+                    },
+                    content: {
+                        text: (options.hasOwnProperty("content") ? options["content"] : "Soll diese Aktion wirklich ausgeführt werden?")
+                    },
+                    footer: {
+                        buttons: {
+                            default: {
+                                text: "Nein",
+                                class: "btn-primary"
+                            },
+                            custom: [
+                                {
+                                    text: "Ja",
+                                    class: "btn-danger",
+                                    actions: [
+                                        {
+                                            click: [
+                                                {
+                                                    function: function() { 
+                                                        let event = $.Event("modalConfirmation", {response: true, sender: element});
+                                                        $(window).trigger(event);
+                                                    },
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                };
+                Modal.create(data);
+            }
+            $(window).on("load", function() {
                 $("#body-overlay").empty();
                 $("#body-overlay").css("opacity", 0).on("transitionend", function() {
                     $(this).remove();
                     $("body").removeClass("overflow-hidden");
                 });
             });
-            window.addEventListener("resize", function() {
+            $(window).on("resize", function() {
                 if ($("#plantsAdminCreationContainer").hasClass("active")) {
                     $("#newPlantContainer").css("max-height", $("#newPlantNavigation").outerHeight(true) + "px");
                 }
             });
+            $(window).on("modalConfirmation", function(element) {
+                // pflanzen, benutzer, programme löschen...
+                switch ($(element["sender"]).attr("data-confirmation-sender")) {
+                    case "discardEditedPlant":
+                        $("#newPlantContainer input[type='text']").val("");
+                        isPlantEditingActive = false;
+                        $("a[href='#plantsAdminOverviewContainer']").removeClass("disabled");
+                        $("a[href='#plantsAdminCreationContainer']").html("Erstellen");
+                        $("#savePlantButton").html("<i class='fas fa-plus'></i> Hinzufügen");
+                        $(this).html("<i class='fas fa-trash-alt'></i> Löschen");
+                        $("#newPlantIdInput").removeAttr("readonly");
+                        $("#newPlantAutoIDCheck").prop("checked", true);
+                        $("#newPlantAutoIDCheck").removeAttr("disabled");
+                        $("#newPlantAutoIDCheckLabel").css("opacity", 1);
+                        break;
+                    default:
+                        break;
+                }
+                bootstrap.Modal.getInstance($("#mainModal")).hide();
+            });
             document.addEventListener("DOMContentLoaded", function() {
                 // Hier alle Skripte ausführen, die auf DOM zugreifen sollen, bevor Bilder und Ähnliches geladen wurden 
-                //$(".dropdown-toggle").dropdown()
                 $("a[href='#systemInfos']").click(function() {
                     let content = "<table class='table-sm w-100'>";
                     content += "<thead>";
@@ -1024,32 +1041,14 @@
                     });
                 });
                 $("#applyPlantTemplateButton").click(function() {
-                    let selectedPlant = Number.parseInt($("#plantsAdminPlantSelection").val());
-                    if (plantIDs.hasOwnProperty(selectedPlant)) {
-                        let index = plantProperties.findIndex(key => key["id"] === selectedPlant);
-                        if (index >= 0) {
-                            let properties = Object.getOwnPropertyNames(plantProperties[index]["properties"]);
-                            for (property of properties) {
-                                let propertyName = property[0].toUpperCase() + property.substring(1, property.length);
-                                let values = Object.getOwnPropertyNames(plantProperties[index]["properties"][property]);
-                                for (value of values) {
-                                    let inputName = value[0].toUpperCase() + value.substring(1, value.length);
-                                    let inputElement = "#newPlant" + propertyName + inputName + "Input";
-                                    $(inputElement).val(plantProperties[index]["properties"][property][value]);
-                                }
-                            }
-                        }
-                    }
+                    fillPlantInputs($("#plantsAdminPlantSelection").val());
                 });
-                $("#saveEditedPlantButton").click(function() {
+                $("#savePlantButton").click(function() {
                     //$().attr("data-plant-id");
                 });
-                $("#discardEditedPlantButton").click(function() {
-                    isPlantEditingActive = false;
-                    $("#plantsAdminPlantSelection").removeAttr("disabled");
-                    $("#applyPlantTemplateButton").removeAttr("disabled");
-                    $("a[href='#plantsAdminOverviewContainer']").removeClass("disabled");
-                    $("a[href='#plantsAdminCreationContainer']").html("Erstellen");
+                $("#discardPlantButton").click(function() {
+                    // neue und bestehende pflanze unterscheiden?
+                    confirmation(this, {title: "Bearbeitung abbrechen", content: "Soll die Bearbeitung der aktuellen Pflanze wirklich abgebrochen werden?"});
                 });
                 $("a[href='#login']").click(function() {
                     let content = "<div><label for='username' class='form-label'>Benutzername:</label>";
@@ -1340,26 +1339,12 @@
                     $("#plantsAdminPlantSelection").empty();
                     let plants = Object.getOwnPropertyNames(plantIDs);
                     if (plants.length >= 1) {
-                        for (plant of plants) {
-                            $("#plantsAdminPlantSelection").append("<option value='" + plant + "'>" + plantIDs[plant] + "</option>");
-                        }
-                    }
-                });
-                /*
-                $("a[href='#plantsAdminCreationContainer']").on("shown.bs.tab", function() {
-                    let plants = Object.getOwnPropertyNames(plantIDs);
-                    $("#plantsAdminPlantSelection").empty();
-                    if (plants.length >= 1) {
-                        for (plant of plants) {
-                            $("#plantsAdminPlantSelection").append("<option value='" + plant + "'>" + plantIDs[plant] + "</option>");
-                        }
                         $("#applyPlantTemplateButton").removeAttr("disabled");
+                        for (plant of plants) {
+                            $("#plantsAdminPlantSelection").append("<option value='" + plant + "'>" + plantIDs[plant] + "</option>");
+                        }
                     }
                 });
-                $("a[href='#plantsAdminOverviewContainer']").on("shown.bs.tab", function() {
-                    $("#plantsCategoriesAdminTable").DataTable().ajax.reload();
-                });*/
-
                 // Aktuell
                 charts["current"]["co2"] = new Chart($("#co2-chart-current")[0].getContext("2d"), {
                     options: {
@@ -2356,12 +2341,9 @@
                         ]
                     }
                 });
-                let dropDowns = $("[data-bs-toggle='collapse']");
-                for (dropDown of dropDowns) {
-                    $(dropDown).click(function() {
-                        $(this).children("i:last-of-type").css("transform", ($(this).attr("aria-expanded") == "true" ? "rotate(180deg)" : "rotate(0deg)"));
-                    });
-                }
+                $("[data-bs-toggle='collapse']").click(function() {
+                    $(this).children("i:last-of-type").css("transform", ($(this).attr("aria-expanded") == "true" ? "rotate(180deg)" : "rotate(0deg)"));
+                });
                 $("#historyTimespan").change(function() {
                     $(this).attr("disabled", "disabled").after("<span class='spinner-border ms-2 text-primary kreiselchen' style='flex: 0 0 auto' data-processing='true'></span>");
                     $.post("history_charts_data.php", {
@@ -2928,35 +2910,51 @@
             #newPlantContainer h5 {
                 font-weight: 600;
             }
-            .accordion-flush .accordion-button:focus, .accordion-flush .accordion-button:not(.collapsed) {
+            .accordion-flush > .accordion-item > .accordion-header > .accordion-button:focus, .accordion-flush .accordion-button:not(.collapsed) {
                 box-shadow: unset;
                 color: black
             }
-            .accordion-flush .accordion-header {
-                border-left: 1px solid var(--bs-gray-300, #dee2e6);
-                border-right: 1px solid var(--bs-gray-300, #dee2e6);
+            .accordion-flush > .accordion-item:last-of-type > .accordion-header > .accordion-button:not(.collapsed) {
+                border-bottom: 1px solid var(--bs-gray-300, #dee2e6)
             }
-            .accordion-flush .accordion-button {
-                background-color: var(--bs-gray-100, #f8f9fa)
-            }
-            .accordion-flush .accordion-collapse.collapse.show > .accordion-body, .accordion-flush .accordion-collapse.collapsing > .accordion-body {
+            .accordion-flush > .accordion-item:first-of-type > .accordion-header > .accordion-button:not(.collapsed) {
                 border-top: 1px solid var(--bs-gray-300, #dee2e6)
             }
-            .accordion-flush .accordion-body {
+            .accordion-flush > .accordion-item > .accordion-header > .accordion-button {
+                background-color: var(--bs-gray-100, #f8f9fa);
                 border-left: 1px solid var(--bs-gray-300, #dee2e6);
                 border-right: 1px solid var(--bs-gray-300, #dee2e6)
             }
-            .accordion-flush > .accordion-item:last-of-type .accordion-header {
+            .accordion-flush > .accordion-item:last-of-type > .accordion-header > .accordion-button.collapsed {
                 overflow: hidden;
                 border-bottom-left-radius: 5px;
                 border-bottom-right-radius: 5px;
                 border-bottom: 1px solid var(--bs-gray-300, #dee2e6)
             }
-            .accordion-flush > .accordion-item:first-of-type .accordion-header {
+            .accordion-flush > .accordion-item:last-of-type > .accordion-header > .accordion-button {
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+            .accordion-flush > .accordion-item:last-of-type .accordion-collapse.collapse.show > .accordion-body, .accordion-flush > .accordion-item:last-of-type .accordion-collapse.collapsing > .accordion-body {
+                border-bottom-left-radius: 5px;
+                border-bottom-right-radius: 5px;
+                border-bottom: 1px solid var(--bs-gray-300, #dee2e6)
+            }
+            .accordion-flush > .accordion-item > .accordion-collapse > .accordion-body {
+                border-left: 1px solid var(--bs-gray-300, #dee2e6);
+                border-right: 1px solid var(--bs-gray-300, #dee2e6)
+            }
+            .accordion-flush > .accordion-item:first-of-type > .accordion-header > .accordion-button {
                 overflow: hidden;
                 border-top-left-radius: 5px;
                 border-top-right-radius: 5px;
-                border-bottom: 1px solid var(--bs-gray-300, #dee2e6);
+                border-top: 1px solid var(--bs-gray-300, #dee2e6)
+            }
+            .accordion-flush > .accordion-item:not(:first-of-type, :last-of-type) .accordion-collapse.collapse.show > .accordion-body, .accordion-flush > .accordion-item:not(:first-of-type, :last-of-type) .accordion-collapse.collapsing > .accordion-body {
+                border-top: 1px solid var(--bs-gray-300, #dee2e6)
+            }
+
+            .accordion-flush > .accordion-item:first-of-type .accordion-collapse.collapse.show > .accordion-body, .accordion-flush > .accordion-item:first-of-type .accordion-collapse.collapsing > .accordion-body {
                 border-top: 1px solid var(--bs-gray-300, #dee2e6)
             }
             @media only screen and (max-width: 600px) {
@@ -3266,8 +3264,9 @@
                                                     </div>
                                                 </div>
                                                 <div class="tab-pane" id="plantsAdminCreationContainer">
+                                                    <h2>Pflanze bearbeiten</h2>
                                                     <div class="d-flex">
-                                                        <label for="plantsAdminPlantSelection">Vorlage:</label>
+                                                        <label for="plantsAdminPlantSelection" class="col-form-label">Vorlage:</label>
                                                         <select class="form-select ms-1 w-auto d-inline-block" id="plantsAdminPlantSelection" data-old="0">
                                                         </select>
                                                     <button type="button" class="ms-1 btn btn-primary align-top" id="applyPlantTemplateButton" disabled="disabled"><i class="fas fa-sync"></i> Übernehmen</button>
@@ -3275,7 +3274,7 @@
                                                     </div>
                                                     <div class="d-flex mt-3" id="newPlantMenu">
                                                         <div id="newPlantNavigation" class="list-group col-md-2 position-relative align-self-start">
-                                                            <a class="list-group-item list-group-item-action" href="#newPlantDescriptionSection">Bezeichnung</a>
+                                                            <a class="list-group-item list-group-item-action" href="#newPlantGeneralSection">Allgemein</a>
                                                             <a class="list-group-item list-group-item-action" href="#newPlantCo2Section">Co²-Gehalt</a>
                                                             <a class="list-group-item list-group-item-action" href="#newPlantTemperatureSection">Temperatur</a>
                                                             <a class="list-group-item list-group-item-action" href="#newPlantphSection">pH-Wert</a>
@@ -3283,16 +3282,25 @@
                                                             <a class="list-group-item list-group-item-action" href="#newPlantHumiditySection">Luftfeuchtigkeit</a>
                                                             <a class="list-group-item list-group-item-action" href="#newPlantWaterlevelSection">Wasserstand</a>
                                                             <a class="list-group-item list-group-item-action" href="#newPlantLightingSection">Beleuchtung</a>
-                                                            <a class="list-group-item list-group-item-action" href="#newPlantSaveSection">Speichern</a>
                                                         </div>
                                                         <div data-bs-spy="scroll" data-bs-target="#newPlantNavigation" data-bs-offset="0" class="p-3 col-md-10 position-relative" id="newPlantContainer">
                                                             <form>
                                                                 <div class="row">
-                                                                    <h5 id="newPlantDescriptionSection" class="col-md-12">Bezeichnung</h5>
+                                                                    <h5 id="newPlantGeneralSection" class="col-md-12">Allgemein</h5>
+                                                                </div>
+                                                                <div class="row mt-2">
+                                                                    <label for="newPlantOldDescriptionInput" class="col-form-label col-md-2">Alte Bezeichnung:</label>
+                                                                    <input type="text" readonly="readonly" class="form-control w-auto d-inline-block col-md-2" id="newPlantOldDescriptionInput" aria-label="Alte Bezeichnung" aria-describedby="newPlantOldDescriptionInput">
                                                                 </div>
                                                                 <div class="row mt-2">
                                                                     <label for="newPlantDescriptionInput" class="col-form-label col-md-2">Bezeichnung:</label>
                                                                     <input required type="text" class="form-control w-auto d-inline-block col-md-2" id="newPlantDescriptionInput" aria-label="Bezeichnung" aria-describedby="newPlantDescriptionInput">
+                                                                    <label for="newPlantIdInput" class="col-form-label col-md-2">ID:</label>
+                                                                    <input type="text" class="form-control col-md-2 w-auto" id="newPlantIdInput" disabled="disabled">
+                                                                    <div class="d-flex align-items-center align-content-center col-md-2">
+                                                                        <input class="form-check-input" type="checkbox" id="newPlantAutoIDCheck" value="1" checked="checked" onclick="toggleFormState('#newPlantIdInput')">
+                                                                        <label class="form-check-label ms-1" id="newPlantAutoIDCheckLabel" for="newPlantAutoIDCheck">Automatisch</label>
+                                                                    </div>
                                                                 </div>
                                                                 <div class="row mt-4">
                                                                     <h5 id="newPlantCo2Section" class="col-md-12">Co²-Gehalt</h5>
@@ -3427,13 +3435,14 @@
                                                                     <label for="newPlantLightingLowerWarningLimitInput" class="col-form-label col-md-2" >Untere Warngrenze:</label>
                                                                     <input required type="text" class="form-control w-auto d-inline-block col-md-2" id="newPlantLightingLowerWarningLimitInput" aria-label="Untere Warngrenze für Wasserstand" aria-describedby="newPlantLightingLowerWarningLimitInput">
                                                                 </div>
+                                                                <!--
                                                                 <div class="row mt-4">
                                                                     <h5 id="newPlantSaveSection" class="mt-4 col-md-12">Speichern</h5>
                                                                 </div>
                                                                 <div class="mt-2">
                                                                     <button class="btn btn-success" id="saveEditedPlantButton"><i class="fas fa-save"></i> Speichern</button>
                                                                     <button class="btn btn-danger" id="discardEditedPlantButton"><i class="fas fa-times"></i> Verwerfen</button>
-                                                                </div>
+                                                                </div>-->
                                                             </form>
                                                             <!--
                                                             <h5 id="newPlantLightingSection" class="mt-4">Beleuchtung</h5>
@@ -3461,6 +3470,10 @@
                                                             </div>-->
                                                         </div>
                                                     </div>
+                                                </div>
+                                                <div class="mt-4">
+                                                    <button class="btn btn-success" id="savePlantButton"><i class="fas fa-plus"></i> Hinzufügen</button>
+                                                    <button class="btn btn-danger" id="discardPlantButton" data-confirmation-sender="discardEditedPlant"><i class="fas fa-trash-alt"></i> Löschen</button>
                                                 </div>
                                             </div>
                                         </div>
