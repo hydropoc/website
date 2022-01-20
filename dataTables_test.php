@@ -331,7 +331,7 @@
         case "pumps":
             for ($i = 1; $i <= 6; $i++) {
                 $isOn = rand(0, 5);
-                $data[] = ["name" => "Pumpe " . $i, "rpm" => $isOn == 2 ? rand(1000, 2000) : 0, "power" => $isOn == 2 ? rand(70, 80) : 0, "status" => "<input type='checkbox' data-toggle='toggle' data-size='sm' data-on='Ein' id='pump-" . $i . "' data-off='Aus' " . ($isOn == 1 ? "checked" : null) . ">"];
+                $data[] = ["name" => "Pumpe " . $i, "rpm" => $isOn == 2 ? rand(1000, 2000) : 0, "power" => $isOn == 2 ? rand(70, 80) : 0, "status" => "<input type='checkbox' data-toggle='toggle' data-size='sm' data-on='Ein' id='pump-" . $i . "' data-off='Aus' " . ($isOn == 1 ? "checked" : null) . "onchange='togglePump(this)'>"];
             }
             break;
         case "events":
