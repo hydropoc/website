@@ -3043,13 +3043,35 @@
             .accordion-flush > .accordion-item:first-of-type .accordion-collapse.collapse.show > .accordion-body, .accordion-flush > .accordion-item:first-of-type .accordion-collapse.collapsing > .accordion-body {
                 border-top: 1px solid var(--bs-gray-300, #dee2e6)
             }
+            #mobile-navbar > ul.dropdown-menu:first-of-type {
+                box-shadow: 0 0 5px 1px #0000008a
+            }
             @media only screen and (max-width: 600px) {
+                main {
+                    padding: 0 2%
+                }
+                .tab-content {
+                    padding: 1rem !important;
+                }
+                table.dataTable {
+                    max-width: 300px !important;
+                }
+                #overview-panel {
+                    grid-auto-rows: minmax(300px, auto);
+                    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))
+                }
                 #overPlantActionContainer {
                     flex-direction: column;
                     align-items: stretch !important;
                 }
                 #overPlantActionContainer > * {
                     margin: 0.5rem 0 0 0 !important;
+                }
+                table.dataTable thead .sorting::after {
+                    background-image: unset;
+                }
+                table.dataTable thead > tr > th {
+                    font-weight: lighter;
                 }
                 #first-navbar, #second-navbar {
                     display: none;
@@ -3069,7 +3091,8 @@
                     margin-left: 0;
                 }
                 #newPlantContainer {
-                    width: 100%
+                    width: 100%;
+                    margin-top: 1rem
                 }
                 #plantsAdminCreationContainer > div:first-of-type {
                     flex-direction: column;
@@ -3550,11 +3573,11 @@
                                                                 </div>
                                                             </div>-->
                                                         </div>
+                                                        <div class="mt-4 d-flex align-content-center align-items-center justify-content-end" style="gap: 5px">
+                                                            <button class="btn btn-success" id="savePlantButton"><i class="fas fa-plus"></i> Hinzufügen</button>
+                                                            <button class="btn btn-danger" id="discardPlantButton" data-confirmation-sender="discardEditedPlant"><i class="fas fa-trash-alt"></i> Löschen</button>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="mt-4 d-flex align-content-center align-items-center justify-content-end" style="gap: 5px">
-                                                    <button class="btn btn-success" id="savePlantButton"><i class="fas fa-plus"></i> Hinzufügen</button>
-                                                    <button class="btn btn-danger" id="discardPlantButton" data-confirmation-sender="discardEditedPlant"><i class="fas fa-trash-alt"></i> Löschen</button>
                                                 </div>
                                             </div>
                                         </div>
