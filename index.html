@@ -55,6 +55,7 @@
                     sSortDescending: ": aktivieren, um Spalte absteigend zu sortieren"
                 }
             }
+            const adminDataTables = {};
             const dataTablesAdminOptions = {
                 plants: {
                     order: [0, "asc"],
@@ -62,10 +63,19 @@
                     scrollY: "400px",
                     scrollCollapse: true,
                     scroller: true,
+                    responsive: {
+                        details: {
+                            renderer: function(api, rowIdx, columns) {
+                                console.log(api, rowIdx, columns);
+                                return "LOL";
+                            }
+                        }
+                    },
                     columns: [
                         {
                             name: "id",
-                            data: "id"
+                            data: "id",
+                            responsivePriority: 10001
                         },
                         {
                             name: "description",
@@ -87,10 +97,16 @@
                                         content += "<button class='accordion-button collapsed p-2' type='button' data-bs-toggle='collapse' data-bs-target='#flush-collapsePlantsAdminTable" + property + "Property-" + row["id"] + "' aria-expanded='false' aria-controls='plantsAdminTable" + property + "Property-" + row["id"] + "'>";
                                         content += plantPropertyNames[property] + "</button></h2>";
                                         content += "<div id='flush-collapsePlantsAdminTable" + property + "Property-" + row["id"] + "' class='accordion-collapse collapse' aria-labelledby='flushPlantsAdminTable" + property + "PropertyHeader-" + row["id"] + "' data-bs-parent='#accordionPlantsAdminTableProperties-" + row["id"] + "'>";
-                                        content += "<div class='accordion-body p-2'><div class='d-flex'><div><div>Sollwert:</div><div>Obere Eingriffsgrenze:</div><div>Untere Eingriffsgrenze:</div><div>Obere Warngrenze:</div><div>Untere Warngrenze:</div></div>";
+                                        content += "<div class='accordion-body p-2'><div class='row'><div class='col-md-8'>Sollwert:</div><div class='col-md-4'>" + (index >= 0 ? plantProperties[index]["properties"][property]["setpoint"] : "(Keine Daten vorhanden)") + "</div>";
+                                        content += "<div class='col-md-8'>Obere Eingriffsgrenze:</div><div class='col-md-4'>" + (index >= 0 ? plantProperties[index]["properties"][property]["upperControlLimit"] : "(Keine Daten vorhanden)") + "</div>";
+                                        content += "<div class='col-md-8'>Untere Eingriffsgrenze:</div><div class='col-md-4'>" + (index >= 0 ? plantProperties[index]["properties"][property]["lowerControlLimit"] : "(Keine Daten vorhanden)") + "</div>";
+                                        content += "<div class='col-md-8'>Obere Warngrenze:</div><div class='col-md-4'>" + (index >= 0 ? plantProperties[index]["properties"][property]["upperWarningLimit"] : "(Keine Daten vorhanden)") + "</div>";
+                                        content += "<div class='col-md-8'>Untere Warngrenze:</div><div class='col-md-4'>" + (index >= 0 ? plantProperties[index]["properties"][property]["lowerWarningLimit"] : "(Keine Daten vorhanden)") + "</div>";
+                                        content += "</div></div></div></div>";
+                                        /*content += "<div class='accordion-body p-2'><div class='d-flex'><div><div>Sollwert:</div><div>Obere Eingriffsgrenze:</div><div>Untere Eingriffsgrenze:</div><div>Obere Warngrenze:</div><div>Untere Warngrenze:</div></div>";
                                         content += "<div class='ms-1'><div>" + (index >= 0 ? plantProperties[index]["properties"][property]["setpoint"] : "(Keine Daten vorhanden)") + "</div><div>"  + (index >= 0 ? plantProperties[index]["properties"][property]["upperControlLimit"] : "(Keine Daten vorhanden)") + "</div><div>" + (index >= 0 ? plantProperties[index]["properties"][property]["lowerControlLimit"] : "(Keine Daten vorhanden)") + "</div>";
                                         content += "<div>" + (index >= 0 ? plantProperties[index]["properties"][property]["upperWarningLimit"] : "(Keine Daten vorhanden)") + "</div><div>" + (index >= 0 ? plantProperties[index]["properties"][property]["lowerWarningLimit"] : "(Keine Daten vorhanden)") + "</div></div>";
-                                        content += "</div></div></div></div>";
+                                        content += "</div></div></div></div>";*/
                                     }
                                     content += "</div>";
                                 }
@@ -98,18 +114,20 @@
                                     content = "(Keine Daten vorhanden)";
                                 }
                                 return content;
-                            }
+                            },
+                            responsivePriority: 2
                         },
                         {
                             name: "options",
                             data: function(row, type, set, meta) {
-                                let buttons = "";
+                                let buttons = "<div class='d-flex' style='gap: 5px' id='plantOptionsCellContainer--" + row["id"] + "'>";
                                 if (plantIDs.hasOwnProperty(row["id"])) {
-                                    buttons = "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editPlant(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px' onclick='destroyPlant(this, " + row["id"] + ")' data-confirmation-sender='destroyPlant'><i class='fas fa-times'></i></button>";
+                                    buttons += "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editPlant(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger' style='width: 32px' onclick='destroyPlant(this, " + row["id"] + ")' data-confirmation-sender='destroyPlant'><i class='fas fa-times'></i></button>";
                                 }
                                 else {
-                                    buttons = "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1 disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
+                                    buttons += "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
                                 }
+                                buttons += "</div>";
                                 return buttons;
                             }
                         },
@@ -119,7 +137,8 @@
                             data: null,
                             orderable: false,
                             defaultContent: "",
-                            className: "TintengefrorenerTiefenfrisch"
+                            className: "TintengefrorenerTiefenfrisch",
+                            responsivePriority: 1
                         }
                     ],
                     ajax: {
@@ -226,12 +245,12 @@
                         {
                             name: "options",
                             data: function(row, type, set, meta) {
-                                let buttons = "";
+                                let buttons = "<div class='d-flex' style='gap: 5px' id='userAccountsOptionsCellContainer--" + row["id"] + "'>";
                                 if (plantIDs.hasOwnProperty(row["id"])) {
-                                    buttons = "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editUserAccount(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px' onclick='removeUserAccount(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
+                                    buttons = "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editUserAccount(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger' style='width: 32px' onclick='removeUserAccount(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
                                 }
                                 else {
-                                    buttons = "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1 disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
+                                    buttons = "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
                                 }
                                 return buttons;
                             }
@@ -289,13 +308,14 @@
                         {
                             name: "options",
                             data: function(row, type, set, meta) {
-                                let buttons = "";
+                                let buttons = "<div class='d-flex' style='gap: 5px' id='plantProgramsOptionsCellContainer--" + row["id"] + "'>";
                                 if (plantIDs.hasOwnProperty(row["id"])) {
-                                    buttons = "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editPlantProgram(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px' onclick='removePlantProgram(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
+                                    buttons += "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editPlantProgram(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger' style='width: 32px' onclick='removePlantProgram(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
                                 }
                                 else {
-                                    buttons = "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1 disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
+                                    buttons += "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
                                 }
+                                buttons += "</div>"
                                 return buttons;
                             }
                         },
@@ -402,13 +422,14 @@
                         {
                             name: "options",
                             data: function(row, type, set, meta) {
-                                let buttons = "";
+                                let buttons = "<div class='d-flex' style='gap: 5px' id='eventsOptionsCellContainer--" + row["id"] + "'>";
                                 if (plantIDs.hasOwnProperty(row["id"])) {
-                                    buttons = "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editEvent" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px' onclick='removeEvent(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
+                                    buttons += "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editEvent" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger' style='width: 32px' onclick='removeEvent(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
                                 }
                                 else {
-                                    buttons = "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1 disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
+                                    buttons += "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
                                 }
+                                buttons += "</div>";
                                 return buttons;
                             }
                         },
@@ -852,7 +873,7 @@
                         warning: "fas fa-exclamation-triangle",
                         success: "fas fa-check-circle"
                     };
-                    if (!["primary", "success", "danger", "warning", "primary"].includes(type)) {
+                    if (!["primary", "success", "danger", "warning"].includes(type)) {
                         type = "primary";
                     }
                     return "<div class='alert-dismissible alert alert-" + type + "' role='alert'><i class='" + icons[type] + "' style='font-size: x-large; vertical-align: sub'></i> " + message + "<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Schließen'></button></div>";
@@ -1017,9 +1038,36 @@
                 });
             });
             $(window).on("resize", function() {
+                let width = window["visualViewport"]["width"];
+                /*
+                if (width >= 1 && width <= 600) {
+                    let dataTables = Object.getOwnPropertyNames(adminDataTables);
+                    for (dataTable of dataTables) {
+                        adminDataTables[dataTable].column(0).visible(false);
+                        adminDataTables[dataTable].tables().header().to$().addClass("d-none");
+                    }
+                    console.log("max 600", width);
+                }
+                else if (width >= 600 && width <= 768) {
+                    console.log("max 768", width);
+                }
+                else if (width >= 768 && width <= 992) {
+                    let dataTables = Object.getOwnPropertyNames(adminDataTables);
+                    for (dataTable of dataTables) {
+                        adminDataTables[dataTable].column(0).visible(true);
+                        adminDataTables[dataTable].tables().header().to$().removeClass("d-none");
+                    }
+                    console.log("max 992", width);
+                }
+                else if (width >= 992 && width <= 1200) {
+                    console.log("max 1200", width);
+                }
+                else if (width >= 1200) {
+                    console.log("1200+", width);
+                }
                 if ($("#plantsAdminCreationContainer").hasClass("active")) {
                     $("#newPlantContainer").css("max-height", $("#newPlantNavigation").outerHeight(true) + "px");
-                }
+                }*/
             });
             $(window).on("modalConfirmation", function(element) {
                 // pflanzen, benutzer, programme löschen...
@@ -1256,7 +1304,7 @@
                         delete options["ajax"]["data"]["category"];
                     }
                     $(this).attr("data-old", value);
-                    $("#plantProgramsAdminTable").DataTable(options);
+                    adminDataTables["plantPrograms"] = $("#plantProgramsAdminTable").DataTable(options);
                 });
                 $("#logsAdminCategorySelection").change(function() {
                     let options = {};
@@ -1282,7 +1330,7 @@
                         delete options["ajax"]["data"]["category"];
                     }
                     $(this).attr("data-old", value);
-                    $("#logsAdminTable").DataTable(options);
+                    adminDataTables["logs"] = $("#logsAdminTable").DataTable(options);
                 });
                 /*
                 $("#plantsAdminPlantSelection").change(function() {
@@ -1319,7 +1367,7 @@
                         options["ajax"]["dataSrc"] = function(response) {
                             return response["data"];
                         };
-                        $("#userAccountsAdminTable").DataTable(options);
+                        adminDataTables["userAccounts"] = $("#userAccountsAdminTable").DataTable(options);
                     }
                     else {
                         $("#userAccountsAdminTable").DataTable().ajax.reload();
@@ -1343,7 +1391,7 @@
                         for (plant of plants) {
                             $("#plantProgramsAdminPlantSelection").append("<option value='" + plant + "'>" + plantIDs[plant] + "</option>");
                         }
-                        $("#plantProgramsAdminTable").DataTable(options);
+                        adminDataTables["plantPrograms"] = $("#plantProgramsAdminTable").DataTable(options);
                     }
                     else {
                         $("#plantProgramsAdminTable").DataTable().ajax.reload();
@@ -1356,7 +1404,7 @@
                         options["ajax"]["dataSrc"] = function(response) {
                             return response["data"];
                         };
-                        $("#pumpsAdminTable").DataTable(options);
+                        adminDataTables["pumps"] = $("#pumpsAdminTable").DataTable(options);
                     }
                     else {
                         $("#pumpsTable").DataTable().ajax.reload();
@@ -1376,7 +1424,7 @@
                             startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + group + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success' onclick='createNewEvent(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
                         };
                         options["orderFixed"] = [0, "asc"];
-                        $("#eventsAdminTable").DataTable(options);
+                        adminDataTables["events"] = $("#eventsAdminTable").DataTable(options);
                     }
                     else {
                         $("#eventAdminsTable").DataTable().ajax.reload();
@@ -1396,7 +1444,7 @@
                             startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + dataTablesRowGroupStrings["logs"][group] + "</td>"); }
                         };
                         options["orderFixed"] = [0, "asc"];
-                        $("#logsAdminTable").DataTable(options);
+                        adminDataTables["logs"] = $("#logsAdminTable").DataTable(options);
                     }
                     else {
                         $("#logsAdminTable").DataTable().ajax.reload();
@@ -1414,7 +1462,7 @@
                                 }
                                 return response["data"];
                             };
-                            $("#plantsAdminTable").DataTable(options);
+                            adminDataTables["plants"] = $("#plantsAdminTable").DataTable(options);
                         }
                         else {
                             $("#plantsAdminTable").DataTable().ajax.reload();
@@ -3047,14 +3095,14 @@
                 box-shadow: 0 0 5px 1px #0000008a
             }
             @media only screen and (max-width: 600px) {
+                .alert > i {
+                    vertical-align: baseline;
+                }
                 main {
                     padding: 0 2%
                 }
                 .tab-content {
                     padding: 1rem !important;
-                }
-                table.dataTable {
-                    max-width: 300px !important;
                 }
                 #overview-panel {
                     grid-auto-rows: minmax(300px, auto);
@@ -3066,9 +3114,6 @@
                 }
                 #overPlantActionContainer > * {
                     margin: 0.5rem 0 0 0 !important;
-                }
-                table.dataTable thead .sorting::after {
-                    background-image: unset;
                 }
                 table.dataTable thead > tr > th {
                     font-weight: lighter;
@@ -3086,13 +3131,15 @@
                 #newPlantNavigation {
                     width: 100%
                 }
-                #newPlantContainer * {
+                #newPlantContainer *:not(input) {
                     padding-left: 0;
                     margin-left: 0;
                 }
                 #newPlantContainer {
                     width: 100%;
-                    margin-top: 1rem
+                    margin-top: 1rem;
+                    border: 1px solid var(--bs-gray-300, #dee2e6);
+                    border-radius: 4px;
                 }
                 #plantsAdminCreationContainer > div:first-of-type {
                     flex-direction: column;
@@ -3102,6 +3149,30 @@
                 }
                 #plantsAdminTableResponsive, #logsAdminTableResponsive, #plantProgramsAdminTableResponsive, #pumpsAdminTableResponsive, #userAccountsAdminTableResponsive, #eventsAdminTableResponsive, #logsAdminTableResponsive {
                     overflow-x: scroll;
+                }
+                /*
+                table.dataTable > tbody > tr:first-of-type > td {
+                    border-top: 1px solid var(--bs-gray-300, #dee2e6) !important;
+                }*/
+                table.dataTable > tbody > tr:first-of-type > td:first-of-type {
+                    border-top-left-radius: 1px;
+                    border-top-right-radius: 1px;
+                    overflow: hidden;
+                }
+                div[id$="OptionsCellContainer-"] {
+                    flex-direction: column;
+                }
+                .accordion-flush > .accordion-item > .accordion-collapse > .accordion-body > div.row > div.col-md-8:not(:first-of-type, :last-of-type) {
+                    margin-top: 0.5rem;
+                }
+                .accordion-flush > .accordion-item > .accordion-collapse > .accordion-body > div.row > div.col-md-4 {
+                    margin: auto auto 0 auto
+                }
+                *:not(h1, h2, h3, h4, h5, h6) {
+                    font-size: 14px !important;
+                }
+                #editPlantHeader {
+                    margin-bottom: 0 !important;
                 }
             }
             /* Small devices (portrait tablets and large phones, 600px and up) */
