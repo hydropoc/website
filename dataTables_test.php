@@ -48,53 +48,53 @@
                 "description" => "Erster",
                 "properties" => [
                     "co2" => [
-                        "upperControlLimit" => 150, 
-                        "lowerControlLimit" => 10, 
-                        "upperWarningLimit" => 140,
-                        "lowerWarningLimit" => 20,
-                        "setpoint" => 70
+                        "upperControlLimit" => 1000, 
+                        "lowerControlLimit" => 2000, 
+                        "upperWarningLimit" => 3000,
+                        "lowerWarningLimit" => 4000,
+                        "setpoint" => 1111
                     ],
                     "salinity" => [
-                        "upperControlLimit" => 150, 
-                        "lowerControlLimit" => 10, 
-                        "upperWarningLimit" => 140,
-                        "lowerWarningLimit" => 20,
-                        "setpoint" => 70
+                        "upperControlLimit" => 1001, 
+                        "lowerControlLimit" => 2002, 
+                        "upperWarningLimit" => 3003,
+                        "lowerWarningLimit" => 4004,
+                        "setpoint" => 2222
                     ],
                     "temperature" => [
-                        "upperControlLimit" => 150, 
-                        "lowerControlLimit" => 10, 
-                        "upperWarningLimit" => 140,
-                        "lowerWarningLimit" => 20,
-                        "setpoint" => 70
+                        "upperControlLimit" => 1010, 
+                        "lowerControlLimit" => 2020, 
+                        "upperWarningLimit" => 3030,
+                        "lowerWarningLimit" => 4040,
+                        "setpoint" => 3333
                     ],
                     "ph" => [
-                        "upperControlLimit" => 150, 
-                        "lowerControlLimit" => 10, 
-                        "upperWarningLimit" => 140,
-                        "lowerWarningLimit" => 20,
-                        "setpoint" => 70
+                        "upperControlLimit" => 1100, 
+                        "lowerControlLimit" => 2200, 
+                        "upperWarningLimit" => 3300,
+                        "lowerWarningLimit" => 4400,
+                        "setpoint" => 4444
                     ],
                     "waterlevel" => [
-                        "upperControlLimit" => 150, 
-                        "lowerControlLimit" => 10, 
-                        "upperWarningLimit" => 140,
-                        "lowerWarningLimit" => 20,
-                        "setpoint" => 70
+                        "upperControlLimit" => 1050, 
+                        "lowerControlLimit" => 2060, 
+                        "upperWarningLimit" => 2070,
+                        "lowerWarningLimit" => 2080,
+                        "setpoint" => 5555
                     ],
                     "humidity" => [
-                        "upperControlLimit" => 150, 
-                        "lowerControlLimit" => 10, 
-                        "upperWarningLimit" => 140,
-                        "lowerWarningLimit" => 20,
-                        "setpoint" => 70
+                        "upperControlLimit" => 1150, 
+                        "lowerControlLimit" => 2160, 
+                        "upperWarningLimit" => 3160,
+                        "lowerWarningLimit" => 4160,
+                        "setpoint" => 6666
                     ],
                     "lighting" => [
-                        "upperControlLimit" => 150, 
-                        "lowerControlLimit" => 10, 
-                        "upperWarningLimit" => 140,
-                        "lowerWarningLimit" => 20,
-                        "setpoint" => 70
+                        "upperControlLimit" => 1337, 
+                        "lowerControlLimit" => 1338, 
+                        "upperWarningLimit" => 1339,
+                        "lowerWarningLimit" => 1340,
+                        "setpoint" => 7777
                     ]
                 ]
             ];
