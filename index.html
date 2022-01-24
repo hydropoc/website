@@ -307,11 +307,12 @@
                             data: function(row, type, set, meta) {
                                 let buttons = "<div class='d-flex formContainer' style='gap: 5px'>";
                                 if (plantIDs.hasOwnProperty(row["id"])) {
-                                    buttons = "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editUserAccount(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger' style='width: 32px' onclick='removeUserAccount(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
+                                    buttons += "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editUserAccount(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger' style='width: 32px' onclick='removeUserAccount(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
                                 }
                                 else {
-                                    buttons = "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
+                                    buttons += "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
                                 }
+                                buttons += "</div>";
                                 return buttons;
                             }
                         },
@@ -1560,7 +1561,7 @@
                             dataSrc: "category",
                             className: "bg-gray-200",
                             endRender: null,
-                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + group + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success' onclick='createNewEvent(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
+                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='2' class='align-middle' style='color: #282828'>" + group + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success' onclick='createNewEvent(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
                         };
                         options["orderFixed"] = [0, "asc"];
                         adminDataTables["events"] = $("#eventsAdminTable").DataTable(options);
@@ -3232,8 +3233,177 @@
             ul.nav-pills .nav-link.disabled {
                 background-color: var(--bs-gray-100, #f8f9fa) !important;
             }
-            table.dataTable.dtr-inline.collapsed>tbody>tr>td.child,table.dataTable.dtr-inline.collapsed>tbody>tr>th.child,table.dataTable.dtr-inline.collapsed>tbody>tr>td.dataTables_empty{cursor:default !important}table.dataTable.dtr-inline.collapsed>tbody>tr>td.child:before,table.dataTable.dtr-inline.collapsed>tbody>tr>th.child:before,table.dataTable.dtr-inline.collapsed>tbody>tr>td.dataTables_empty:before{display:none !important}table.dataTable.dtr-inline.collapsed>tbody>tr>td.dtr-control,table.dataTable.dtr-inline.collapsed>tbody>tr>th.dtr-control{position:relative;padding-left:30px;cursor:pointer}table.dataTable.dtr-inline.collapsed>tbody>tr>td.dtr-control:before,table.dataTable.dtr-inline.collapsed>tbody>tr>th.dtr-control:before{top:50%;left:5px;height:1em;width:1em;margin-top:-9px;display:block;position:absolute;color:white;border:.15em solid white;border-radius:1em;box-shadow:0 0 .2em #444;box-sizing:content-box;text-align:center;text-indent:0 !important;font-family:"Courier New",Courier,monospace;line-height:1em;content:"+";background-color:#0d6efd}table.dataTable.dtr-inline.collapsed>tbody>tr.parent>td.dtr-control:before,table.dataTable.dtr-inline.collapsed>tbody>tr.parent>th.dtr-control:before{content:"-";background-color:#d33333}table.dataTable.dtr-inline.collapsed.compact>tbody>tr>td.dtr-control,table.dataTable.dtr-inline.collapsed.compact>tbody>tr>th.dtr-control{padding-left:27px}table.dataTable.dtr-inline.collapsed.compact>tbody>tr>td.dtr-control:before,table.dataTable.dtr-inline.collapsed.compact>tbody>tr>th.dtr-control:before{left:4px;height:14px;width:14px;border-radius:14px;line-height:14px;text-indent:3px}table.dataTable.dtr-column>tbody>tr>td.dtr-control,table.dataTable.dtr-column>tbody>tr>th.dtr-control,table.dataTable.dtr-column>tbody>tr>td.control,table.dataTable.dtr-column>tbody>tr>th.control{position:relative;cursor:pointer}table.dataTable.dtr-column>tbody>tr>td.dtr-control:before,table.dataTable.dtr-column>tbody>tr>th.dtr-control:before,table.dataTable.dtr-column>tbody>tr>td.control:before,table.dataTable.dtr-column>tbody>tr>th.control:before{top:50%;left:50%;height:.8em;width:.8em;margin-top:-0.5em;margin-left:-0.5em;display:block;position:absolute;color:white;border:.15em solid white;border-radius:1em;box-shadow:0 0 .2em #444;box-sizing:content-box;text-align:center;text-indent:0 !important;font-family:"Courier New",Courier,monospace;line-height:1em;content:"+";background-color:#0d6efd}table.dataTable.dtr-column>tbody>tr.parent td.dtr-control:before,table.dataTable.dtr-column>tbody>tr.parent th.dtr-control:before,table.dataTable.dtr-column>tbody>tr.parent td.control:before,table.dataTable.dtr-column>tbody>tr.parent th.control:before{content:"-";background-color:#d33333}table.dataTable>tbody>tr.child{padding:.5em 1em}table.dataTable>tbody>tr.child:hover{background:transparent !important}table.dataTable>tbody>tr.child ul.dtr-details{display:inline-block;list-style-type:none;margin:0;padding:0}table.dataTable>tbody>tr.child ul.dtr-details>li{border-bottom:1px solid #efefef;padding:.5em 0}table.dataTable>tbody>tr.child ul.dtr-details>li:first-child{padding-top:0}table.dataTable>tbody>tr.child ul.dtr-details>li:last-child{border-bottom:none}table.dataTable>tbody>tr.child span.dtr-title{display:inline-block;min-width:75px;font-weight:bold}div.dtr-modal{position:fixed;box-sizing:border-box;top:0;left:0;height:100%;width:100%;z-index:100;padding:10em 1em}div.dtr-modal div.dtr-modal-display{position:absolute;top:0;left:0;bottom:0;right:0;width:50%;height:50%;overflow:auto;margin:auto;z-index:102;overflow:auto;background-color:#f5f5f7;border:1px solid black;border-radius:.5em;box-shadow:0 12px 30px rgba(0, 0, 0, 0.6)}div.dtr-modal div.dtr-modal-content{position:relative;padding:1em}div.dtr-modal div.dtr-modal-close{position:absolute;top:6px;right:6px;width:22px;height:22px;border:1px solid #eaeaea;background-color:#f9f9f9;text-align:center;border-radius:3px;cursor:pointer;z-index:12}div.dtr-modal div.dtr-modal-close:hover{background-color:#eaeaea}div.dtr-modal div.dtr-modal-background{position:fixed;top:0;left:0;right:0;bottom:0;z-index:101;background:rgba(0, 0, 0, 0.6)}@media screen and (max-width: 767px){div.dtr-modal div.dtr-modal-display{width:95%}}div.dtr-bs-modal table.table tr:first-child td{border-top:none}
-
+            table.dataTable.dtr-inline.collapsed > tbody > tr > td.child, table.dataTable.dtr-inline.collapsed > tbody > tr > th.child, table.dataTable.dtr-inline.collapsed > tbody > tr > td.dataTables_empty {
+                cursor: default !important
+            }
+            table.dataTable.dtr-inline.collapsed > tbody > tr > td.child:before, table.dataTable.dtr-inline.collapsed > tbody > tr > th.child:before, table.dataTable.dtr-inline.collapsed > tbody > tr > td.dataTables_empty:before{
+                display: none !important
+            }
+            table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control, table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control {
+                position: relative;
+                padding-left: 30px;
+                cursor: pointer
+            }
+            table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control:before, table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
+                top: 50%;
+                left: 5px;
+                height: 1em;
+                width: 1em;
+                margin-top: -9px;
+                display: block;
+                position: absolute;
+                color: white;
+                border: 0.15em solid white;
+                border-radius: 1em;
+                box-shadow: 0 0 0.2em #444;
+                box-sizing: content-box;
+                text-align: center;
+                text-indent: 0 !important;
+                font-family: "Courier New", Courier, monospace;
+                line-height: 1em;
+                content: "i";
+                background-color: #0d6efd;
+                font-weight: bold;
+            }
+            table.dataTable.dtr-inline.collapsed > tbody > tr.parent > td.dtr-control:before, table.dataTable.dtr-inline.collapsed > tbody > tr.parent > th.dtr-control:before {
+                content: "-";
+                background-color: #d33333
+            }
+            table.dataTable.dtr-inline.collapsed.compact > tbody > tr > td.dtr-control, table.dataTable.dtr-inline.collapsed.compact > tbody > tr > th.dtr-control {
+                padding-left: 27px
+            }
+            table.dataTable.dtr-inline.collapsed.compact > tbody > tr > td.dtr-control:before, table.dataTable.dtr-inline.collapsed.compact > tbody > tr > th.dtr-control:before {
+                left: 4px;
+                height: 14px;
+                width: 14px;
+                border-radius: 14px;
+                line-height: 14px;
+                text-indent: 3px
+            }
+            table.dataTable.dtr-column > tbody > tr > td.dtr-control, table.dataTable.dtr-column > tbody > tr > th.dtr-control, table.dataTable.dtr-column > tbody > tr > td.control,
+            table.dataTable.dtr-column > tbody > tr > th.control{
+                position: relative;
+                cursor: pointer
+            }
+            table.dataTable.dtr-column > tbody > tr > td.dtr-control:before, table.dataTable.dtr-column > tbody > tr > th.dtr-control:before, table.dataTable.dtr-column > tbody > tr > td.control:before,
+            table.dataTable.dtr-column > tbody > tr > th.control:before{
+                top: 50%;
+                left: 50%;
+                height: 0.8em;
+                width: 0.8em;
+                margin-top: -0.5em;
+                margin-left: -0.5em;
+                display: block;
+                position: absolute;
+                color: white;
+                border: 0.15em solid white;
+                border-radius: 1em;
+                box-shadow: 0 0 0.2em #444;
+                box-sizing: content-box;
+                text-align: center;
+                text-indent: 0 !important;
+                font-family: "Courier New", Courier, monospace;
+                line-height: 1em;
+                content: "i";
+                background-color: #0d6efd;
+                font-weight: bold
+            }
+            table.dataTable.dtr-column > tbody > tr.parent td.dtr-control:before, table.dataTable.dtr-column > tbody > tr.parent th.dtr-control:before, table.dataTable.dtr-column > tbody > tr.parent td.control:before,
+            table.dataTable.dtr-column > tbody > tr.parent th.control:before{
+                content: "-";
+                background-color: #d33333
+            }
+            table.dataTable > tbody > tr.child {
+                padding: 0.5em 1em
+            }
+            table.dataTable > tbody > tr.child:hover {
+                background: transparent !important
+            }
+            table.dataTable > tbody > tr.child ul.dtr-details{
+                display: inline-block;
+                list-style-type: none;
+                margin: 0;
+                padding: 0
+            }
+            table.dataTable > tbody > tr.child ul.dtr-details > li {
+                border-bottom: 1px solid #efefef;
+                padding: 0.5em 0
+            }
+            table.dataTable > tbody > tr.child ul.dtr-details > li:first-child {
+                padding-top: 0
+            }
+            table.dataTable > tbody > tr.child ul.dtr-details > li:last-child {
+                border-bottom: none
+            }
+            table.dataTable > tbody > tr.child span.dtr-title {
+                display: inline-block;
+                min-width: 75px;
+                font-weight: bold
+            }
+            div.dtr-modal {
+                position: fixed;
+                box-sizing: border-box;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 100%;
+                z-index: 100;
+                padding: 10em 1em
+            }
+            div.dtr-modal div.dtr-modal-display {
+                position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+                width: 50%;
+                height: 50%;
+                overflow: auto;
+                margin: auto;
+                z-index: 102;
+                overflow: auto;
+                background-color: #f5f5f7;
+                border: 1px solid black;
+                border-radius: 0.5em;
+                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6)
+            }
+            div.dtr-modal div.dtr-modal-content {
+                position: relative;
+                padding: 1em
+            }
+            div.dtr-modal div.dtr-modal-close{
+                position: absolute;
+                top: 6px;
+                right: 6px;
+                width: 22px;
+                height: 22px;
+                border: 1px solid #eaeaea;
+                background-color: #f9f9f9;
+                text-align: center;
+                border-radius: 3px;
+                cursor: pointer;
+                z-index: 12
+            }
+            div.dtr-modal div.dtr-modal-close:hover{
+                background-color: #eaeaea
+            }
+            div.dtr-modal div.dtr-modal-background{
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 101;
+                background: rgba(0, 0, 0, 0.6)
+            }
+            @media screen and (max-width: 767px) {
+                div.dtr-modal div.dtr-modal-display {
+                    width: 95%
+                }
+            }
+            div.dtr-bs-modal table.table tr:first-child td {
+                border-top: none
+            }
             @media only screen and (max-width: 600px) {
                 .alert > i {
                     vertical-align: baseline;
@@ -3287,14 +3457,9 @@
                 #plantsAdminCreationContainer > div:first-of-type > * {
                     margin: 5px 0 0 0 !important;
                 }
-                /*
-                #plantsAdminTableResponsive, #logsAdminTableResponsive, #plantProgramsAdminTableResponsive, #pumpsAdminTableResponsive, #userAccountsAdminTableResponsive, #eventsAdminTableResponsive, #logsAdminTableResponsive {
-                    overflow-x: scroll;
-                }*/
-                /*
-                table.dataTable > tbody > tr:first-of-type > td {
-                    border-top: 1px solid var(--bs-gray-300, #dee2e6) !important;
-                }*/
+                td.dtr-control {
+                    vertical-align: middle;
+                }
                 table.dataTable > tbody > tr:first-of-type > td:first-of-type {
                     border-top-left-radius: 1px;
                     border-top-right-radius: 1px;
@@ -3779,7 +3944,7 @@
                                         <div class="card-body">
                                             <div class="d-flex formContainer">
                                                 <label for="plantProgramsAdminPlantSelection">Pflanze:</label>
-                                                <select class="form-select ms-1 w-auto d-inline-block" id="plantProgramsAdminPlantSelection" data-old="0">
+                                                <select class="form-select w-auto d-inline-block" id="plantProgramsAdminPlantSelection" data-old="0">
                                                     <option value="0">Alle</option>
                                                 </select>
                                             </div>
@@ -3899,12 +4064,14 @@
                                     </div>
                                     <div id="collapse-events-actions" class="collapse hide" data-bs-parent="#events-accordion">
                                         <div class="card-body">
-                                            <label for="eventsAdminCategorySelection">Kategorie:</label>
-                                            <select class="form-select ms-1 w-auto d-inline-block" id="eventsAdminCategorySelection" data-old="0">
-                                                <option value="0">Alles</option>
-                                                <option value="1">Pflanzen</option>
-                                                <option value="2">Pumpen</option>
-                                            </select>
+                                            <div class="d-flex formContainer">
+                                                <label for="eventsAdminCategorySelection">Kategorie:</label>
+                                                <select class="form-select w-auto d-inline-block" id="eventsAdminCategorySelection" data-old="0">
+                                                    <option value="0">Alles</option>
+                                                    <option value="1">Pflanzen</option>
+                                                    <option value="2">Pumpen</option>
+                                                </select>
+                                            </div>
                                             <button type="button" class="ms-1 btn btn-primary align-top"><i class="fas fa-sync"></i></button>
                                             <div class="mt-3 pt-1" id="eventsAdminTableResponsive">
                                                 <table class="table table-sm w-100" id="eventsAdminTable">
