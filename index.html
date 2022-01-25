@@ -443,7 +443,7 @@
                         console.log(a,b);
                         $("#plantProgramsAdminTable_wrapper .dataTables_scrollBody").css("height", a + b + "px");
                         if (!settings.hasOwnProperty("rowGroup") && $("#createNewPlantProgram(Button").length == 0) {
-                            $("#plantProgramsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3' style='height: 40px'><button type='button' class='btn btn-success' onclick='createNewPlantProgram(()' id='createNewPlantProgram(Button'><i class='fas fa-asterisk'></i> Neu...</button></div>");
+                            $("#plantProgramsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3' style='height: 40px'><button type='button' class='btn btn-success' onclick='createNewPlantProgram()' id='createNewPlantProgramButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
                         }
                     }
                 },
@@ -1524,14 +1524,27 @@
                             dataSrc: "plantID",
                             className: "bg-gray-200",
                             endRender: null,
-                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='2' class='align-middle' style='color: #282828'>" + plantIDs[group] + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success' onclick='createNewPlantProgram((" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
+                            startRender: function(rows, group) { return $("<tr>").append("<td colspan='2' class='align-middle' style='color: #282828'>" + plantIDs[group] + "</td><td colspan='2' class='fritz'><button class='btn btn-sm btn-success' onclick='createNewPlantProgram(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>"); }
                         };
                         options["orderFixed"] = [0, "asc"];
                         let plants = Object.getOwnPropertyNames(plantIDs);
                         for (plant of plants) {
                             $("#plantProgramsAdminPlantSelection").append("<option value='" + plant + "'>" + plantIDs[plant] + "</option>");
                         }
-                        adminDataTables["plantPrograms"] = $("#plantProgramsAdminTable").DataTable(options);
+                        adminDataTables["plantPrograms"] = $("#plantProgramsAdminTable").DataTable(options).on("responsive-resize", function(e, datatable, columns) {
+                            let hiddenColumns = columns.filter(function(column) {
+                                return column === false;
+                            });
+                            let totalColumns = $("#plantProgramsAdminTable > thead > tr > th").length;
+                            // colspan ändern
+                            if (hiddenColumns.length >= 1) {
+                                $("#plantProgramsAdminTable > tbody > tr.dtrg-start > td:first-of-type").attr("colspan", hiddenColumns.length);
+                            }
+                            else {
+                                $("#plantProgramsAdminTable > tbody > tr.dtrg-start > td:first-of-type").attr("colspan", totalColumns -2);
+                            }
+                            $("#plantProgramsAdminTable").columns.adjust().draw();
+                        });
                     }
                     else {
                         $("#plantProgramsAdminTable").DataTable().ajax.reload();
@@ -2640,6 +2653,20 @@
                         $("#historyTimespan").removeAttr("disabled");
                     });
                 });
+                $("#historyGalleryTimespanSelect").change(function() {
+                    let that = this;
+                    $("#historyGallery").find(".alert").remove();
+                    $(this).attr("disabled", "disabled").after("<span class='spinner-border ms-2 text-primary kreiselchen' style='flex: 0 0 auto' data-processing='true'></span>");
+                    $.post("lol", {
+                        history: $(this).val()
+                    }).done(function(response) {
+                    }).fail(function(response) {
+                        $("#historyGallery").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
+                    }).always(function() {
+                        $(that).removeAttr("disabled");
+                        $("#historyGallery").find("[data-processing='true']").remove();
+                    });
+                });
                 // Neue Daten vom Server laden
                 setInterval(function() {
                     // "current" gilt für das Diagramm der letzten Minute, "history" ist für das Verlaufsdiagramm
@@ -2841,7 +2868,7 @@
             [data-bs-toggle="collapse"] > i {
                 transition: transform 250ms;
             }
-            #overview-panel {
+            #overviewPanel {
                 display: grid;
                 /* Höhe */
                 grid-auto-rows: minmax(350px, auto);
@@ -2850,6 +2877,26 @@
                 grid-gap: 10px;
                 align-content: flex-start;
                 justify-content: space-between
+            }
+            #historyGalleryPanel {
+                display: grid;
+                /* Höhe */
+                grid-auto-rows: minmax(200px, auto);
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                /* Breite */ 
+                grid-gap: 10px;
+                align-content: flex-start;
+                justify-content: space-between
+            }
+            #historyGalleryPanel > img {
+                border: 2px solid var(--bs-gray-300, #dee2e6);
+                max-width: 200px;
+                max-height: 200px;
+                transition: border 200ms ease-in-out 0s;
+            }
+            #historyGalleryPanel > img:hover {
+                cursor: pointer;
+                border: 2px solid var(--bs-gray-500, #adb5bd);
             }
             section.lol {
                 border: 2px solid var(--bs-gray-300, #dee2e6)
@@ -2904,9 +2951,9 @@
                 content: "";
                 position: absolute;
                 width: 100%;
-                height: 20px;
+                height: 15px;
                 left: 0;
-                bottom: -10px;
+                bottom: -12px;
                 z-index: 10;
                 background-color: #fbfbfb;
                 display: block
@@ -3414,7 +3461,7 @@
                 .tab-content {
                     padding: 1rem !important;
                 }
-                #overview-panel {
+                #overviewPanel {
                     grid-auto-rows: minmax(300px, auto);
                     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))
                 }
@@ -3612,6 +3659,9 @@
                           <a class="nav-link active" data-bs-toggle="tab" href="#overview">Übersicht</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#historyGallery">Bildergalerie</a>
+                        </li>
+                        <li class="nav-item">
                           <a class="nav-link" data-bs-toggle="tab" href="#administration">Administration</a>
                           <!-- class="nav-link disabled" -->
                         </li>
@@ -3629,7 +3679,7 @@
                                 <button type="button" class="btn btn-success ms-1 align-baseline"><i class="fas fa-play"></i></button>
                                 <!--<button type="button" class="btn btn-warning ms-2"><i class="fas fa-pause"></i></button>-->
                             </div>
-                            <div id="overview-panel" class="mt-3">
+                            <div id="overviewPanel" class="mt-3">
                                 <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-co2">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Co²-Gehalt</span>
@@ -4131,6 +4181,20 @@
                                     </div>
                                 </div>
                             </section>
+                        </div>
+                        <div class="tab-pane fade" id="historyGallery">
+                            <div class="formContainer">
+                                <label for="historyGalleryTimespanSelect">Zeitraum:</label>
+                                <select id="historyGalleryTimespanSelect">
+                                    <option value="0">Gesamt</option>
+                                    <option value="1">00:00-06:00 Uhr</option>
+                                    <option value="2">06:00-12:00 Uhr</option>
+                                </select>
+                                <div id="historyGalleryPanel" class="mt-3">
+                                    <!-- mit js füllen -->
+                                    <img src="img/test1.gif" class="rounded-3">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
