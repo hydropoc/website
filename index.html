@@ -3492,6 +3492,13 @@
                     grid-auto-rows: minmax(300px, auto);
                     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))
                 }
+                #historyGalleryPanel {
+                    grid-auto-rows: minmax(300px, auto);
+                    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                }
+                .historyGalleryItem > div:first-of-type > div:first-of-type {
+                    max-width: 300px;
+                }
                 #overPlantActionContainer {
                     flex-direction: column;
                     align-items: stretch !important;
@@ -4225,6 +4232,7 @@
                                         </div>
                                         <article><span class="text-secondary">verdammt</span><br>01.01.1970, 11:11:11 Uhr</article>
                                     </div>
+                                    <!--
                                     <div class="d-flex flex-column rounded-3 p-1" onclick="showHistoryGalleryImage('test2.jpg')">
                                         <div style="background: url('img/test2.jpg') no-repeat left top/100% 100%; flex: 0 1 100%" class="rounded-3"></div>
                                         <article><span class="text-secondary">verdammt</span><br>01.01.1970, 11:11:11 Uhr</article>
@@ -4233,6 +4241,15 @@
                                         <div style="background: url('img/test3.jpg') no-repeat left top/100% 100%; flex: 0 1 100%" class="rounded-3"></div>
                                         <article><span class="text-secondary">verdammt</span><br>01.01.1970, 11:11:11 Uhr</article>
                                     </div>
+                                -->
+                                <div class="d-flex flex-column rounded-3 p-1" onclick="showHistoryGalleryImage('test2.jpg')">
+                                    <div style="background: url('img/test2.jpg') no-repeat left top/100% 100%; flex: 0 1 100%" class="rounded-3"></div>
+                                    <article><span class="text-secondary">verdammt</span><br>01.01.1970, 11:11:11 Uhr</article>
+                                </div>
+                                <div class="d-flex flex-column rounded-3 p-1" onclick="showHistoryGalleryImage('test3.jpg')">
+                                    <div style="background: url('img/test3.jpg') no-repeat left top/100% 100%; flex: 0 1 100%" class="rounded-3"></div>
+                                    <article><span class="text-secondary">verdammt</span><br>01.01.1970, 11:11:11 Uhr</article>
+                                </div>
                                 </div>
                             </div>
                         </div>
