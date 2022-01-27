@@ -85,9 +85,9 @@
                                         content += "<div id='flush-collapsePlantsAdminTableModal" + property + "Property-" + rowIdx + "' class='accordion-collapse collapse' aria-labelledby='flushPlantsAdminTableModal" + property + "PropertyHeader-" + rowIdx + "' data-bs-parent='#accordionPlantsAdminTableModalProperties-" + rowIdx + "'>";
                                         content += "<div class='accordion-body p-2'><table class='table-sm w-100 table-borderless'><tbody><tr><td class='w-50 align-top'>Sollwert:</td><td class='w-50'>" + (plantProperties[index]["properties"][property].hasOwnProperty("setpoint") ? plantProperties[index]["properties"][property]["setpoint"] : "(Keine Daten vorhanden)") + "</td></tr>";
                                         content += "<tr><td class='align-top'>Obere Eingriffsgrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("upperControlLimit") ? plantProperties[index]["properties"][property]["upperControlLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "<tr><td class='align-top'>Untere Eingriffsgrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("lowerControlLimit") >= 0 ? plantProperties[index]["properties"][property]["lowerControlLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "<tr><td class='align-top'>Obere Warngrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("upperWarningLimit") >= 0 ? plantProperties[index]["properties"][property]["upperWarningLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "<tr><td class='align-top'>Untere Warngrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("lowerWarningLimit") >= 0 ? plantProperties[index]["properties"][property]["lowerWarningLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
+                                        content += "<tr><td class='align-top'>Untere Eingriffsgrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("lowerControlLimit") ? plantProperties[index]["properties"][property]["lowerControlLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
+                                        content += "<tr><td class='align-top'>Obere Warngrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("upperWarningLimit") ? plantProperties[index]["properties"][property]["upperWarningLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
+                                        content += "<tr><td class='align-top'>Untere Warngrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("lowerWarningLimit") ? plantProperties[index]["properties"][property]["lowerWarningLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
                                         content += "</tbody></table></div></div></div>";
                                     }
                                     content += "</div>";
@@ -255,29 +255,16 @@
                                 }
                             }),
                             renderer: function(api, rowIdx, columns) {
-                                /*
-                                let index = plantProperties.findIndex(key => key["id"] === api.cell(rowIdx, "id:name").data());
+                                let index = userAccounts.findIndex(key => key["id"] === api.cell(rowIdx, "id:name").data());
                                 let content = "";
                                 if (index >= 0) {
-                                    let properties = Object.getOwnPropertyNames(plantPropertyNames);
-                                    content += "<div class='accordion accordion-flush' id='accordionPlantsAdminTableModalProperties-" + rowIdx + "'>";
-                                    for (property of properties) {
-                                        content += "<div class='accordion-item'>";
-                                        content += "<h2 class='accordion-header' id='flushPlantsAdminTable" + property + "PropertyHeader-" + rowIdx + "'>";
-                                        content += "<button class='accordion-button collapsed p-2' type='button' data-bs-toggle='collapse' data-bs-target='#flush-collapsePlantsAdminTableModal" + property + "Property-" + rowIdx + "' aria-expanded='false' aria-controls='plantsAdminTableModal" + property + "Property-" + rowIdx + "'>";
-                                        content += plantPropertyNames[property] + "</button></h2>";
-                                        content += "<div id='flush-collapsePlantsAdminTableModal" + property + "Property-" + rowIdx + "' class='accordion-collapse collapse' aria-labelledby='flushPlantsAdminTableModal" + property + "PropertyHeader-" + rowIdx + "' data-bs-parent='#accordionPlantsAdminTableModalProperties-" + rowIdx + "'>";
-                                        content += "<div class='accordion-body p-2'><table class='table-sm w-100 table-borderless'><tbody><tr><td class='w-50 align-top'>Sollwert:</td><td class='w-50'>" + (plantProperties[index]["properties"][property].hasOwnProperty("setpoint") ? plantProperties[index]["properties"][property]["setpoint"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "<tr><td class='align-top'>Obere Eingriffsgrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("upperControlLimit") ? plantProperties[index]["properties"][property]["upperControlLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "<tr><td class='align-top'>Untere Eingriffsgrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("lowerControlLimit") >= 0 ? plantProperties[index]["properties"][property]["lowerControlLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "<tr><td class='align-top'>Obere Warngrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("upperWarningLimit") >= 0 ? plantProperties[index]["properties"][property]["upperWarningLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "<tr><td class='align-top'>Untere Warngrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("lowerWarningLimit") >= 0 ? plantProperties[index]["properties"][property]["lowerWarningLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "</tbody></table></div></div></div>";
-                                    }
-                                    content += "</div>";
+                                    content += "<table class='table-sm w-100 table-borderless'><tbody><tr><td class='w-50 align-top'>Benutzername:</td><td class='w-50'>" + (userAccounts[index].hasOwnProperty("username") ? userAccounts[index]["username"] : "(Keine Daten vorhanden)") + "</td></tr>";
+                                    content += "<tr><td class='w-50 align-top'>Erstellt:</td><td>" + (userAccounts[index].hasOwnProperty("creation") ? userAccounts[index]["creation"] : "(Keine Daten vorhanden)") + "</td></tr>";
                                 }
-                                return content;*/
-                                return "LOL"
+                                else {
+                                    content += Alert.create("warning", "(Keine Daten vorhanden)");
+                                }
+                                return content;
                             }
                         }
                     },
@@ -286,6 +273,7 @@
                             name: "displayname",
                             data: "displayname",
                             className: "dtr-control",
+                            responsivePriority: 2
                         },
                         {
                             // in uid/username unbenennen
@@ -358,29 +346,16 @@
                                 }
                             }),
                             renderer: function(api, rowIdx, columns) {
-                                /*
-                                let index = plantProperties.findIndex(key => key["id"] === api.cell(rowIdx, "id:name").data());
+                                let index = plantPrograms.findIndex(key => key["plantID"] === api.cell(rowIdx, "id:name").data());
                                 let content = "";
                                 if (index >= 0) {
-                                    let properties = Object.getOwnPropertyNames(plantPropertyNames);
-                                    content += "<div class='accordion accordion-flush' id='accordionPlantsAdminTableModalProperties-" + rowIdx + "'>";
-                                    for (property of properties) {
-                                        content += "<div class='accordion-item'>";
-                                        content += "<h2 class='accordion-header' id='flushPlantsAdminTable" + property + "PropertyHeader-" + rowIdx + "'>";
-                                        content += "<button class='accordion-button collapsed p-2' type='button' data-bs-toggle='collapse' data-bs-target='#flush-collapsePlantsAdminTableModal" + property + "Property-" + rowIdx + "' aria-expanded='false' aria-controls='plantsAdminTableModal" + property + "Property-" + rowIdx + "'>";
-                                        content += plantPropertyNames[property] + "</button></h2>";
-                                        content += "<div id='flush-collapsePlantsAdminTableModal" + property + "Property-" + rowIdx + "' class='accordion-collapse collapse' aria-labelledby='flushPlantsAdminTableModal" + property + "PropertyHeader-" + rowIdx + "' data-bs-parent='#accordionPlantsAdminTableModalProperties-" + rowIdx + "'>";
-                                        content += "<div class='accordion-body p-2'><table class='table-sm w-100 table-borderless'><tbody><tr><td class='w-50 align-top'>Sollwert:</td><td class='w-50'>" + (plantProperties[index]["properties"][property].hasOwnProperty("setpoint") ? plantProperties[index]["properties"][property]["setpoint"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "<tr><td class='align-top'>Obere Eingriffsgrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("upperControlLimit") ? plantProperties[index]["properties"][property]["upperControlLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "<tr><td class='align-top'>Untere Eingriffsgrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("lowerControlLimit") >= 0 ? plantProperties[index]["properties"][property]["lowerControlLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "<tr><td class='align-top'>Obere Warngrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("upperWarningLimit") >= 0 ? plantProperties[index]["properties"][property]["upperWarningLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "<tr><td class='align-top'>Untere Warngrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("lowerWarningLimit") >= 0 ? plantProperties[index]["properties"][property]["lowerWarningLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "</tbody></table></div></div></div>";
-                                    }
-                                    content += "</div>";
+                                    content += "<table class='table-sm w-100 table-borderless'><tbody><tr><td class='w-50 align-top'>ID:</td><td class='w-50'>" + plantPrograms[index]["plantID"] + "</td></tr>";
+                                    content += "<tr><td class='w-50 align-top'>Beschreibung:</td><td>" + (plantPrograms[index].hasOwnProperty("name") ? plantPrograms[index]["description"] : "(Keine Daten vorhanden)") + "</td></tr>";
                                 }
-                                return content;*/
-                                return "LOL"
+                                else {
+                                    content += Alert.create("warning", "(Keine Daten vorhanden)");
+                                }
+                                return content;
                             }
                         }
                     },
@@ -453,14 +428,39 @@
                     scrollY: "400px",
                     scrollCollapse: true,
                     scroller: true,
+                    responsive: {
+                        details: {
+                            type: "inline",
+                            display: $.fn.dataTable.Responsive.display.modal({
+                                header: function(row) {
+                                    return "Eigenschaften von Pumpe &quot;" + row.data()["name"] + "&quot;";
+                                }
+                            }),
+                            renderer: function(api, rowIdx, columns) {
+                                let index = pumps.findIndex(key => key["id"] === api.cell(rowIdx, "id:name").data());
+                                let content = "";
+                                if (index >= 0) {
+                                    content += "<table class='table-sm w-100 table-borderless'><tbody><tr><td class='w-50 align-top'>ID:</td><td class='w-50'>" + plantPrograms[index]["plantID"] + "</td></tr>";
+                                    content += "<tr><td class='w-50 align-top'>Beschreibung:</td><td>" + (pumps[index].hasOwnProperty("power") ? pumps[index]["power"] : "(Keine Daten vorhanden)") + "</td></tr>";
+                                }
+                                else {
+                                    content += Alert.create("warning", "(Keine Daten vorhanden)");
+                                }
+                                return content;
+                            }
+                        }
+                    },
                     columns: [
                         {
                             name: "name",
-                            data: "name"
+                            data: "name",
+                            className: "dtr-control",
+                            responsivePriority: 2
                         },
                         {
                             name: "power",
-                            data: "power"
+                            data: "power",
+                            responsivePriority: 10001
                         },
                         {
                             name: "rpm",
@@ -476,7 +476,8 @@
                             data: null,
                             orderable: false,
                             defaultContent: "",
-                            className: "TintengefrorenerTiefenfrisch"
+                            className: "TintengefrorenerTiefenfrisch",
+                            responsivePriority: 1
                         }
                     ],
                     ajax: {
@@ -507,33 +508,18 @@
                             type: "inline",
                             display: $.fn.dataTable.Responsive.display.modal({
                                 header: function(row) {
-                                    return "Eigenschaften von Pflanze &quot;" + row.data()["description"] + "&quot;";
+                                    return "Eigenschaften von Ereignis &quot;" + row.data()["description"] + "&quot;";
                                 }
                             }),
                             renderer: function(api, rowIdx, columns) {
-                                /*
                                 let index = plantProperties.findIndex(key => key["id"] === api.cell(rowIdx, "id:name").data());
                                 let content = "";
                                 if (index >= 0) {
-                                    let properties = Object.getOwnPropertyNames(plantPropertyNames);
-                                    content += "<div class='accordion accordion-flush' id='accordionPlantsAdminTableModalProperties-" + rowIdx + "'>";
-                                    for (property of properties) {
-                                        content += "<div class='accordion-item'>";
-                                        content += "<h2 class='accordion-header' id='flushPlantsAdminTable" + property + "PropertyHeader-" + rowIdx + "'>";
-                                        content += "<button class='accordion-button collapsed p-2' type='button' data-bs-toggle='collapse' data-bs-target='#flush-collapsePlantsAdminTableModal" + property + "Property-" + rowIdx + "' aria-expanded='false' aria-controls='plantsAdminTableModal" + property + "Property-" + rowIdx + "'>";
-                                        content += plantPropertyNames[property] + "</button></h2>";
-                                        content += "<div id='flush-collapsePlantsAdminTableModal" + property + "Property-" + rowIdx + "' class='accordion-collapse collapse' aria-labelledby='flushPlantsAdminTableModal" + property + "PropertyHeader-" + rowIdx + "' data-bs-parent='#accordionPlantsAdminTableModalProperties-" + rowIdx + "'>";
-                                        content += "<div class='accordion-body p-2'><table class='table-sm w-100 table-borderless'><tbody><tr><td class='w-50 align-top'>Sollwert:</td><td class='w-50'>" + (plantProperties[index]["properties"][property].hasOwnProperty("setpoint") ? plantProperties[index]["properties"][property]["setpoint"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "<tr><td class='align-top'>Obere Eingriffsgrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("upperControlLimit") ? plantProperties[index]["properties"][property]["upperControlLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "<tr><td class='align-top'>Untere Eingriffsgrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("lowerControlLimit") >= 0 ? plantProperties[index]["properties"][property]["lowerControlLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "<tr><td class='align-top'>Obere Warngrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("upperWarningLimit") >= 0 ? plantProperties[index]["properties"][property]["upperWarningLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "<tr><td class='align-top'>Untere Warngrenze:</td><td>" + (plantProperties[index]["properties"][property].hasOwnProperty("lowerWarningLimit") >= 0 ? plantProperties[index]["properties"][property]["lowerWarningLimit"] : "(Keine Daten vorhanden)") + "</td></tr>";
-                                        content += "</tbody></table></div></div></div>";
-                                    }
-                                    content += "</div>";
                                 }
-                                return content;-*/
-                                return "lol"
+                                else {
+                                    content += Alert.create("warning", "(Keine Daten vorhanden)");
+                                }
+                                return content;
                             }
                         }
                     },
@@ -681,6 +667,7 @@
                 ventilation: {enabled: 0},
                 brightness: {enabled: 0}
             };
+            const userAccounts = [];
             var isLoadingCurrentChartData = false;
             var currentChartPlant = null; // Aktuell gewählte Pflanze für Diagramme
             var systemInfosEventSource = null;
@@ -1382,13 +1369,10 @@
                     $("#plantSelection").val(plants[0]);
                     currentChartPlant = plants[0];
                 });
-                // Nur als Admin sichtbar
+                // Soll nur als Admin sichtbar sein!
                 $.get("dataTables_test.php", {type: "plantPrograms"}).done(function(response) {
                     let data = JSON.parse(response);
-                    let programs = data["data"];
-                    for (program of programs) {
-                        plantPrograms.push({id: program["id"], plantID: program["plantID"], name: program["name"]});
-                    }
+                    Object.assign(plantPrograms, data["data"]);
                 });
                 let date = new Date();
                 $("footer").html("&copy; " + (date.getFullYear() >= 2022 ? "2021-" + date.getFullYear() : date.getFullYear()) + " BSDGG/IN20");
@@ -1559,7 +1543,7 @@
                             else {
                                 $("#plantProgramsAdminTable > tbody > tr.dtrg-start > td:first-of-type").attr("colspan", totalColumns -2);
                             }
-                            $("#plantProgramsAdminTable").columns.adjust().draw();
+                            adminDataTables["plantPrograms"].columns.adjust().draw();
                         });
                     }
                     else {
@@ -1635,6 +1619,19 @@
                         }
                     }
                 });
+                // DataTables-Layout neu berechnen, wenn sich die Bildschirmbreite ändert, wenn Administrationsseite nicht aktiv war 
+                $("a[href='#administration']").on("shown.bs.tab", function () {
+                    let collapses = ["#collapse-plants-actions", "#collapse-plants-programs-actions", "collapse-user-actions", "#collapse-pump-actions", "#collapse-events-actions"];
+                    let element = null;
+                    let tableName = null;
+                    for (collapse of collapses) {
+                        element = $("a[href='" + collapse + "']");
+                        tableName = $(element).attr("data-table");
+                        if ($(element).attr("aria-expanded") === "true") {
+                            adminDataTables[tableName].columns.adjust().draw();
+                        }
+                    }
+                });
                 $("a[href='#plantsAdminCreationContainer']").on("shown.bs.tab", function() {
                     $("#newPlantContainer").css("max-height", $("#newPlantNavigation").outerHeight(true) + "px");
                     $("#plantsAdminPlantSelection").empty();
@@ -1646,14 +1643,29 @@
                         }
                     }
                 });
+                // Bilderlinks laden
+                $("a[href='#historyGallery']").on("shown.bs.tab", function() {
+                    if ($("#historyGalleryPanel").find(".historyGalleryItem").length == 0) {
+                        $("#historyGalleryTimespanSelect").attr("disabled", "disabled").after("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary'></span>");
+                        $.get("lol", {
+                            span: 0
+                        }).done(function(response) {
+                            // img.naturalWidth and img.naturalHeight
+                        }).fail(function(response) {
+                            $("#historyGallery").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
+                        }).always(function() {
+                            $("#historyGalleryTimespan").find("[data-processing='true']").remove();
+                            $("#historyGalleryTimespanSelect").removeAttr("disabled");
+                        });
+                    }
+                });
                 // Aktuell
                 charts["current"]["co2"] = new Chart($("#co2-chart-current")[0].getContext("2d"), {
                     options: {
                         plugins: {
-                            legend: {
+                           legend: {
                                 display: false,
                                 labels: {
-                                    usePointStyle: true,
                                     pointStyle: "rect",
                                     font: {
                                         family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
@@ -2913,17 +2925,17 @@
                 cursor: pointer;
                 border: 2px solid var(--bs-gray-500, #adb5bd);
             }
+            /*
             .historyGalleryItem > div:first-of-type {
                 background-color: black;
                 flex: 0 1 100%;
                 border-radius: 5px;
-            }
+            }*/
             .historyGalleryItem > div:first-of-type > div:first-of-type {
                 margin: 0 auto 0 auto;
                 min-height: 100%;
                 max-width: 200px;
                 align-self: flex-start;
-                background: url('img/test1.jpg') no-repeat left top/100% 100%
             }
             section.lol {
                 border: 2px solid var(--bs-gray-300, #dee2e6)
@@ -3474,9 +3486,9 @@
                 div.dtr-modal div.dtr-modal-display {
                     width: 95%
                 }
-            }
-            div.dtr-bs-modal table.table tr:first-child td {
-                border-top: none
+                div.dtr-bs-modal table.table tr:first-child td {
+                    border-top: none
+                }
             }
             @media only screen and (max-width: 600px) {
                 .alert > i {
@@ -3804,7 +3816,7 @@
                             <section id="plants-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
-                                        <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-plants-actions">
+                                        <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-plants-actions" data-table="plants">
                                             <h4 class="ms-0 mt-auto me-auto mb-auto"><i class="fas fa-seedling"></i> Pflanzen</h4>
                                             <i class="fas fa-chevron-down ms-auto mt-auto me-2 mb-auto"></i>
                                         </a>
@@ -4019,7 +4031,7 @@
                             <section id="plants-programs-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
-                                        <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-plants-programs-actions">
+                                        <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-plants-programs-actions" data-table="plantPrograms">
                                             <h4 class="ms-0 mt-auto me-auto mb-auto"><i class="fas fa-cubes"></i> Pflanzenprogramme</h4>
                                             <i class="fas fa-chevron-down ms-auto mt-auto me-2 mb-auto"></i>
                                         </a>
@@ -4055,7 +4067,7 @@
                             <section id="pump-actions-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
-                                        <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-pump-actions">
+                                        <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-pump-actions" data-table="pumps">
                                             <h4 class="ms-0 mt-auto me-auto mb-auto"><i class="fas fa-fan"></i> Pumpensteuerung</h4>
                                             <i class="fas fa-chevron-down ms-auto mt-auto me-2 mb-auto"></i>
                                         </a>
@@ -4099,7 +4111,7 @@
                             <section id="user-actions-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
-                                        <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-user-actions">
+                                        <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-user-actions" data-table="userAccounts">
                                             <h4 class="ms-0 mt-auto me-auto mb-auto"><i class="fas fa-user-circle"></i> Benutzerkonten</h4>
                                             <i class="fas fa-chevron-down ms-auto mt-auto me-2 mb-auto"></i>
                                         </a>
@@ -4141,7 +4153,7 @@
                             <section id="events-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
-                                        <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-events-actions">
+                                        <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-events-actions" data-table="events">
                                           <h4 class="ms-0 mt-auto me-auto mb-auto"><i class="fas fa-newspaper"></i> Ereignisse</h4>
                                           <i class="fas fa-chevron-down ms-auto mt-auto me-2 mb-auto"></i>
                                         </a>
@@ -4180,22 +4192,24 @@
                             <section id="logs-accordion">
                                 <div class="card">
                                     <div class="card-header">
-                                        <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-logs-actions">
+                                        <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-logs-actions" data-table="logs">
                                             <h4 class="ms-0 mt-auto me-auto mb-auto"><i class="fas fa-scroll"></i> Logs</h4>
                                             <i class="fas fa-chevron-down ms-auto mt-auto me-2 mb-auto"></i>
                                         </a>
                                     </div>
                                     <div id="collapse-logs-actions" class="collapse hide" data-bs-parent="#logs-accordion">
                                         <div class="card-body">
-                                            <label for="logAdminCategorySelection" class="form-label col-form-label">Kategorie:</label>
-                                            <select class="form-select w-auto d-inline-block ms-1" id="logsAdminCategorySelection" data-old="0">
-                                                <option value="0">Alles</option>
-                                                <option value="1">Aktoren</option>
-                                                <option value="2">Pumpen</option>
-                                                <!--<option value="">Selbsttests</option>-->
-                                                <option value="3">Benutzeraktivitäten</option>
-                                                <option value="4">Ereignisse</option>
-                                            </select>
+                                            <div class="d-flex formContainer">
+                                                <label for="logAdminCategorySelection" class="form-label col-form-label">Kategorie:</label>
+                                                <select class="form-select w-auto d-inline-block ms-1" id="logsAdminCategorySelection" data-old="0">
+                                                    <option value="0">Alles</option>
+                                                    <option value="1">Aktoren</option>
+                                                    <option value="2">Pumpen</option>
+                                                    <!--<option value="">Selbsttests</option>-->
+                                                    <option value="3">Benutzeraktivitäten</option>
+                                                    <option value="4">Ereignisse</option>
+                                                </select>
+                                            </div>
                                             <button type="button" class="ms-1 btn btn-primary align-top"><i class="fas fa-sync"></i></button>
                                             <div class="mt-3 pt-1" id="logsAdminTableResponsive">
                                                 <table class="table table-sm w-100" id="logsAdminTable">
@@ -4217,39 +4231,19 @@
                             </section>
                         </div>
                         <div class="tab-pane fade" id="historyGallery">
-                            <div class="formContainer">
+                            <div class="formContainer" id="historyGalleryTimespan">
                                 <label for="historyGalleryTimespanSelect">Zeitraum:</label>
                                 <select id="historyGalleryTimespanSelect">
                                     <option value="0">Gesamt</option>
                                     <option value="1">00:00-06:00 Uhr</option>
                                     <option value="2">06:00-12:00 Uhr</option>
                                 </select>
-                                <div id="historyGalleryPanel" class="mt-3">
-                                    <!-- mit js füllen -->
-                                    <div class="historyGalleryItem d-flex flex-column p-1" onclick="showHistoryGalleryImage('test1.jpg')">
-                                        <div>
-                                            <div class="rounded-3"></div>
-                                        </div>
-                                        <article><span class="text-secondary">verdammt</span><br>01.01.1970, 11:11:11 Uhr</article>
-                                    </div>
-                                    <!--
-                                    <div class="d-flex flex-column rounded-3 p-1" onclick="showHistoryGalleryImage('test2.jpg')">
-                                        <div style="background: url('img/test2.jpg') no-repeat left top/100% 100%; flex: 0 1 100%" class="rounded-3"></div>
-                                        <article><span class="text-secondary">verdammt</span><br>01.01.1970, 11:11:11 Uhr</article>
-                                    </div>
-                                    <div class="d-flex flex-column rounded-3 p-1" onclick="showHistoryGalleryImage('test3.jpg')">
-                                        <div style="background: url('img/test3.jpg') no-repeat left top/100% 100%; flex: 0 1 100%" class="rounded-3"></div>
-                                        <article><span class="text-secondary">verdammt</span><br>01.01.1970, 11:11:11 Uhr</article>
-                                    </div>
-                                -->
-                                <div class="d-flex flex-column rounded-3 p-1" onclick="showHistoryGalleryImage('test2.jpg')">
-                                    <div style="background: url('img/test2.jpg') no-repeat left top/100% 100%; flex: 0 1 100%" class="rounded-3"></div>
+                            </div>
+                            <div id="historyGalleryPanel" class="mt-3">
+                                <!-- mit js füllen -->
+                                <div class="historyGalleryItem d-flex flex-column p-1" onclick="showHistoryGalleryImage('test1.jpg')">
+                                    <img src="img/test1.jpg">
                                     <article><span class="text-secondary">verdammt</span><br>01.01.1970, 11:11:11 Uhr</article>
-                                </div>
-                                <div class="d-flex flex-column rounded-3 p-1" onclick="showHistoryGalleryImage('test3.jpg')">
-                                    <div style="background: url('img/test3.jpg') no-repeat left top/100% 100%; flex: 0 1 100%" class="rounded-3"></div>
-                                    <article><span class="text-secondary">verdammt</span><br>01.01.1970, 11:11:11 Uhr</article>
-                                </div>
                                 </div>
                             </div>
                         </div>
