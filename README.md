@@ -1,5 +1,7 @@
 # HP
 
+#
+
 let dataToSend = {
     "sensor_pt1000": 123456789,
     "sensor_eco2": 123456789,
