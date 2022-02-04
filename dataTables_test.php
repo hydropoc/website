@@ -34,18 +34,10 @@
                 }
             }
             break;
-        case "plants":
-            $data[] = ["name" => "Riesenrafflesie", "id" => 1];
-            $data[] = ["name" => "Buddhas Hand", "id" => 2];
-            $data[] = ["name" => "Verpiss-dich-Pflanze", "id" => 3];
-            $data[] = ["name" => "Leberwurstbaum", "id" => 4];
-            $data[] = ["name" => "Kuheuterpflanze", "id" => 5];
-            $data[] = ["name" => "Altweiberzorn", "id" => 6];
-            break;
         case "plantdetails":
             $data[] = [
                 "id" => 1,
-                "description" => "Erster",
+                "name" => "Riesenrafflesie",
                 "properties" => [
                     "co2" => [
                         "upperControlLimit" => 1000, 
@@ -100,7 +92,7 @@
             ];
             $data[] = [
                 "id" => 2,
-                "description" => "Erster",
+                "name" => "Buddhas Hand",
                 "properties" => [
                     "co2" => [
                         "upperControlLimit" => 150, 
@@ -155,7 +147,7 @@
             ];
             $data[] = [
                 "id" => 3,
-                "description" => "Erster",
+                "name" => "Verpiss-dich-Pflanze",
                 "properties" => [
                     "co2" => [
                         "upperControlLimit" => 150, 
@@ -210,7 +202,7 @@
             ];
             $data[] = [
                 "id" => 4,
-                "description" => "Erster",
+                "name" => "Leberwurstbaum",
                 "properties" => [
                     "co2" => [
                         "upperControlLimit" => 150, 
@@ -265,7 +257,62 @@
             ];
             $data[] = [
                 "id" => 5,
-                "description" => "Erster",
+                "name" => "Kuheuterpflanze",
+                "properties" => [
+                    "co2" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "salinity" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "temperature" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "ph" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "waterlevel" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "humidity" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ],
+                    "lighting" => [
+                        "upperControlLimit" => 150, 
+                        "lowerControlLimit" => 10, 
+                        "upperWarningLimit" => 140,
+                        "lowerWarningLimit" => 20,
+                        "setpoint" => 70
+                    ]
+                ]
+            ];
+            $data[] = [
+                "id" => 6,
+                "name" => "Altweiberzorn",
                 "properties" => [
                     "co2" => [
                         "upperControlLimit" => 150, 
@@ -322,8 +369,8 @@
         case "useraccounts":
             $data[] = [
                 "displayname" => "Deine Mutter",
-                "cn" => "deimuddah",
-                "created" => "11.05.2000",
+                "uid" => "deimuddah",
+                "creation" => "11.05.2000",
                 "status" => "offline",
                 "options" => "<button type='button' class='btn btn-sm btn-primary' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger ms-1' style='width: 32px'><i class='fas fa-times'></i></button>"
             ];
