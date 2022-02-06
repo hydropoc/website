@@ -30,3 +30,17 @@ $.ajax({
 });
 
 Bootstrap toggle: https://gitbrent.github.io/bootstrap4-toggle/ - funktioniert auch mit BS5
+
+TODO:
+* "Unsichtbare" Spalten von Tabellen entfernen (TintengefrorenerTiefenfrisch). In DataTables script und im HTML.
+* In drawCallback von DataTables Befehl zum Ändern des "colspan"-Attribute entfernen.
+* CSS-Regel "table.dataTable:not(.table-borderless) > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)" entfernen.
+* CSS-Regel "table > thead > tr > th" mit einziger "border-left"-Eigenschaft zu "table > thead > tr > th:not(.TintengefrorenerTiefenfrisch)" ändern.
+* CSS-Regel "table.dataTable:not(.table-borderless) > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)" entfernen.
+* CSS-Regel "table.dataTable > thead > tr > th:nth-last-of-type(2)" entfernen.
+* CSS-Regel "table.dataTable > thead > tr > th:last-of-type" entfernen.
+* CSS-Regel "table.dataTable > tbody > tr > td.TintengefrorenerTiefenfrisch, .dts_label" entfernen.
+* CSS-Regel "div.dataTables_scrollBody > table th" entfernen.
+* CSS-Regel "table.dataTable:not(.table-borderless) > tbody > tr > td:only-of-type, table.dataTable:not(.table-borderless) > tbody > tr > td:last-of-type" mit Eigenschaft "border-right: 1px solid var(--bs-gray-300, #dee2e6)" hinzufügen.
+* In der Funktion "create" der Klasse "Alert" die "return"-Zeile mit return "<div class='" + (closeable ? "alert-dismissible " : "") + "alert alert-" + type + " messageboxContainer " + classes + "' role='alert'><div class='messageboxIcon " + type + "'><i class='" + icons[type] + "'></i></div><div class='messageboxText'>" + message + (closeable ? "</div><button type='button' class='btn-close position-static align-self-start' data-bs-dismiss='alert' aria-label='Schließen'></button>" : "") + "</div>"; ersetzen.
+* In der Funktion "create" der Klasse "Modal" das " > div:first-of-type" entfernen, wo die Attribute "data-bs-backdrop" und "data-bs-keyboard" hinzugefügt/entfernt werden.
