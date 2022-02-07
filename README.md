@@ -41,6 +41,9 @@ TODO:
 * CSS-Regel "table.dataTable > thead > tr > th:last-of-type" entfernen.
 * CSS-Regel "table.dataTable > tbody > tr > td.TintengefrorenerTiefenfrisch, .dts_label" entfernen.
 * CSS-Regel "div.dataTables_scrollBody > table th" entfernen.
+* In CSS-Regel ".table-container" die Eigenschaft "width" entfernen.
+* Alle CSS-Regeln, die mit "table.dataTable" beginnen und "border"-Eigenschaften enthalten ändern zu "table.dataTable:not(.table-borderless)"
+* Alle CSS-Regeln, die mit "table" beginnen und "border"-Eigenschaften enthalten ändern zu "table:not(.table-borderless)"
 * CSS-Regel "table.dataTable:not(.table-borderless) > tbody > tr > td:only-of-type, table.dataTable:not(.table-borderless) > tbody > tr > td:last-of-type" mit Eigenschaft "border-right: 1px solid var(--bs-gray-300, #dee2e6)" hinzufügen.
 * In der Funktion "create" der Klasse "Alert" die "return"-Zeile ersetzen.
 * In der Funktion "create" der Klasse "Modal" das " > div:first-of-type" entfernen, wo die Attribute "data-bs-backdrop" und "data-bs-keyboard" hinzugefügt/entfernt werden.
