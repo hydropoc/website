@@ -33,7 +33,7 @@ Bootstrap toggle: https://gitbrent.github.io/bootstrap4-toggle/ - funktioniert a
 
 TODO:
 * "Unsichtbare" Spalten von Tabellen entfernen (TintengefrorenerTiefenfrisch). Im DataTables script und im HTML
-* In <strong>drawCallback</strong> von DataTables Befehl zum Ändern des <i>colspan</i>-Attribute entfernen.
+* In <strong>drawCallback</strong>-Funkitionen von DataTables Befehl zum Ändern des <i>colspan</i>-Attribute entfernen.
 * CSS-Regel <strong>table.dataTable:not(.table-borderless) > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)</strong> entfernen.
 * CSS-Regel <strong>table > thead > tr > th</strong> mit einziger <i>border-left</i>-Eigenschaft zu <strong>table > thead > tr > th:not(.TintengefrorenerTiefenfrisch)</strong> ändern.
 * CSS-Regel <strong>table.dataTable:not(.table-borderless) > tbody > tr:not(.dtrg-start) > td:nth-last-of-type(2)</strong> entfernen.
@@ -46,3 +46,4 @@ TODO:
 * CSS-Regel <strong>table.dataTable:not(.table-borderless) > tbody > tr > td:only-of-type, table.dataTable:not(.table-borderless) > tbody > tr > td:last-of-type</strong> mit Eigenschaft <i>border-right: 1px solid var(--bs-gray-300, #dee2e6)</i> hinzufügen.
 * In der Funktion <strong>create</strong> der Klasse <strong>Alert</strong> die <i>return</i>-Zeile ersetzen.
 * In der Funktion <strong>create</strong> der Klasse <strong>Modal</strong> das <strong> > div:first-of-type</strong> entfernen, wo die Attribute <i>data-bs-backdrop</i> und <i>data-bs-keyboard</i> hinzugefügt/entfernt werden.
+* In <strong>startRender</strong>-Funktionen alles bis auf das <i>return</i> entfernen und darin die <i>colspan</i>-Attribute auf statische Werte setzen oder ganz entfernen, wenn sie  nicht benötigt werden.
