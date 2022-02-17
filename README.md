@@ -32,4 +32,3 @@ $.ajax({
 Bootstrap toggle: https://gitbrent.github.io/bootstrap4-toggle/ - funktioniert auch mit BS5
 
 TODO:
-* In <strong>startRender</strong>-Funktionen alles bis auf das <i>return</i> entfernen und darin die <i>colspan</i>-Attribute auf statische Werte setzen oder ganz entfernen, wenn sie nicht benötigt werden.
