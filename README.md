@@ -30,3 +30,5 @@ $.ajax({
 });
 
 Bootstrap toggle: https://gitbrent.github.io/bootstrap4-toggle/ - funktioniert auch mit BS5
+
+TODO:
