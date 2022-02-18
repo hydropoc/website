@@ -422,19 +422,21 @@
                 });
             }
             function showHistoryGalleryImage(wtf) {
-                let content = "<img src='" + $(wtf).find("img:first-of-type").attr("src") + "'>";
+                let img = $(wtf).find("img:first-of-type");
+                let url = $(img).attr("src");
+                let path = url.match(/([^\.\/\\]+)(\.[^\.]+)?$/i);
                 let data = {
                     modal: {
-                        name: "showHistoryGalleryImage"
-                        //size: "xl"
+                        name: "showHistoryGalleryImage",
+                        size: "l"
                     },
                     title: {
-                        text: wtf
+                        text: (path !== null && path.length >= 1 ? path[0] : "(Unbekannte Datei)")
                     },
                     content: {
-                        text: content
+                        text: "<img src='" + url + "'>"
                     }
-                }
+                };
                 Modal.create(data);
             }
             function login(wtf) {
@@ -445,7 +447,7 @@
                     if ($(wtf).find("[data-processing='true']").length == 0) {
                         $(wtf).attr("disabled", "disabled").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
                     }
-                    $("#mainModal .modal-footer > [data-bs-dismiss='modal']").attr("disabled", "disabled");
+                    $("#mainModal .modal-footer > button").attr("disabled", "disabled");
                     $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
                     $("#mainModal .modal-body > .alert").remove();
                     $.post("lol", {
@@ -803,7 +805,7 @@
                                                         if ($("#saveNewUserButton").find("[data-processing='true']").length == 0) {
                                                             $("#saveNewUserButton").attr("disabled", "disabled").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
                                                         }
-                                                        $("#mainModal .modal-footer > [data-bs-dismiss='modal']").attr("disabled", "disabled");
+                                                        $("#mainModal .modal-footer > button").attr("disabled", "disabled");
                                                         $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
                                                         $("#mainModal .modal-body > .alert").remove();
                                                         $.post("lol", {
@@ -831,6 +833,19 @@
                     }
                 };
                 Modal.create(data);
+            }
+            function wtf() {
+                $.ajax("http://127.0.0.1:3000/api/data/sensors", {
+                    data: JSON.stringify({amount: 50}),
+                    type: "POST",
+                    processData: false,
+                    contentType: "application/json"
+                    //Header set Access-Control-Allow-Origin "*"
+                }).done(function(response) {
+                    console.lg(response);
+                }).fail(function(response) {
+                    console.log(response);
+                });
             }
             function fillPlantInputs(wtf = null) {
                 let selectedPlant = Number.parseInt(wtf);
@@ -1497,19 +1512,19 @@
                 });
                 // Bilderlinks laden
                 $("a[href='#historyGallery']").on("shown.bs.tab", function() {
-                        $("#historyGalleryTimespanSelect").attr("disabled", "disabled").after("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary'></span>");
-                        $.get("gallery.php", {
-                            span: 0
-                        }).done(function(response) {
-                            let data = JSON.parse(response);
-                            if (data["images"].length >= 1) {
-                                let images = "";
-                                for (image of data["images"]) {
-                                    images += "<div class='historyGalleryItem d-flex flex-column p-1' onclick='showHistoryGalleryImage(this)'><img src='img/" + image + "'>";
-                                    images += "<article><span class='text-secondary'>verdammt</span><br>01.01.1970, 11:11:11 Uhr</article></div>";
-                                }
-                                $("#historyGalleryPanel").html(images);
+                    $("#historyGalleryTimespanSelect").attr("disabled", "disabled").after("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary'></span>");
+                       $.get("gallery.php", {
+                        span: 0
+                    }).done(function(response) {
+                        let data = JSON.parse(response);
+                        if (data["images"].length >= 1) {
+                            let images = "";
+                            for (image of data["images"]) {
+                                images += "<div class='historyGalleryItem d-flex flex-column p-1' onclick='showHistoryGalleryImage(this)'><img src='img/" + image + "'>";
+                                images += "<article><span class='text-secondary'>verdammt</span><br>01.01.1970, 11:11:11 Uhr</article></div>";
                             }
+                            $("#historyGalleryPanel").html(images);
+                        }
                             // img.naturalWidth and img.naturalHeight
                         }).fail(function(response) {
                             $("#historyGallery").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
@@ -3500,6 +3515,9 @@
                 #mobile-navbar {
                     display: none;
                 }
+                *:not(h1, h2, h3, h4, h5, h6, .messageboxIcon > i, h1 > span, h2 > span, h3 > span, h4 > span, h5 > span, h6 > span, h1 > i, h2 > i, h3 > i, h4 > i, h5 > i, h6 > i) {
+                    font-size: 16px !important;
+                }
                 .knorke {
                     padding-left: 0;
                 }
@@ -3539,6 +3557,9 @@
                 #mobile-navbar {
                     display: none;
                 }
+                *:not(h1, h2, h3, h4, h5, h6, .messageboxIcon > i, h1 > span, h2 > span, h3 > span, h4 > span, h5 > span, h6 > span, h1 > i, h2 > i, h3 > i, h4 > i, h5 > i, h6 > i) {
+                    font-size: 16px !important;
+                }
             }
             /* Extra large devices (large laptops and desktops, 1200px and up) */
             @media only screen and (min-width: 1200px) {
@@ -3551,7 +3572,7 @@
                 #mobile-navbar {
                     display: none;
                 }
-                *:not(h1, h2, h3, h4, h5, h6, .messageboxIcon > i, h1 > span, h2 > span, h3 > span, h4 > span, h5 > span, h6 > span) {
+                *:not(h1, h2, h3, h4, h5, h6, .messageboxIcon > i, h1 > span, h2 > span, h3 > span, h4 > span, h5 > span, h6 > span, h1 > i, h2 > i, h3 > i, h4 > i, h5 > i, h6 > i) {
                     font-size: 16px !important;
                 }
                 .formContainer > label, .formContainer > select, .formContainer > input, .formContainer > button {
