@@ -154,12 +154,12 @@
                             name: "options",
                             data: function(row, type, set, meta) {
                                 let buttons = "<div class='d-flex flex-wrap' style='gap: 5px'>";
-                                let index = plantProperties.findIndex(key => key["id"] === row["id"]);
+                                let index = userAccounts.findIndex(key => key["id"] === row["id"]);
                                 if (index >= 0) {
                                     buttons += "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editUserAccount(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger' style='width: 32px' onclick='confirmUserDeletion(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
                                 }
                                 else {
-                                    buttons += "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
+                                    buttons += "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times' onclick='confirmUserDeeltion(" + row["id"] + ")'></i></button>";
                                 }
                                 buttons += "</div>";
                                 return buttons;
@@ -202,7 +202,7 @@
                             name: "options",
                             data: function(row, type, set, meta) {
                                 let buttons = "<div class='d-flex flex-wrap' style='gap: 5px'>";
-                                let index = plantProperties.findIndex(key => key["id"] === row["id"]);
+                                let index = plantPrograms.findIndex(key => key["id"] === row["id"]);
                                 if (index >= 0) {
                                     buttons += "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editPlantProgram(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger' style='width: 32px' onclick='confirmPlantProgramDeletion(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
                                 }
@@ -283,8 +283,8 @@
                             name: "options",
                             data: function(row, type, set, meta) {
                                 let buttons = "<div class='d-flex flex-wrap' style='gap: 5px'>";
-                                let index = plantProperties.findIndex(key => key["id"] === row["id"]);
-                                if (index>= 0) {
+                                let index = events.findIndex(key => key["id"] === row["id"]);
+                                if (index >= 0) {
                                     buttons += "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editEvent" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger' style='width: 32px' onclick='confirmEventDeletion(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
                                 }
                                 else {
@@ -354,7 +354,6 @@
                     //
                 }
             };
-            const plantIDs = {}; // nicht mehr verwenden!
             const plantPrograms = [];
             const plantProperties = [];
             const userAccounts = [];
@@ -382,8 +381,9 @@
             var viewportWidth = visualViewport["width"];
             var isLoadingCurrentChartData = false;
             var currentChartPlant = null; // Aktuell gewählte Pflanze für Diagramme
-            var systemInfosEventSource = null;
+            var systemInfosTimer = null;
             var isPlantEditingActive = false;
+            var isLoadingSystemInfos = false;
             var authToken = null;
             function switchAlert(element, type) {
                 type = type.toLowerCase();
@@ -455,6 +455,7 @@
                         password: $("#password").val()
                     }).done(function(response) {
                         //cookies setzen
+                        //document.cookie = "username=John Doe; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/";
                         //anmeldeknopf durch abmeldeknopf ersetzen
                     }).fail(function(response) {
                         $("#mainModal .modal-body").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
@@ -523,41 +524,42 @@
                 }
             }
             function updateSystemInfos() {
-                if (systemInfosEventSource === null || systemInfosEventSource["readyState"] == 2) {
-                    systemInfosEventSource = new EventSource("sse_test.php");
-                    systemInfosEventSource.onmessage = function(event) {
-                        if ($("#mainModal").attr("data-name") == "systemInfos") {
-                            let data = JSON.parse(event["data"]);
-                            let statsText = "";
-                            if (data.hasOwnProperty("osname")) {
-                                statsText += "<tr><td class='align-top'>Kernelversion</td><td>" + data["osname"] + "</td></tr>";
-                            }
-                            if (data.hasOwnProperty("arch")) {
-                                statsText += "<tr><td class='align-top'>Architektur</td><td>" + data["arch"] + "</td></tr>";
-                            }
-                            if (data.hasOwnProperty("cpus")) {
-                                statsText += "<tr><td class='align-top'>CPU</td><td>" + data["cpus"][0]["model"];
-                                for (let [index, cpu] of data["cpus"].entries()) {
-                                    statsText += "<div>CPU #" + index + ":<div class='ps-3'>Takt: " + cpu["speed"] + "MHz</div></div>";
-                                }
-                                statsText += "</td></tr>";
-                            }
-                            if (data.hasOwnProperty("freememory") && data.hasOwnProperty("totalmemory")) {
-                                statsText += "<tr><td class='align-top'>Speicher</td><td>" + data["freememory"] + " MB/" + data["totalmemory"] + " MB (" + Math.floor(((data["freememory"] / data["totalmemory"]) *100)) + " %)</td></tr>";
-                            }
-                            if (data.hasOwnProperty("hostname")) {
-                                statsText += "<tr><td class='align-top'>Host</td><td>" + data["hostname"] + "</td></tr>";
-                            }
-                            if (data.hasOwnProperty("uptime")) {
-                                statsText += "<tr><td class='align-top'>Laufzeit</td><td>" + data["uptime"].duration() + "</td></tr>";
-                            }
-                            $("#systemInfosTable").html(statsText);
+                if (systemInfosTimer !== null && $("#mainModal").hasClass("show") && $("#mainModal").attr("data-name") === "systemInfos" && !isLoadingSystemInfos) {
+                    isLoadingSystemInfos = true;
+                    $.ajax("http://CHRISTIAN:3000/api/device/environment", {
+                        type: "GET",
+                        crossDomain: true
+                    }).done(function(response) {
+                        console.log(response);
+                        let statsText = "";
+                        if (response.hasOwnProperty("osname")) {
+                            statsText += "<tr><td class='align-top'>Betriebssystem</td><td>" + response["osname"] + "</td></tr>";
                         }
-                        else {
-                            systemInfosEventSource.close();
-                            systemInfosEventSource = null;
+                        if (response.hasOwnProperty("arch")) {
+                            statsText += "<tr><td class='align-top'>Architektur</td><td>" + response["arch"] + "</td></tr>";
                         }
-                    };
+                        if (response.hasOwnProperty("cpus")) {
+                            statsText += "<tr><td class='align-top'>CPU</td><td>" + response["cpus"][0]["model"];
+                            for (let [index, cpu] of response["cpus"].entries()) {
+                                statsText += "<div>CPU #" + index + ":<div class='ps-3'>Takt: " + cpu["speed"] + "MHz</div></div>";
+                            }
+                            statsText += "</td></tr>";
+                        }
+                        if (response.hasOwnProperty("memory") && response.hasOwnProperty("totalmemory")) {
+                            statsText += "<tr><td class='align-top'>Speicher</td><td>" + Math.floor((response["memory"] / 1024) / 1024) + " MB/" + Math.floor((response["totalmemory"] / 1024) / 1024) + " MB (~" + Math.floor(((response["memory"] / response["totalmemory"]) *100)) + " %)</td></tr>";
+                        }
+                        if (response.hasOwnProperty("hostname")) {
+                            statsText += "<tr><td class='align-top'>Host</td><td>" + response["hostname"] + "</td></tr>";
+                        }
+                        if (response.hasOwnProperty("uptime")) {
+                            statsText += "<tr><td class='align-top'>Laufzeit</td><td>" + response["uptime"].duration() + "</td></tr>";
+                        }
+                        $("#systemInfosTable").html(statsText);
+                    }).fail(function(response) {
+                        console.log(response);
+                    }).always(function() {
+                        isLoadingSystemInfos = false;
+                    });
                 }
             }
             // Wird verwendet, um Funktionen innerhalb von Objekten auszuführen
@@ -568,43 +570,49 @@
                 /*
                 data: {
                     modal: {
-                        size: sm|default|lg|xl,
-                        static: bool,
-                        name: string
+                        size?: sm|default|lg|xl,
+                        static?: bool,
+                        name: string,
+                        events?: [
+                            {
+                                hide: {
+                                    function: function() { },
+                                    args?: []
+                                }
+                            }
+                        ]
                     },
                     title: {
                         text: string
                     },
                     content: {
                         text: string
-                        options: {
-                            scroll: bool,
-                            align: left|center|right
+                        options?: {
+                            scroll?: bool,
+                            align?: left|center|right
                         }
                     },
-                    footer: {
-                        buttons: {
-                            default: {
+                    footer?: {
+                        buttons?: {
+                            default?: {
                                 text: string,
-                                class: string,
-                                display: bool,
-                                attributes: {}
+                                class?: string,
+                                display?: bool,
+                                attributes?: {
+                                    attribute: value
+                                }
                             }
                             // Eigene
-                            custom: [
+                            custom?: [
                                 {
                                     text: string,
-                                    class: string,
-                                    attributes: {},
+                                    class?: string,
+                                    attributes?: {},
                                     actions: [{
                                         click: [
                                             {
-                                                function: string,
-                                                args: []
-                                            },
-                                            {
-                                                function: string,
-                                                args: []
+                                                function: (string|function() {}),
+                                                args?: []
                                             }
                                         ]
                                     }]
@@ -698,7 +706,7 @@
                                                                 achso(func["function"], func["args"]);
                                                             });
                                                         }
-                                                        else {
+                                                        else if (typeof(func["function"]) === "function") {
                                                             $(currentButton).on(event, function() {
                                                                 achso(func["function"]);
                                                             });
@@ -723,6 +731,26 @@
                         }
                         else {
                             $("#mainModal .modal-footer").append("<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Schließen</button>");
+                        }
+                        if (data["modal"].hasOwnProperty("events")) {
+                            let eventNames = {hide: "hide.bs.modal", hidden: "hidden.bs.modal", show: "show.bs.modal", shown: "shown.bs.modal", hidePrevented: "hidePrevented.bs.modal"};
+                            for (event of data["modal"]["events"]) {
+                                let events = Object.getOwnPropertyNames(event);
+                                for (var event_ of events) {
+                                    if (eventNames.hasOwnProperty(event_)) {
+                                        if (event[event_].hasOwnProperty("args") && typeof(event[event_]["function"]) === "object") {
+                                            $("#mainModal").one(eventNames[event_], function() {
+                                                achso(event[event_]["function"], event[event_]["args"]);
+                                            });
+                                        }
+                                        else if (typeof(event[event_]["function"]) === "function") {
+                                            $("#mainModal").one(eventNames[event_], function() {
+                                                achso(event[event_]["function"]);
+                                            });
+                                        }
+                                    }
+                                }
+                            }
                         }
                         new bootstrap.Modal($("#mainModal")).show();
                     }
@@ -835,14 +863,15 @@
                 Modal.create(data);
             }
             function wtf() {
-                $.ajax("http://127.0.0.1:3000/api/data/sensors", {
+                $.ajax("http://CHRISTIAN:3000/api/data/sensors", {
                     data: JSON.stringify({amount: 50}),
                     type: "POST",
                     processData: false,
-                    contentType: "application/json"
+                    contentType: "application/json",
+                    crossDomain: true
                     //Header set Access-Control-Allow-Origin "*"
                 }).done(function(response) {
-                    console.lg(response);
+                    console.log(response);
                 }).fail(function(response) {
                     console.log(response);
                 });
@@ -1086,7 +1115,26 @@
                     content += "</table>";
                     let data = {
                         modal: {
-                            name: "systemInfos"
+                            name: "systemInfos",
+                            events: [
+                                {
+                                    hide: {
+                                        function: function() {
+                                            if (systemInfosTimer !== null) {
+                                                clearInterval(systemInfosTimer);
+                                                systemInfosTimer = null;
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    shown: {
+                                        function: function() {
+                                            systemInfosTimer = setInterval(updateSystemInfos, 5000);
+                                        }
+                                    }
+                                }
+                            ]
                         },
                         title: {
                             text: "Systeminformationen"
@@ -1099,7 +1147,6 @@
                         }
                     };
                     Modal.create(data);
-                    updateSystemInfos();
                 });
                 $("a[href='#staff']").click(function() {
                     let content = "<table class='table-borderless'><thead></thead><tbody><tr><td class='align-text-top pe-3'>Projektleitung</td><td>Luca Israel<br>Jessica Gerken</td></tr>";
@@ -1131,7 +1178,16 @@
                     let data = {
                         modal: {
                             size: "lg",
-                            name: "about"
+                            name: "about",
+                            events: [
+                                {
+                                    hide: {
+                                        function: function() {
+                                            $("#hydroPocLogo").off("click animationend");
+                                        }
+                                    }
+                                }
+                            ]
                         },
                         title: {
                             text: "Über"
@@ -1208,12 +1264,6 @@
                         }
                     };
                     Modal.create(data);
-                });
-                $("#mainModal").on("hide.bs.modal", function() {
-                    $(this).removeAttr("data-name");
-                    if ($("#hydroPocLogo") !== undefined) {
-                        $("#hydroPocLogo").off("click animationend");
-                    }
                 });
                 $(".config-chart-button").click(function() {
                     $("#chartHistoryElementTitle").html($(this).attr("data-chart-title"));
@@ -1514,7 +1564,8 @@
                 $("a[href='#historyGallery']").on("shown.bs.tab", function() {
                     $("#historyGalleryTimespanSelect").attr("disabled", "disabled").after("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary'></span>");
                        $.get("gallery.php", {
-                        span: 0
+                        span: 0 // Zeitspanne; 0 = alles
+                        // timespan geht nicht, vielleicht $.ajax mit processData-Option verwenden?
                     }).done(function(response) {
                         let data = JSON.parse(response);
                         if (data["images"].length >= 1) {
@@ -2619,10 +2670,10 @@
                                                 charts["current"][item]["options"]["scales"]["x"]["min"] = data[item]["labels"][0];
                                                 charts["current"][item]["options"]["scales"]["x"]["max"] = data[item]["labels"][data[item]["labels"].length -1];
                                                 // Wenn Wert kleiner gleich Warnwert
-                                                if ((Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) > Number(data[item]["data"]["lowerControlLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperWarningLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["upperControlLimit"]["y"]))) {
+                                                if ((Number.parseInt(data[item]["data"]["current"]["y"]) <= Number.parseInt(data[item]["data"]["lowerWarningLimit"]["y"]) && Number.parseInt(data[item]["data"][chart]["y"]) > Number.parseInt(data[item]["data"]["lowerControlLimit"]["y"])) || (Number.parseInt(data[item]["data"]["current"]["y"]) >= Number.parseInt(data[item]["data"]["upperWarningLimit"]["y"]) && Number.parseInt(data[item]["data"][chart]["y"]) < Number.parseInt(data[item]["data"]["upperControlLimit"]["y"]))) {
                                                     switchAlert(item, "warning");
                                                 }
-                                                else if ((Number(data[item]["data"]["current"]["y"]) >= Number(data[item]["data"]["upperControlLimit"]["y"]) && Number(data[item]["data"]["current"]["y"]) > Number(data[item]["data"]["upperWarningLimit"]["y"])) || (Number(data[item]["data"]["current"]["y"]) <= Number(data[item]["data"]["lowerControlLimit"]["y"]) && Number(data[item]["data"][chart]["y"]) < Number(data[item]["data"]["lowerWarningLimit"]["y"]))) {
+                                                else if ((Number.parseInt(data[item]["data"]["current"]["y"]) >= Number.parseInt(data[item]["data"]["upperControlLimit"]["y"]) && Number.parseInt(data[item]["data"]["current"]["y"]) > Number.parseInt(data[item]["data"]["upperWarningLimit"]["y"])) || (Number.parseInt(data[item]["data"]["current"]["y"]) <= Number.parseInt(data[item]["data"]["lowerControlLimit"]["y"]) && Number.parseInt(data[item]["data"][chart]["y"]) < Number.parseInt(data[item]["data"]["lowerWarningLimit"]["y"]))) {
                                                     switchAlert(item, "danger");
                                                     console.log("joo");
                                                 }
