@@ -428,13 +428,13 @@
                 let data = {
                     modal: {
                         name: "showHistoryGalleryImage",
-                        size: "l"
+                        size: "lg"
                     },
                     title: {
                         text: (path !== null && path.length >= 1 ? path[0] : "(Unbekannte Datei)")
                     },
                     content: {
-                        text: "<img src='" + url + "'>"
+                        text: "<img src='" + url + "' class='mw-100'>"
                     }
                 };
                 Modal.create(data);
@@ -530,7 +530,6 @@
                         type: "GET",
                         crossDomain: true
                     }).done(function(response) {
-                        console.log(response);
                         let statsText = "";
                         if (response.hasOwnProperty("osname")) {
                             statsText += "<tr><td class='align-top'>Betriebssystem</td><td>" + response["osname"] + "</td></tr>";
@@ -1286,7 +1285,7 @@
                     Object.assign(plantPrograms, data["data"]);
                 });
                 let date = new Date();
-                $("footer").html("&copy; " + (date.getFullYear() >= 2022 ? "2021-" + date.getFullYear() : date.getFullYear()) + " BSDGG/IN20");
+                $("footer").html("&copy; " + "2021-" + date.getFullYear() + " BSDGG/IN20");
                 $("#plantSelection").change(function() {
                     $("#plantProgramSelection").empty().attr("disabled", "disabled");;
                     $(this).attr("disabled", "disabled");
@@ -3508,6 +3507,9 @@
                 #newPlantNavigation {
                     width: 100%
                 }
+                #newPlantForm label:not(.form-check-label) {
+                    padding-left: 0;
+                }
                 #newPlantContainer {
                     width: 100%;
                     margin-top: 1rem;
@@ -3537,7 +3539,7 @@
                 .accordion-flush > .accordion-item > .accordion-collapse > .accordion-body > div.row > div.col-md-4 {
                     margin: auto auto 0 auto
                 }
-                *:not(h1, h2, h3, h4, h5, h6, .messageboxIcon > i, h1 > span, h2 > span, h3 > span, h4 > span, h5 > span, h6 > span) {
+                *:not(h1, h2, h3, h4, h5, h6, .messageboxIcon > i, h1 > span, h2 > span, h3 > span, h4 > span, h5 > span, h6 > span, h1 > i, h2 > i, h3 > i, h4 > i, h5 > i, h6 > i) {
                     font-size: 14px !important;
                 }
                 .dataTables_filter {
@@ -3567,7 +3569,7 @@
                     display: none;
                 }
                 *:not(h1, h2, h3, h4, h5, h6, .messageboxIcon > i, h1 > span, h2 > span, h3 > span, h4 > span, h5 > span, h6 > span, h1 > i, h2 > i, h3 > i, h4 > i, h5 > i, h6 > i) {
-                    font-size: 16px !important;
+                    font-size: 14px !important;
                 }
                 .knorke {
                     padding-left: 0;
