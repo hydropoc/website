@@ -1,6 +1,5 @@
 # HP
-
-#
+![Logo](img/hydropoc.png)
 
 let dataToSend = {
     "sensor_pt1000": 123456789,
@@ -30,5 +29,3 @@ $.ajax({
 });
 
 Bootstrap toggle: https://gitbrent.github.io/bootstrap4-toggle/ - funktioniert auch mit BS5
-
-TODO:
