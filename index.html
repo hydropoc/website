@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
     <head>
         <meta charset="utf-8">
         <title>Hydropoc</title>
@@ -773,22 +773,42 @@
                     return "<div class='" + (closeable ? "alert-dismissible " : "") + "alert alert-" + type + " messageboxContainer " + classes + "' role='alert'><div class='messageboxIcon " + type + "'><i class='" + icons[type] + "'></i></div><div class='messageboxText'>" + message + (closeable ? "</div><button type='button' class='btn-close position-static align-self-start' data-bs-dismiss='alert' aria-label='Schließen'></button>" : "") + "</div></div>";
                 }
             }
-            function editPlant(wtf) {
-                if (!isPlantEditingActive) {
-                    isPlantEditingActive = true;
-                    $("#savePlantButton").attr("data-plant-id", wtf);
-                    //$("#discardEditedPlantButton").attr("data-plant-id", wtf);
-                    let tab = $("a[href='#plantsAdminCreationContainer']")[0];
-                    $("a[href='#plantsAdminOverviewContainer']").addClass("disabled");
-                    $(tab).html("Bearbeitung");
-                    $("#savePlantButton").html("<i class='fas fa-save'></i> Speichern");
-                    $("#discardPlantButton").html("<i class='fas fa-times'></i> Abbrechen");
-                    $("#newPlantIdInput").attr("readonly", "readonly");
-                    $("#newPlantAutoIDCheck").prop("checked", false);
-                    $("#newPlantAutoIDCheck").attr("disabled", "disabled");
-                    $("#newPlantAutoIDCheckLabel").css("opacity", 0.50);
-                    fillPlantInputs(wtf);
-                    new bootstrap.Tab(tab).show();
+            async function editPlant(wtf) {
+                let plant = Number.parseInt(wtf);
+                if (Number.isSafeInteger(plant)) {
+                    let index = plantProperties.findIndex(key => key["id"] === plant);
+                    if (index >= 0) {
+                        if (isPlantEditingActive) {
+                            if (await confirmReplacePlantEditing(index)) {
+                                $("#savePlantButton").attr("data-plant-id", wtf);
+                                let tab = $("a[href='#plantsAdminCreationContainer']")[0];
+                                $(tab).html("Bearbeitung");
+                                $("#savePlantButton").html("<i class='fas fa-save'></i> Speichern");
+                                $("#discardPlantButton").html("<i class='fas fa-times'></i> Abbrechen");
+                                $("#newPlantIdInput").attr("readonly", "readonly");
+                                $("#newPlantAutoIDCheck").prop("checked", false);
+                                $("#newPlantAutoIDCheck").attr("disabled", "disabled");
+                                $("#newPlantAutoIDCheckLabel").css("opacity", 0.50);
+                                fillPlantInputs(wtf);
+                                new bootstrap.Tab(tab).show();
+                                bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
+                            }
+                        }
+                        else {
+                            isPlantEditingActive = true;
+                            $("#savePlantButton").attr("data-plant-id", wtf);
+                            let tab = $("a[href='#plantsAdminCreationContainer']")[0];
+                            $(tab).html("Bearbeitung");
+                            $("#savePlantButton").html("<i class='fas fa-save'></i> Speichern");
+                            $("#discardPlantButton").html("<i class='fas fa-times'></i> Abbrechen");
+                            $("#newPlantIdInput").attr("readonly", "readonly");
+                            $("#newPlantAutoIDCheck").prop("checked", false);
+                            $("#newPlantAutoIDCheck").attr("disabled", "disabled");
+                            $("#newPlantAutoIDCheckLabel").css("opacity", 0.50);
+                            fillPlantInputs(wtf);
+                            new bootstrap.Tab(tab).show();
+                        }
+                    }
                 }
             }
             function createNewUser() {
@@ -884,6 +904,9 @@
                         $("#newPlantDescriptionInput").val(plantProperties[index]["name"]);
                         if ($("#editPlantHeader").length == 0) {
                             $("#plantsAdminCreationContainer").prepend("<h4 class='mt-3 mb-4' id='editPlantHeader'>Pflanze &quot;" + plantProperties[index]["name"] + "&quot; bearbeiten</h4>")
+                        }
+                        else {
+                            $("#editPlantHeader").html("Pflanze &quot;" + plantProperties[index]["name"] + "&quot; bearbeiten");
                         }
                     }
                     let properties = Object.getOwnPropertyNames(plantProperties[index]["properties"]);
@@ -1073,7 +1096,6 @@
                 if (result) {
                     $("#newPlantContainer input[type='text']").val("");
                     isPlantEditingActive = false;
-                    $("a[href='#plantsAdminOverviewContainer']").removeClass("disabled");
                     $("a[href='#plantsAdminCreationContainer']").html("Erstellen");
                     $("#savePlantButton").html("<i class='fas fa-plus'></i> Hinzufügen");
                     $(this).html("<i class='fas fa-trash-alt'></i> Löschen");
@@ -1083,6 +1105,23 @@
                     $("#newPlantAutoIDCheckLabel").css("opacity", 1);
                     $("#editPlantHeader").remove();
                     bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
+                }
+            }
+            // wtf = Index der zu bearbeitenden Pflanze!
+            async function confirmReplacePlantEditing(wtf) {
+                let currentPlant = Number.parseInt($("#savePlantButton").attr("data-plant-id"));
+                if (Number.isSafeInteger(currentChartPlant)) {
+                    let index = plantProperties.findIndex(key => key["id"] === currentChartPlant);
+                    if (index >= 0) {
+                        let prompt = new Promise(function(resolve) {
+                            confirmation({
+                                title: "Pflanze entfernen bestätigen",
+                                content: "Zurzeit ist die Bearbeitung der Pflanze " + plantProperties[index]["name"] + " (ID: " + currentChartPlant + ") aktiv. Soll diese abgebrochen und stattdessen die Pflanze " + plantProperties[wtf]["name"] + " (ID: " + plantProperties[wtf]["id"] + ") bearbeitet werden?"
+                            },
+                            resolve);
+                        });
+                        return await prompt;
+                    }
                 }
             }
             $(window).on("load", function() {
@@ -1129,6 +1168,7 @@
                                 {
                                     shown: {
                                         function: function() {
+                                            updateSystemInfos();
                                             systemInfosTimer = setInterval(updateSystemInfos, 5000);
                                         }
                                     }
@@ -1626,14 +1666,14 @@
                             {
                                 label: "Aktueller Wert",
                                 stack: "current",
-                                borderColor: "black",
+                                borderColor: getCSSVar("--chart-current-border"),
                                 backgroundColor: "rgba(0, 0, 0, 0.75)",
                                 borderWidth: 1
                             },
                             {
                                 label: "Mittelwert",
                                 stack: "middle",
-                                borderColor: "green",
+                                borderColor: getCSSVar("--chart-middle-border"),
                                 backgroundColor: "rgba(0, 255, 0, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "line"
@@ -1641,7 +1681,7 @@
                             {
                                 label: "Sollwert",
                                 stack: "setpoint",
-                                borderColor: "orange",
+                                borderColor: getCSSVar("--chart-setpoint-border"),
                                 backgroundColor: "rgba(253, 126, 20, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "line"
@@ -1649,7 +1689,7 @@
                             {
                                 label: "Obere Eingriffsgrenze",
                                 stack: "upperControlLimit",
-                                borderColor: "rgb(220, 53, 69)",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 borderDash: [10, 5],
@@ -1658,7 +1698,7 @@
                             {
                                 label: "Obere Warngrenze",
                                 stack: "upperWarningLimit",
-                                borderColor: "rgb(255, 127, 39)",
+                                borderColor: getCSSVar("--chart-warning-limit-border"),
                                 backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
                                 borderDash: [5, 5],
@@ -1667,7 +1707,7 @@
                             {
                                 label: "Untere Eingriffsgrenze",
                                 stack: "lowerControlLimit",
-                                borderColor: "rgb(220, 53, 69)",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 borderDash: [10, 5],
@@ -1676,7 +1716,7 @@
                             {
                                 label: "Untere Warngrenze",
                                 stack: "lowerWarningLimit",
-                                borderColor: "rgb(255, 127, 39)",
+                                borderColor: getCSSVar("--chart-warning-limit-border"),
                                 backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
                                 borderDash: [5, 5],
@@ -1685,7 +1725,7 @@
                             {
                                 label: "Aktoraktivität",
                                 stack: "actuator",
-                                borderColor: "rgb(112, 146, 190)",
+                                borderColor: getCSSVar("--chart-actuator-border"),
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
@@ -1757,14 +1797,14 @@
                             {
                                 label: "Aktueller Wert",
                                 stack: "current",
-                                borderColor: "black",
+                                borderColor: getCSSVar("--chart-current-border"),
                                 backgroundColor: "rgba(0, 0, 0, 0.75)",
                                 borderWidth: 1
                             },
                             {
                                 label: "Mittelwert",
                                 stack: "middle",
-                                borderColor: "green",
+                                borderColor: getCSSVar("--chart-middle-border"),
                                 backgroundColor: "rgba(0, 255, 0, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "line"
@@ -1772,7 +1812,7 @@
                             {
                                 label: "Sollwert",
                                 stack: "setpoint",
-                                borderColor: "orange",
+                                borderColor: getCSSVar("--chart-setpoint-border"),
                                 backgroundColor: "rgba(253, 126, 20, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "line"
@@ -1780,7 +1820,7 @@
                             {
                                 label: "Obere Eingriffsgrenze",
                                 stack: "upperControlLimit",
-                                borderColor: "rgb(220, 53, 69)",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 borderDash: [10, 5],
@@ -1789,7 +1829,7 @@
                             {
                                 label: "Obere Warngrenze",
                                 stack: "upperWarningLimit",
-                                borderColor: "rgb(255, 127, 39)",
+                                borderColor: getCSSVar("--chart-warning-limit-border"),
                                 backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
                                 borderDash: [5, 5],
@@ -1798,7 +1838,7 @@
                             {
                                 label: "Untere Eingriffsgrenze",
                                 stack: "lowerControlLimit",
-                                borderColor: "rgb(220, 53, 69)",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 borderDash: [10, 5],
@@ -1807,7 +1847,7 @@
                             {
                                 label: "Untere Warngrenze",
                                 stack: "lowerWarningLimit",
-                                borderColor: "rgb(255, 127, 39)",
+                                borderColor: getCSSVar("--chart-warning-limit-border"),
                                 backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
                                 borderDash: [5, 5],
@@ -1816,7 +1856,7 @@
                             {
                                 label: "Aktoraktivität",
                                 stack: "actuator",
-                                borderColor: "rgb(112, 146, 190)",
+                                borderColor: getCSSVar("--chart-actuator-border"),
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
@@ -1888,14 +1928,14 @@
                             {
                                 label: "Aktueller Wert",
                                 stack: "current",
-                                borderColor: "black",
+                                borderColor: getCSSVar("--chart-current-border"),
                                 backgroundColor: "rgba(0, 0, 0, 0.75)",
                                 borderWidth: 1
                             },
                             {
                                 label: "Mittelwert",
                                 stack: "middle",
-                                borderColor: "green",
+                                borderColor: getCSSVar("--chart-middle-border"),
                                 backgroundColor: "rgba(0, 255, 0, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "line"
@@ -1903,7 +1943,7 @@
                             {
                                 label: "Sollwert",
                                 stack: "setpoint",
-                                borderColor: "orange",
+                                borderColor: getCSSVar("--chart-setpoint-border"),
                                 backgroundColor: "rgba(253, 126, 20, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "line"
@@ -1911,7 +1951,7 @@
                             {
                                 label: "Obere Eingriffsgrenze",
                                 stack: "upperControlLimit",
-                                borderColor: "rgb(220, 53, 69)",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 borderDash: [10, 5],
@@ -1920,7 +1960,7 @@
                             {
                                 label: "Obere Warngrenze",
                                 stack: "upperWarningLimit",
-                                borderColor: "rgb(255, 127, 39)",
+                                borderColor: getCSSVar("--chart-warning-limit-border"),
                                 backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
                                 borderDash: [5, 5],
@@ -1929,7 +1969,7 @@
                             {
                                 label: "Untere Eingriffsgrenze",
                                 stack: "lowerControlLimit",
-                                borderColor: "rgb(220, 53, 69)",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 borderDash: [10, 5],
@@ -1938,7 +1978,7 @@
                             {
                                 label: "Untere Warngrenze",
                                 stack: "lowerWarningLimit",
-                                borderColor: "rgb(255, 127, 39)",
+                                borderColor: getCSSVar("--chart-warning-limit-border"),
                                 backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
                                 borderDash: [5, 5],
@@ -1947,7 +1987,7 @@
                             {
                                 label: "Aktoraktivität",
                                 stack: "actuator",
-                                borderColor: "rgb(112, 146, 190)",
+                                borderColor: getCSSVar("--chart-actuator-border"),
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
@@ -2019,14 +2059,14 @@
                             {
                                 label: "Aktueller Wert",
                                 stack: "current",
-                                borderColor: "black",
+                                borderColor: getCSSVar("--chart-current-border"),
                                 backgroundColor: "rgba(0, 0, 0, 0.75)",
                                 borderWidth: 1
                             },
                             {
                                 label: "Mittelwert",
                                 stack: "middle",
-                                borderColor: "green",
+                                borderColor: getCSSVar("--chart-middle-border"),
                                 backgroundColor: "rgba(0, 255, 0, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "line"
@@ -2034,7 +2074,7 @@
                             {
                                 label: "Sollwert",
                                 stack: "setpoint",
-                                borderColor: "orange",
+                                borderColor: getCSSVar("--chart-setpoint-border"),
                                 backgroundColor: "rgba(253, 126, 20, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "line"
@@ -2042,7 +2082,7 @@
                             {
                                 label: "Obere Eingriffsgrenze",
                                 stack: "upperControlLimit",
-                                borderColor: "rgb(220, 53, 69)",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 borderDash: [10, 5],
@@ -2051,7 +2091,7 @@
                             {
                                 label: "Obere Warngrenze",
                                 stack: "upperWarningLimit",
-                                borderColor: "rgb(255, 127, 39)",
+                                borderColor: getCSSVar("--chart-warning-limit-border"),
                                 backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
                                 borderDash: [5, 5],
@@ -2060,7 +2100,7 @@
                             {
                                 label: "Untere Eingriffsgrenze",
                                 stack: "lowerControlLimit",
-                                borderColor: "rgb(220, 53, 69)",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 borderDash: [10, 5],
@@ -2069,7 +2109,7 @@
                             {
                                 label: "Untere Warngrenze",
                                 stack: "lowerWarningLimit",
-                                borderColor: "rgb(255, 127, 39)",
+                                borderColor: getCSSVar("--chart-warning-limit-border"),
                                 backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
                                 borderDash: [5, 5],
@@ -2078,7 +2118,7 @@
                             {
                                 label: "Aktoraktivität",
                                 stack: "actuator",
-                                borderColor: "rgb(112, 146, 190)",
+                                borderColor: getCSSVar("--chart-actuator-border"),
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
@@ -2150,14 +2190,14 @@
                             {
                                 label: "Aktueller Wert",
                                 stack: "current",
-                                borderColor: "black",
+                                borderColor: getCSSVar("--chart-current-border"),
                                 backgroundColor: "rgba(0, 0, 0, 0.75)",
                                 borderWidth: 1
                             },
                             {
                                 label: "Mittelwert",
                                 stack: "middle",
-                                borderColor: "green",
+                                borderColor: getCSSVar("--chart-middle-border"),
                                 backgroundColor: "rgba(0, 255, 0, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "line"
@@ -2165,7 +2205,7 @@
                             {
                                 label: "Sollwert",
                                 stack: "setpoint",
-                                borderColor: "orange",
+                                borderColor: getCSSVar("--chart-setpoint-border"),
                                 backgroundColor: "rgba(253, 126, 20, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "line"
@@ -2173,7 +2213,7 @@
                             {
                                 label: "Obere Eingriffsgrenze",
                                 stack: "upperControlLimit",
-                                borderColor: "rgb(220, 53, 69)",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 borderDash: [10, 5],
@@ -2182,7 +2222,7 @@
                             {
                                 label: "Obere Warngrenze",
                                 stack: "upperWarningLimit",
-                                borderColor: "rgb(255, 127, 39)",
+                                borderColor: getCSSVar("--chart-warning-limit-border"),
                                 backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
                                 borderDash: [5, 5],
@@ -2191,7 +2231,7 @@
                             {
                                 label: "Untere Eingriffsgrenze",
                                 stack: "lowerControlLimit",
-                                borderColor: "rgb(220, 53, 69)",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 borderDash: [10, 5],
@@ -2200,7 +2240,7 @@
                             {
                                 label: "Untere Warngrenze",
                                 stack: "lowerWarningLimit",
-                                borderColor: "rgb(255, 127, 39)",
+                                borderColor: getCSSVar("--chart-warning-limit-border"),
                                 backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
                                 borderDash: [5, 5],
@@ -2209,7 +2249,7 @@
                             {
                                 label: "Aktoraktivität",
                                 stack: "actuator",
-                                borderColor: "rgb(112, 146, 190)",
+                                borderColor: getCSSVar("--chart-actuator-border"),
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
@@ -2281,14 +2321,14 @@
                             {
                                 label: "Aktueller Wert",
                                 stack: "current",
-                                borderColor: "black",
+                                borderColor: getCSSVar("--chart-current-border"),
                                 backgroundColor: "rgba(0, 0, 0, 0.75)",
                                 borderWidth: 1
                             },
                             {
                                 label: "Mittelwert",
                                 stack: "middle",
-                                borderColor: "green",
+                                borderColor: getCSSVar("--chart-middle-border"),
                                 backgroundColor: "rgba(0, 255, 0, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "line"
@@ -2296,7 +2336,7 @@
                             {
                                 label: "Sollwert",
                                 stack: "setpoint",
-                                borderColor: "orange",
+                                borderColor: getCSSVar("--chart-setpoint-border"),
                                 backgroundColor: "rgba(253, 126, 20, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "line"
@@ -2304,7 +2344,7 @@
                             {
                                 label: "Obere Eingriffsgrenze",
                                 stack: "upperControlLimit",
-                                borderColor: "rgb(220, 53, 69)",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 borderDash: [10, 5],
@@ -2313,7 +2353,7 @@
                             {
                                 label: "Obere Warngrenze",
                                 stack: "upperWarningLimit",
-                                borderColor: "rgb(255, 127, 39)",
+                                borderColor: getCSSVar("--chart-warning-limit-border"),
                                 backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
                                 borderDash: [5, 5],
@@ -2322,7 +2362,7 @@
                             {
                                 label: "Untere Eingriffsgrenze",
                                 stack: "lowerControlLimit",
-                                borderColor: "rgb(220, 53, 69)",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 borderDash: [10, 5],
@@ -2331,7 +2371,7 @@
                             {
                                 label: "Untere Warngrenze",
                                 stack: "lowerWarningLimit",
-                                borderColor: "rgb(255, 127, 39)",
+                                borderColor: getCSSVar("--chart-warning-limit-border"),
                                 backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
                                 borderDash: [5, 5],
@@ -2340,7 +2380,7 @@
                             {
                                 label: "Aktoraktivität",
                                 stack: "actuator",
-                                borderColor: "rgb(112, 146, 190)",
+                                borderColor: getCSSVar("--chart-actuator-border"),
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
@@ -2407,14 +2447,14 @@
                             {
                                 label: "Aktueller Wert",
                                 stack: "current",
-                                borderColor: "black",
+                                borderColor: getCSSVar("--chart-current-border"),
                                 backgroundColor: "rgba(0, 0, 0, 0.75)",
                                 borderWidth: 1
                             },
                             {
                                 label: "Mittelwert",
                                 stack: "middle",
-                                borderColor: "green",
+                                borderColor: getCSSVar("--chart-middle-border"),
                                 backgroundColor: "rgba(0, 255, 0, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "line"
@@ -2422,7 +2462,7 @@
                             {
                                 label: "Sollwert",
                                 stack: "setpoint",
-                                borderColor: "orange",
+                                borderColor: getCSSVar("--chart-setpoint-border"),
                                 backgroundColor: "rgba(253, 126, 20, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "line"
@@ -2430,7 +2470,7 @@
                             {
                                 label: "Obere Eingriffsgrenze",
                                 stack: "upperControlLimit",
-                                borderColor: "rgb(220, 53, 69)",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 borderDash: [10, 5],
@@ -2439,7 +2479,7 @@
                             {
                                 label: "Obere Warngrenze",
                                 stack: "upperWarningLimit",
-                                borderColor: "rgb(255, 127, 39)",
+                                borderColor: getCSSVar("--chart-warning-limit-border"),
                                 backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
                                 borderDash: [5, 5],
@@ -2448,7 +2488,7 @@
                             {
                                 label: "Untere Eingriffsgrenze",
                                 stack: "lowerControlLimit",
-                                borderColor: "rgb(220, 53, 69)",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 borderDash: [10, 5],
@@ -2457,7 +2497,7 @@
                             {
                                 label: "Untere Warngrenze",
                                 stack: "lowerWarningLimit",
-                                borderColor: "rgb(255, 127, 39)",
+                                borderColor: getCSSVar("--chart-warning-limit-border"),
                                 backgroundColor: "rgba(255, 127, 39, 0.75)",
                                 borderWidth: 1,
                                 borderDash: [5, 5],
@@ -2466,7 +2506,7 @@
                             {
                                 label: "Aktoraktivität",
                                 stack: "actuator",
-                                borderColor: "rgb(112, 146, 190)",
+                                borderColor: getCSSVar("--chart-actuator-border"),
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
@@ -2562,7 +2602,7 @@
                             {
                                 label: "Höchstwert",
                                 stack: "highest",
-                                borderColor: "rgb(220, 53, 69)",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
                                 backgroundColor: "rgba(220, 53, 69, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "circle"
@@ -2731,20 +2771,18 @@
                 src: url("fonts/free-fa-solid-900.woff") format("woff")
             }
             :root {
+                --chart-setpoint-border: green;
+                --chart-current-border: black;
+                --chart-middle-border: orange;
+                --chart-warning-limit-border: rgb(255, 115, 0);
+                --chart-control-limit-border: rgb(220, 53, 69);
+                --chart-actuator-border: rgb(112, 146, 190);
                 --alert-color-warning: #cd853f;
                 --alert-background-warning: #f7e8cd;
                 --alert-color-danger: #dc143c;
                 --alert-background-danger: #ffe4e1;
                 --alert-color-success: #228b22;
                 --alert-background-success: #c0edc0;
-                --chart-background-danger: #dc143c80;
-                --chart-border-danger: #dc143cbf;
-                --chart-background-warning: #cd853f80;
-                --chart-border-warning: #cd853fbf;
-                --chart-background-success: #228b2280;
-                --chart-border-success: #228b22bf;
-                --chart-background-info: #0dcaf080;
-                --chart-border-info: #0dcaf0bf;
             }
             body {
                 display: grid;
@@ -2861,13 +2899,13 @@
                 max-width: 200px;
                 align-self: flex-start;
             }
-            section.lol {
+            div.lol {
                 border: 2px solid var(--bs-gray-300, #dee2e6)
             }
-            section.lol div:first-of-type {
+            div.lol div:first-of-type {
                 flex: 0 0 28px
             }
-            section.lol > div:first-of-type > span:first-of-type {
+            div.lol > div:first-of-type > span:first-of-type {
                 font-weight: bold;
                 font-size: 1rem;
                 vertical-align: middle;
@@ -2890,12 +2928,12 @@
                 justify-content: center;
                 display: flex
             }
-            section.lol.warning {
+            div.lol.warning {
                 background-color: var(--alert-background-warning);
                 border: 2px dashed var(--alert-color-warning);
                 animation: background-flashing-warning 3s linear 0s infinite
             }
-            section.lol.danger {
+            div.lol.danger {
                 background-color: var(--alert-background-danger);
                 border: 2px dashed var(--alert-color-danger);
                 animation: background-flashing-danger 1s linear 0s infinite
@@ -3311,13 +3349,14 @@
                 margin: 0;
                 padding: 0;
             }
-            @media screen and (max-width: 767px) {
-                div.dtr-modal div.dtr-modal-display {
-                    width: 95%
-                }
-                div.dtr-bs-modal table.table tr:first-child td {
-                    border-top: none
-                }
+            #section-legend {
+                gap: 5px;
+            }
+            .legendContainer div.legendIcon {
+                position: relative;
+                top: 2px;
+                width: 16px;
+                height: 16px
             }
             @media only screen and (max-width: 600px) {
                 .alert > i {
@@ -3373,7 +3412,7 @@
                     border: 1px solid var(--bs-gray-300, #dee2e6);
                     border-radius: 4px;
                 }
-                .formContainer {
+                .formContainer, .legendContainer {
                     flex-direction: column;
                 }
                 .formContainer > label {
@@ -3382,7 +3421,7 @@
                 .formContainer > label:not(:first-child), .formContainer > select:not(:first-child), .formContainer > input:not(:first-child), .formContainer > button:not(:first-child) {
                     margin-left: 0;
                 }
-                .formContainer > label, .formContainer > select, .formContainer > input, .formContainer > button {
+                .formContainer > label, .formContainer > select, .formContainer > input, .formContainer > button, .legendContainer > label {
                     margin-top: 0.5rem;
                 }
                 table.dataTable:not(.table-borderless) > tbody > tr:first-of-type > td:first-of-type {
@@ -3406,6 +3445,9 @@
                     width: 0;
                     flex: 1 0 auto;
                     overflow-y: auto
+                }
+                .legendContainer {
+                    margin-top: 0;
                 }
             }
             /* Small devices (portrait tablets and large phones, 600px and up) */
@@ -3456,7 +3498,7 @@
                     border: 1px solid var(--bs-gray-300, #dee2e6);
                     border-radius: 4px;
                 }
-                .formContainer {
+                .formContainer, .legendContainer {
                     flex-direction: column;
                 }
                 .formContainer > label {
@@ -3465,7 +3507,7 @@
                 .formContainer > label:not(:first-child), .formContainer > select:not(:first-child), .formContainer > input:not(:first-child), .formContainer > button:not(:first-child) {
                     margin-left: 0;
                 }
-                .formContainer > label, .formContainer > select, .formContainer > input, .formContainer > button {
+                .formContainer > label, .formContainer > select, .formContainer > input, .formContainer > button, .legendContainer > label {
                     margin-top: 0.5rem;
                 }
                 table.dataTable:not(.table-borderless) > tbody > tr:first-of-type > td:first-of-type {
@@ -3490,6 +3532,9 @@
                     flex: 1 0 auto;
                     overflow-y: auto
                 }
+                .legendContainer {
+                    margin-top: 0;
+                }
             }
             /* Medium devices (landscape tablets, 768px and up) */
             @media only screen and (min-width: 768px) {
@@ -3499,10 +3544,6 @@
                 #newPlantMenu {
                     flex-direction: column;
                 }
-                /*
-                #newPlantForm label:not(.form-check-label) {
-                    padding-left: calc(var(--bs-gutter-x) * 0.5)
-                }*/
                 #newPlantForm .form-check-label {
                     padding-left: 0;
                 }
@@ -3514,6 +3555,9 @@
                 }
                 .knorke {
                     padding-left: 0;
+                }
+                .legendContainer {
+                    margin-top: 0;
                 }
             }
             /* Large devices (laptops/desktops, 992px and up) */
@@ -3537,7 +3581,7 @@
                     margin-left: 0.5rem;
                     flex: 1 0;
                 }
-                .formContainer {
+                .formContainer, .legendContainer {
                     flex-direction: row;
                     align-content: center;
                     align-items: center;
@@ -3545,7 +3589,7 @@
                 .formContainer > label:not(:first-child), .formContainer > select:not(:first-child), .formContainer > input:not(:first-child), .formContainer > button:not(:first-child) {
                     margin-left: 0.5rem;
                 }
-                .formContainer > label, .formContainer > select, .formContainer > input, .formContainer > button {
+                .formContainer > label, .formContainer > select, .formContainer > input, .formContainer > button, .legendContainer {
                     margin-top: 0.5rem;
                 }
                 #mobile-navbar {
@@ -3553,6 +3597,9 @@
                 }
                 *:not(h1, h2, h3, h4, h5, h6, .messageboxIcon > i, h1 > span, h2 > span, h3 > span, h4 > span, h5 > span, h6 > span, h1 > i, h2 > i, h3 > i, h4 > i, h5 > i, h6 > i) {
                     font-size: 16px !important;
+                }
+                .legendContainer > label {
+                    margin-top: 0;
                 }
             }
             /* Extra large devices (large laptops and desktops, 1200px and up) */
@@ -3573,7 +3620,7 @@
                     margin-top: 0;
                 }
             }
-            @media only screen and (min-width: 1280px) {
+            @media only screen and (min-width: 1281px) {
                 #newPlantForm input[type="text"] {
                     display: inline-block;
                 }
@@ -3654,18 +3701,19 @@
                                 <button type="button" class="btn btn-success align-baseline"><i class="fas fa-play"></i></button>
                                 <!--<button type="button" class="btn btn-warning ms-2"><i class="fas fa-pause"></i></button>-->
                             </div>
-                            <section id="section-legend">
-                                <h6>Legende</h6>
-                                <div class="d-flex align-content-center align-items-center">
-                                    <div style="background-color: black; border: 1px solid rgba(0, 0, 0, 0.75); width: 1rem; height: 1rem;"></div><span>Messwert</span>
-                                    <div style="background-color: green; border: 1px solid rgba(0, 255, 0, 0.75); width: 1rem; height: 1rem;"></div><span>Sollwert</span>
-                                    <div style="background-color: orange; border: 1px solid rgba(253, 126, 20, 0.75); width: 1rem; height: 1rem;"></div>Mittelwert
-                                    <div style="background-color: rgba(220, 53, 69, 0.75); border: 1px solid rgb(220, 53, 69); width: 1rem; height: 1rem;"></div>Eingriffsgrenze
-                                    <div style="background-color: rgba(255, 127, 39, 0.75); border: 1px solid rgb(255, 127, 39); width: 1rem; height: 1rem;"></div>Warngrenze
+                            <div class="d-flex legendContainer">
+                                <label class="me-2">Legende:</label>
+                                <div id="section-legend" class="flex-wrap d-flex">
+                                    <div><div style="background-color: black;" class="d-inline-block legendIcon"></div><span class="ms-1">Messwert</span></div>
+                                    <div><div style="background-color: green;" class="d-inline-block legendIcon"></div><span class="ms-1">Sollwert</span></div>
+                                    <div><div style="background-color: orange;" class="d-inline-block legendIcon"></div><span class="ms-1">Mittelwert</span></div>
+                                    <div><div style="background-color: rgb(112, 146, 190);" class="d-inline-block legendIcon"></div><span class="ms-1">Aktoraktivität</span></div>
+                                    <div><div style="border: 2px dashed rgb(220, 53, 69);" class="d-inline-block legendIcon"></div><span class="ms-1">Eingriffsgrenze</span></div>
+                                    <div><div style="border: 1px dashed rgb(255, 115, 0);" class="d-inline-block legendIcon"></div><span class="ms-1">Warngrenze</span></div>
+                                </div>
                             </div>
-                            </section>
                             <div id="overviewPanel" class="mt-3">
-                                <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-co2">
+                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-co2">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Co²-Gehalt</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="co2" data-chart-title="Co²" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
@@ -3676,8 +3724,8 @@
                                         </div>
                                         <canvas id="co2-chart-current"></canvas>
                                     </div>
-                                </section>
-                                <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-temperature">
+                                </div>
+                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-temperature">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Temperatur</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="temperature" data-chart-title="Temperatur" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
@@ -3688,8 +3736,8 @@
                                         </div>
                                         <canvas id="temperature-chart-current"></canvas>
                                     </div>
-                                </section>
-                                <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-salinity">
+                                </div>
+                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-salinity">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Salzgehalt</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="salinity" data-chart-title="Salzgehalt" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
@@ -3700,8 +3748,8 @@
                                         </div>
                                         <canvas id="salinity-chart-current"></canvas>
                                     </div>
-                                </section>
-                                <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-ph">
+                                </div>
+                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-ph">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>pH-Wert</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ph" data-chart-title="pH-Wert" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
@@ -3712,8 +3760,8 @@
                                         </div>
                                         <canvas id="ph-chart-current"></canvas>
                                     </div>
-                                </section>
-                                <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-waterlevel">
+                                </div>
+                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-waterlevel">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Wasserstand</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="waterlevel" data-chart-title="Wasserstand" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
@@ -3724,8 +3772,8 @@
                                         </div>
                                         <canvas id="waterlevel-chart-current"></canvas>
                                     </div>
-                                </section>
-                                <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-ventilation">
+                                </div>
+                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-ventilation">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Belüftung oder Luftfeuchtigkeit?</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ventilation" data-chart-title="Belüftung" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
@@ -3736,8 +3784,8 @@
                                         </div>
                                         <canvas id="ventilation-chart-current"></canvas>
                                     </div>
-                                </section>
-                                <section class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-brightness">
+                                </div>
+                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-brightness">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Beleuchtung</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="brightness" data-chart-title="Beleuchtung" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
@@ -3748,11 +3796,11 @@
                                         </div>
                                         <canvas id="brightness-chart-current"></canvas>
                                     </div>
-                                </section>
+                                </div>
                             </div>
                         </div>
                         <div class="tab-pane fade" id="administration">
-                            <section id="plants-accordion" class="mb-3">
+                            <div id="plants-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
                                         <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-plants-actions" data-table="plants">
@@ -3816,7 +3864,7 @@
                                                                         <label for="newPlantIdInput" class="col-form-label col-md-6">ID:</label>
                                                                         <input type="text" class="form-control w-auto col-md-6" id="newPlantIdInput" disabled="disabled">
                                                                     </div>
-                                                                    <div class="d-flex align-items-center align-content-center col-md-12 franz knorke offset-md-6 mt-1">
+                                                                    <div class="d-flex align-items-center align-content-center col-md-12 franz knorke mt-1">
                                                                         <input class="form-check-input mt-0" type="checkbox" id="newPlantAutoIDCheck" value="1" checked="checked" onclick="toggleFormState('#newPlantIdInput')">
                                                                         <label class="form-check-label" id="newPlantAutoIDCheckLabel" for="newPlantAutoIDCheck">Automatisch</label>
                                                                     </div>
@@ -3827,7 +3875,7 @@
                                                                 <div class="row mt-2">
                                                                     <div class="col-md-12">
                                                                         <label for="newPlantCo2SetpointInput" class="col-form-label col-md-3">Sollwert:</label>
-                                                                        <input type="text" class="form-control w-auto col-md-6" id="newPlantCo2SetpointInput" aria-label="Co²-Gehalt Sollwert" aria-describedby="newPlantCategoryCo2InputSetpoint">
+                                                                        <input type="text" class="form-control w-auto col-md-6" id="newPlantCo2SetpointInput" aria-label="Co²-Gehalt Sollwert" aria-describedby="newPlantCo2SetpointInput">
                                                                     </div>
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
@@ -4008,8 +4056,8 @@
                                         </div>
                                     </div>
                                 </div>
-                            </section>
-                            <section id="plants-programs-accordion" class="mb-3">
+                            </div>
+                            <div id="plants-programs-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
                                         <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-plants-programs-actions" data-table="plantPrograms">
@@ -4040,8 +4088,8 @@
                                         </div>
                                     </div>
                                 </div>
-                            </section>
-                            <section id="pump-actions-accordion" class="mb-3">
+                            </div>
+                            <div id="pump-actions-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
                                         <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-pump-actions" data-table="pumps">
@@ -4065,8 +4113,8 @@
                                         </div>
                                     </div>
                                 </div>
-                            </section>
-                            <section id="user-actions-accordion" class="mb-3">
+                            </div>
+                            <div id="user-actions-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
                                         <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-user-actions" data-table="userAccounts">
@@ -4104,8 +4152,8 @@
                                         </div>
                                     </div>
                                 </div>
-                            </section>
-                            <section id="events-accordion" class="mb-3">
+                            </div>
+                            <div id="events-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
                                         <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-events-actions" data-table="events">
@@ -4139,8 +4187,8 @@
                                         </div>
                                     </div>
                                 </div>
-                            </section>
-                            <section id="logs-accordion">
+                            </div>
+                            <div id="logs-accordion">
                                 <div class="card">
                                     <div class="card-header">
                                         <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-logs-actions" data-table="logs">
@@ -4151,7 +4199,7 @@
                                     <div id="collapse-logs-actions" class="collapse hide" data-bs-parent="#logs-accordion">
                                         <div class="card-body">
                                             <div class="d-flex formContainer mb-3">
-                                                <label for="logAdminCategorySelection">Kategorie:</label>
+                                                <label for="logsAdminCategorySelection">Kategorie:</label>
                                                 <select class="form-select w-auto d-inline-block" id="logsAdminCategorySelection" data-old="0">
                                                     <option value="0">Alles</option>
                                                     <option value="1">Aktoren</option>
@@ -4175,7 +4223,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </section>
+                            </div>
                         </div>
                         <div class="tab-pane fade" id="historyGallery">
                             <div class="formContainer mb-3" id="historyGalleryTimespan">
@@ -4186,13 +4234,7 @@
                                     <option value="2">06:00-12:00 Uhr</option>
                                 </select>
                             </div>
-                            <div id="historyGalleryPanel" class="mt-3">
-                                <!-- mit js füllen
-                                <div class="historyGalleryItem d-flex flex-column p-1" onclick="showHistoryGalleryImage('test1.jpg')">
-                                    <img src="img/test1.jpg">
-                                    <article><span class="text-secondary">verdammt</span><br>01.01.1970, 11:11:11 Uhr</article>
-                                </div>-->
-                            </div>
+                            <div id="historyGalleryPanel" class="mt-3"></div>
                         </div>
                     </div>
                 </div>
@@ -4268,9 +4310,9 @@
                                         <option value="24">Letzte 24 Stunden</option>
                                     </select>
                                 </div>
-                                <section id="history" class="w-100" style="height:60vh">
+                                <div id="history" class="w-100" style="height:60vh">
                                     <canvas id="charts-history"></canvas>
-                                </section>
+                                </div>
                             </div>
                             <div class="tab-pane fade" id="lolo">
                                 <h2>Ja spinnt der Beppi!</h2>
@@ -4287,13 +4329,11 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title"></h4>
+                        <h4 class="modal-title">Dieser Titel gehört ersetzt!</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body">
-                    </div>
-                    <div class="modal-footer">
-                    </div>
+                    <div class="modal-body"></div>
+                    <div class="modal-footer"></div>
                 </div>
             </div>
         </div>
