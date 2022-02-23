@@ -2771,9 +2771,9 @@
                 src: url("fonts/free-fa-solid-900.woff") format("woff")
             }
             :root {
-                --chart-setpoint-border: green;
+                --chart-setpoint-border: orange;
                 --chart-current-border: black;
-                --chart-middle-border: orange;
+                --chart-middle-border: green;
                 --chart-warning-limit-border: rgb(255, 115, 0);
                 --chart-control-limit-border: rgb(220, 53, 69);
                 --chart-actuator-border: rgb(112, 146, 190);
@@ -3705,8 +3705,8 @@
                                 <label class="me-2">Legende:</label>
                                 <div id="section-legend" class="flex-wrap d-flex">
                                     <div><div style="background-color: black;" class="d-inline-block legendIcon"></div><span class="ms-1">Messwert</span></div>
-                                    <div><div style="background-color: green;" class="d-inline-block legendIcon"></div><span class="ms-1">Sollwert</span></div>
-                                    <div><div style="background-color: orange;" class="d-inline-block legendIcon"></div><span class="ms-1">Mittelwert</span></div>
+                                    <div><div style="background-color: var(--chart-setpoint-border);" class="d-inline-block legendIcon"></div><span class="ms-1">Sollwert</span></div>
+                                    <div><div style="background-color: var(--chart-middle-border);" class="d-inline-block legendIcon"></div><span class="ms-1">Mittelwert</span></div>
                                     <div><div style="background-color: rgb(112, 146, 190);" class="d-inline-block legendIcon"></div><span class="ms-1">Aktoraktivität</span></div>
                                     <div><div style="border: 2px dashed rgb(220, 53, 69);" class="d-inline-block legendIcon"></div><span class="ms-1">Eingriffsgrenze</span></div>
                                     <div><div style="border: 1px dashed rgb(255, 115, 0);" class="d-inline-block legendIcon"></div><span class="ms-1">Warngrenze</span></div>
@@ -3859,7 +3859,7 @@
                                                                     <label for="newPlantDescriptionInput" class="col-form-label col-md-6">Bezeichnung:</label>
                                                                     <input required type="text" class="form-control w-auto col-md-6" id="newPlantDescriptionInput" aria-label="Bezeichnung" aria-describedby="newPlantDescriptionInput">
                                                                 </div>
-                                                                <div class="mt-2 col-md-6 d-flex flex-column align-items-start align-content-start">
+                                                                <div class="mt-2 col-md-6">
                                                                     <div class="col-md-12">
                                                                         <label for="newPlantIdInput" class="col-form-label col-md-6">ID:</label>
                                                                         <input type="text" class="form-control w-auto col-md-6" id="newPlantIdInput" disabled="disabled">
