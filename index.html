@@ -468,12 +468,12 @@
                     });
                 }
             }
-            function toggleFormState(wtf) {
-                if ($(wtf).attr("disabled") == "disabled") {
-                    $(wtf).removeAttr("disabled");
+            function toggleFormState(element, wtf) {
+                if ($(element).prop("checked")) {
+                    $(wtf).attr("disabled", "disabled");
                 }
                 else {
-                    $(wtf).attr("disabled", "disabled");
+                    $(wtf).removeAttr("disabled");
                 }
             }
             function logout(wtf) {
@@ -3289,9 +3289,6 @@
             table.dataTable:not(.table-borderless) > tbody > tr > td:only-of-type, table.dataTable:not(.table-borderless) > tbody > tr > td:last-of-type {
                 border-right: 1px solid var(--bs-gray-300, #dee2e6)
             }
-            .knorke > .form-check-label {
-                margin-left: 0.25rem;
-            }
             .alert-info.messageboxContainer {
                 border-color: #bbd8e6
             }
@@ -3358,6 +3355,20 @@
                 width: 16px;
                 height: 16px
             }
+            .knorke {
+                margin-left: 0.25rem;
+            }
+            input[type="text"].form-placeholder {
+                visibility: hidden !important;
+                padding: 0 !important;
+                border-width: 0 !important;
+                height: 0 !important;
+            }
+            label.form-placeholder {
+                font-size: 0 !important;
+                visibility: hidden !important;
+                padding: 0 !important;
+            }
             @media only screen and (max-width: 600px) {
                 .alert > i {
                     vertical-align: baseline !important;
@@ -3420,8 +3431,9 @@
                 }
                 .formContainer > label:not(:first-child), .formContainer > select:not(:first-child), .formContainer > input:not(:first-child), .formContainer > button:not(:first-child) {
                     margin-left: 0;
+                    margin-top: 0.5rem;
                 }
-                .formContainer > label, .formContainer > select, .formContainer > input, .formContainer > button, .legendContainer > label {
+                .legendContainer > label {
                     margin-top: 0.5rem;
                 }
                 table.dataTable:not(.table-borderless) > tbody > tr:first-of-type > td:first-of-type {
@@ -3448,6 +3460,9 @@
                 }
                 .legendContainer {
                     margin-top: 0;
+                }
+                .form-placeholder {
+                    display: none !important;
                 }
             }
             /* Small devices (portrait tablets and large phones, 600px and up) */
@@ -3506,8 +3521,6 @@
                 }
                 .formContainer > label:not(:first-child), .formContainer > select:not(:first-child), .formContainer > input:not(:first-child), .formContainer > button:not(:first-child) {
                     margin-left: 0;
-                }
-                .formContainer > label, .formContainer > select, .formContainer > input, .formContainer > button, .legendContainer > label {
                     margin-top: 0.5rem;
                 }
                 table.dataTable:not(.table-borderless) > tbody > tr:first-of-type > td:first-of-type {
@@ -3535,6 +3548,9 @@
                 .legendContainer {
                     margin-top: 0;
                 }
+                .form-placeholder {
+                    display: none !important;
+                }
             }
             /* Medium devices (landscape tablets, 768px and up) */
             @media only screen and (min-width: 768px) {
@@ -3553,11 +3569,11 @@
                 *:not(h1, h2, h3, h4, h5, h6, .messageboxIcon > i, h1 > span, h2 > span, h3 > span, h4 > span, h5 > span, h6 > span, h1 > i, h2 > i, h3 > i, h4 > i, h5 > i, h6 > i) {
                     font-size: 14px !important;
                 }
-                .knorke {
-                    padding-left: 0;
-                }
                 .legendContainer {
                     margin-top: 0;
+                }
+                .form-placeholder {
+                    display: none !important;
                 }
             }
             /* Large devices (laptops/desktops, 992px and up) */
@@ -3588,9 +3604,10 @@
                 }
                 .formContainer > label:not(:first-child), .formContainer > select:not(:first-child), .formContainer > input:not(:first-child), .formContainer > button:not(:first-child) {
                     margin-left: 0.5rem;
-                }
-                .formContainer > label, .formContainer > select, .formContainer > input, .formContainer > button, .legendContainer {
                     margin-top: 0.5rem;
+                }
+                .legendContainer {
+                    margin-top: 0;
                 }
                 #mobile-navbar {
                     display: none;
@@ -3600,6 +3617,9 @@
                 }
                 .legendContainer > label {
                     margin-top: 0;
+                }
+                .form-placeholder {
+                    display: unset !important;
                 }
             }
             /* Extra large devices (large laptops and desktops, 1200px and up) */
@@ -3623,9 +3643,6 @@
             @media only screen and (min-width: 1281px) {
                 #newPlantForm input[type="text"] {
                     display: inline-block;
-                }
-                .franz {
-                    padding-left: 0.25rem;
                 }
             }
         </style>
@@ -3852,26 +3869,45 @@
                                                         </div>
                                                         <div data-bs-spy="scroll" data-bs-target="#newPlantNavigation" data-bs-offset="0" class="p-3 col-md-10 position-relative" id="newPlantContainer">
                                                             <form id="newPlantForm" class="row">
-                                                                <div class="col-md-12">
-                                                                    <h5 id="newPlantGeneralSection" class="col-md-12">Allgemein</h5>
-                                                                </div>
+                                                                <h5 id="newPlantGeneralSection" class="col-md-12">Allgemein</h5>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="newPlantDescriptionInput" class="col-form-label col-md-6">Bezeichnung:</label>
                                                                     <input required type="text" class="form-control w-auto col-md-6" id="newPlantDescriptionInput" aria-label="Bezeichnung" aria-describedby="newPlantDescriptionInput">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
+                                                                    <label for="newPlantIdInput" class="col-form-label col-md-6">ID:</label>
+                                                                    <input type="text" class="form-control w-auto col-md-4" id="newPlantIdInput" disabled="disabled">
+                                                                </div>
+                                                                <div class="row">
                                                                     <div class="col-md-12">
-                                                                        <label for="newPlantIdInput" class="col-form-label col-md-6">ID:</label>
-                                                                        <input type="text" class="form-control w-auto col-md-6" id="newPlantIdInput" disabled="disabled">
-                                                                    </div>
-                                                                    <div class="d-flex align-items-center align-content-center col-md-12 franz knorke mt-1">
-                                                                        <input class="form-check-input mt-0" type="checkbox" id="newPlantAutoIDCheck" value="1" checked="checked" onclick="toggleFormState('#newPlantIdInput')">
-                                                                        <label class="form-check-label" id="newPlantAutoIDCheckLabel" for="newPlantAutoIDCheck">Automatisch</label>
+                                                                        <div class="col-md-6">
+                                                                            <label class="col-md-6">
+                                                                            <input type="text" class="form-control col-md-6 w-auto">
+                                                                            <label class="col-md-6">
+                                                                            <div class="d-inline-flex align-items-center align-content-center mt-1 col-md-6">
+                                                                                <input class="form-check-input mt-0" type="checkbox" id="newPlantAutoIDCheck" value="1" checked="checked" onclick="toggleFormState(this, '#newPlantIdInput')">
+                                                                                <label class="form-check-label" id="newPlantAutoIDCheckLabel" for="newPlantAutoIDCheck">Automatisch</label>
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                                <div class="mt-4 col-md-12">
-                                                                    <h5 id="newPlantCo2Section" class="col-md-12">Co²-Gehalt</h5>
+                                                                <!--
+                                                                <div class="col-md-6">
+                                                                    <div class="col-md-12">
+                                                                        <label class="col-form-label col-md-6 p-0 form-placeholder">lol</label>
+                                                                        <input type="text" class="form-control w-auto col-md-6 form-placeholder">
+                                                                    </div>
                                                                 </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="col-md-12">
+                                                                        <label class="col-form-label col-md-6 p-0 form-placeholder">lol</label>
+                                                                        <div class="d-inline-flex align-items-center align-content-center col-md-5">
+                                                                            <input class="form-check-input mt-0" type="checkbox" id="newPlantAutoIDCheck" value="1" checked="checked" onclick="toggleFormState(this, '#newPlantIdInput')">
+                                                                            <label class="form-check-label knorke" id="newPlantAutoIDCheckLabel" for="newPlantAutoIDCheck">Automatisch</label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>-->
+                                                                <h5 id="newPlantCo2Section" class="mt-4 col-md-12">Co²-Gehalt</h5>
                                                                 <div class="row mt-2">
                                                                     <div class="col-md-12">
                                                                         <label for="newPlantCo2SetpointInput" class="col-form-label col-md-3">Sollwert:</label>
@@ -3894,9 +3930,7 @@
                                                                     <label for="newPlantCo2LowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
                                                                     <input required type="text" class="form-control w-auto col-md-6" id="newPlantCo2LowerWarningLimitInput" aria-label="Untere Warngrenze für Co²-Gehalt" aria-describedby="newPlantCo2LowerWarningLimitInput">
                                                                 </div>
-                                                                <div class="mt-4 col-md-12">
-                                                                    <h5 id="newPlantTemperatureSection" class="col-md-12">Temperatur</h5>
-                                                                </div>
+                                                                <h5 id="newPlantTemperatureSection" class="mt-4 col-md-12">Temperatur</h5>
                                                                 <div class="row mt-2">
                                                                     <div class="col-md-12">
                                                                         <label for="newPlantTemperatureSetpointInput" class="col-form-label col-md-3">Sollwert:</label>
@@ -3919,9 +3953,7 @@
                                                                     <label for="newPlantTemperatureLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
                                                                     <input required type="text" class="form-control w-auto col-md-6" id="newPlantTemperatureLowerWarningLimitInput" aria-label="Untere Warngrenze für Temperatur" aria-describedby="newPlantTemperatureLowerWarningLimitInput">
                                                                 </div>
-                                                                <div class="mt-4 col-md-12">
-                                                                    <h5 id="newPlantphSection" class="col-md-12">pH-Wert</h5>
-                                                                </div>
+                                                                <h5 id="newPlantphSection" class="mt-4 col-md-12">pH-Wert</h5>
                                                                 <div class="row mt-2">
                                                                     <div class="col-md-12">
                                                                         <label for="newPlantPhSetpointInput" class="col-form-label col-md-3">Sollwert:</label>
@@ -3969,9 +4001,7 @@
                                                                     <label for="newPlantSalinityLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
                                                                     <input required type="text" class="form-control w-auto col-md-6" id="newPlantSalinityLowerWarningLimitInput" aria-label="Untere Warngrenze für Salzgehalt" aria-describedby="newPlantSalinityLowerWarningLimitInput">
                                                                 </div>
-                                                                <div class="mt-4 col-md-12">
-                                                                    <h5 id="newPlantHumiditySection" class="col-md-12">Luftfeuchtigkeit</h5>
-                                                                </div>
+                                                                <h5 id="newPlantHumiditySection" class="mt-4 col-md-12">Luftfeuchtigkeit</h5>
                                                                 <div class="row mt-2">
                                                                     <div class="col-md-12">
                                                                         <label for="newPlantHumiditySetpointInput" class="col-form-label col-md-3">Sollwert:</label>
@@ -3994,9 +4024,7 @@
                                                                     <label for="newPlantHumidityLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
                                                                     <input required type="text" class="form-control w-auto col-md-6" id="newPlantHumidityLowerWarningLimitInput" aria-label="Untere Warngrenze für Luftfeuchtigkeit" aria-describedby="newPlantHumidityLowerWarningLimitInput">
                                                                 </div>
-                                                                <div class="mt-4 col-md-12">
-                                                                    <h5 id="newPlantWaterlevelSection" class="col-md-12">Wasserstand</h5>
-                                                                </div>
+                                                                <h5 id="newPlantWaterlevelSection" class="mt-4 col-md-12">Wasserstand</h5>
                                                                 <div class="row mt-2">
                                                                     <div class="col-md-12">
                                                                         <label for="newPlantWaterlevelSetpointInput" class="col-form-label col-md-3">Sollwert:</label>
@@ -4019,9 +4047,7 @@
                                                                     <label for="newPlantWaterlevelLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
                                                                     <input required type="text" class="form-control w-auto col-md-6" id="newPlantWaterlevelLowerWarningLimitInput" aria-label="Untere Warngrenze für Wasserstand" aria-describedby="newPlantWaterlevelLowerWarningLimitInput">
                                                                 </div>
-                                                                <div class="mt-4 col-md-12">
-                                                                    <h5 id="newPlantLightingSection" class="mt-4 col-md-12">Beleuchtung</h5>
-                                                                </div>
+                                                                <h5 id="newPlantLightingSection" class="mt-4 col-md-12">Beleuchtung</h5>
                                                                 <div class="row mt-2">
                                                                     <div class="col-md-12">
                                                                         <label for="newPlantLightingSetpointInput" class="col-form-label col-md-3">Sollwert:</label>
