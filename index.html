@@ -3062,11 +3062,6 @@
             table.dataTable:not(.table-borderless) > tbody > tr > td:not(.fritz) {
                 border-left: 1px solid var(--bs-gray-300, #dee2e6) !important
             }
-            /*
-            table.dataTable:not(.table-borderless) > tbody > tr.dtrg-start > td:nth-last-of-type(2) {
-                border-right: 1px solid transparent
-            }
-            */
             table.dataTable:not(.table-borderless) > tbody > tr:last-of-type > td {
                 border-bottom: 1px solid var(--bs-gray-300, #dee2e6) !important
             }
@@ -3347,7 +3342,7 @@
                 padding: 0;
             }
             #section-legend {
-                gap: 5px;
+                gap: 8px;
             }
             .legendContainer div.legendIcon {
                 position: relative;
@@ -3355,19 +3350,11 @@
                 width: 16px;
                 height: 16px
             }
+            .legendContainer {
+                border: 2px solid var(--bs-gray-300, #dee2e6);
+            }
             .knorke {
                 margin-left: 0.25rem;
-            }
-            input[type="text"].form-placeholder {
-                visibility: hidden !important;
-                padding: 0 !important;
-                border-width: 0 !important;
-                height: 0 !important;
-            }
-            label.form-placeholder {
-                font-size: 0 !important;
-                visibility: hidden !important;
-                padding: 0 !important;
             }
             @media only screen and (max-width: 600px) {
                 .alert > i {
@@ -3389,10 +3376,6 @@
                 }
                 .historyGalleryItem > div:first-of-type > div:first-of-type {
                     max-width: 300px;
-                }
-                #overPlantActionContainer {
-                    flex-direction: column;
-                    align-items: stretch !important;
                 }
                 table.dataTable thead > tr > th {
                     font-weight: 600;
@@ -3433,9 +3416,13 @@
                     margin-left: 0;
                     margin-top: 0.5rem;
                 }
+                /*
                 .legendContainer > label {
                     margin-top: 0.5rem;
                 }
+                .legendContainer div.legendItem {
+                    width: 100%;
+                }*/
                 table.dataTable:not(.table-borderless) > tbody > tr:first-of-type > td:first-of-type {
                     border-top-left-radius: 1px;
                     border-top-right-radius: 1px;
@@ -3447,7 +3434,7 @@
                 .accordion-flush > .accordion-item > .accordion-collapse > .accordion-body > div.row > div.col-md-4 {
                     margin: auto auto 0 auto
                 }
-                *:not(h1, h2, h3, h4, h5, h6, .messageboxIcon > i, h1 > span, h2 > span, h3 > span, h4 > span, h5 > span, h6 > span) {
+                *:not(h1, h2, h3, h4, h5, h6, .messageboxIcon > i, h1 > span, h2 > span, h3 > span, h4 > span, h5 > span, h6 > span, h1 > i, h2 > i, h3 > i, h4 > i, h5 > i, h6 > i) {
                     font-size: 14px !important;
                 }
                 .dataTables_filter {
@@ -3486,10 +3473,6 @@
                 }
                 .historyGalleryItem > div:first-of-type > div:first-of-type {
                     max-width: 300px;
-                }
-                #overPlantActionContainer {
-                    flex-direction: column;
-                    align-items: stretch !important;
                 }
                 table.dataTable thead > tr > th {
                     font-weight: 600;
@@ -3547,7 +3530,10 @@
                 }
                 .legendContainer {
                     margin-top: 0;
-                }
+                }/*
+                .legendContainer .legendItem {
+                    width: 100%;
+                }*/
                 .form-placeholder {
                     display: none !important;
                 }
@@ -3572,16 +3558,15 @@
                 .legendContainer {
                     margin-top: 0;
                 }
+                .legendContainer .legendItem {
+                    width: auto;
+                }
                 .form-placeholder {
                     display: none !important;
                 }
             }
             /* Large devices (laptops/desktops, 992px and up) */
             @media only screen and (min-width: 992px) {
-                #overPlantActionContainer {
-                    flex-direction: row;
-                    align-items: center !important;
-                }
                 #first-navbar, #second-navbar {
                     display: flex;
                 }
@@ -3597,10 +3582,13 @@
                     margin-left: 0.5rem;
                     flex: 1 0;
                 }
-                .formContainer, .legendContainer {
+                .formContainer {
                     flex-direction: row;
                     align-content: center;
                     align-items: center;
+                }
+                .legendContainer .legendItem {
+                    width: auto;
                 }
                 .formContainer > label:not(:first-child), .formContainer > select:not(:first-child), .formContainer > input:not(:first-child), .formContainer > button:not(:first-child) {
                     margin-left: 0.5rem;
@@ -3638,6 +3626,9 @@
                 }
                 .formContainer > label, .formContainer > select, .formContainer > input, .formContainer > button {
                     margin-top: 0;
+                }
+                .legendContainer .legendItem {
+                    width: auto;
                 }
             }
             @media only screen and (min-width: 1281px) {
@@ -3718,15 +3709,15 @@
                                 <button type="button" class="btn btn-success align-baseline"><i class="fas fa-play"></i></button>
                                 <!--<button type="button" class="btn btn-warning ms-2"><i class="fas fa-pause"></i></button>-->
                             </div>
-                            <div class="d-flex legendContainer">
+                            <div class="d-flex legendContainer rounded-3 p-2 mt-3">
                                 <label class="me-2">Legende:</label>
                                 <div id="section-legend" class="flex-wrap d-flex">
-                                    <div><div style="background-color: black;" class="d-inline-block legendIcon"></div><span class="ms-1">Messwert</span></div>
-                                    <div><div style="background-color: var(--chart-setpoint-border);" class="d-inline-block legendIcon"></div><span class="ms-1">Sollwert</span></div>
-                                    <div><div style="background-color: var(--chart-middle-border);" class="d-inline-block legendIcon"></div><span class="ms-1">Mittelwert</span></div>
-                                    <div><div style="background-color: rgb(112, 146, 190);" class="d-inline-block legendIcon"></div><span class="ms-1">Aktoraktivität</span></div>
-                                    <div><div style="border: 2px dashed rgb(220, 53, 69);" class="d-inline-block legendIcon"></div><span class="ms-1">Eingriffsgrenze</span></div>
-                                    <div><div style="border: 1px dashed rgb(255, 115, 0);" class="d-inline-block legendIcon"></div><span class="ms-1">Warngrenze</span></div>
+                                    <div class="legendItem"><div style="background-color: black;" class="d-inline-block legendIcon"></div><span class="ms-1">Messwert</span></div>
+                                    <div class="legendItem"><div style="background-color: var(--chart-setpoint-border);" class="d-inline-block legendIcon"></div><span class="ms-1">Sollwert</span></div>
+                                    <div class="legendItem"><div style="background-color: var(--chart-middle-border);" class="d-inline-block legendIcon"></div><span class="ms-1">Mittelwert</span></div>
+                                    <div class="legendItem"><div style="background-color: rgb(112, 146, 190);" class="d-inline-block legendIcon"></div><span class="ms-1">Aktoraktivität</span></div>
+                                    <div class="legendItem"><div style="border: 2px dashed rgb(220, 53, 69);" class="d-inline-block legendIcon"></div><span class="ms-1">Eingriffsgrenze</span></div>
+                                    <div class="legendItem"><div style="border: 1px dashed rgb(255, 115, 0);" class="d-inline-block legendIcon"></div><span class="ms-1">Warngrenze</span></div>
                                 </div>
                             </div>
                             <div id="overviewPanel" class="mt-3">
