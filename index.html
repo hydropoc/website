@@ -156,7 +156,7 @@
                                 let buttons = "<div class='d-flex flex-wrap' style='gap: 5px'>";
                                 let index = userAccounts.findIndex(key => key["id"] === row["id"]);
                                 if (index >= 0) {
-                                    buttons += "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editUserAccount(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger' style='width: 32px' onclick='confirmUserDeletion(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
+                                    buttons += "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editUser(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger' style='width: 32px' onclick='confirmUserDeletion(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
                                 }
                                 else {
                                     buttons += "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times' onclick='confirmUserDeeltion(" + row["id"] + ")'></i></button>";
@@ -524,7 +524,7 @@
                 }
             }
             function updateSystemInfos() {
-                if (systemInfosTimer !== null && $("#mainModal").hasClass("show") && $("#mainModal").attr("data-name") === "systemInfos" && !isLoadingSystemInfos) {
+                if ($("#mainModal").hasClass("show") && $("#mainModal").attr("data-name") === "systemInfos" && !isLoadingSystemInfos) {
                     isLoadingSystemInfos = true;
                     $.ajax("http://127.0.0.1:3000/api/device/environment", {
                         type: "GET",
@@ -733,20 +733,18 @@
                         }
                         if (data["modal"].hasOwnProperty("events")) {
                             let eventNames = {hide: "hide.bs.modal", hidden: "hidden.bs.modal", show: "show.bs.modal", shown: "shown.bs.modal", hidePrevented: "hidePrevented.bs.modal"};
-                            for (event of data["modal"]["events"]) {
-                                let events = Object.getOwnPropertyNames(event);
-                                for (var event_ of events) {
-                                    if (eventNames.hasOwnProperty(event_)) {
-                                        if (event[event_].hasOwnProperty("args") && typeof(event[event_]["function"]) === "object") {
-                                            $("#mainModal").one(eventNames[event_], function() {
-                                                achso(event[event_]["function"], event[event_]["args"]);
-                                            });
-                                        }
-                                        else if (typeof(event[event_]["function"]) === "function") {
-                                            $("#mainModal").one(eventNames[event_], function() {
-                                                achso(event[event_]["function"]);
-                                            });
-                                        }
+                            let events_ = Object.getOwnPropertyNames(data["modal"]["events"]);
+                            for (let event_ of events_) {
+                                if (eventNames.hasOwnProperty(event_)) {
+                                    if (data["modal"]["events"][event_].hasOwnProperty("args") && typeof(data["modal"]["events"][event_]["function"]) === "object") {
+                                        $("#mainModal").one(eventNames[event_], function() {
+                                            achso(data["modal"]["events"][event_]["function"], data["modal"]["events"][event_]["args"]);
+                                        });
+                                    }
+                                    else if (typeof(data["modal"]["events"][event_]["function"]) === "function") {
+                                        $("#mainModal").one(eventNames[event_], function() {
+                                            achso(data["modal"]["events"][event_]["function"]);
+                                        });
                                     }
                                 }
                             }
@@ -810,6 +808,80 @@
                         }
                     }
                 }
+            }
+            function editUser(user) {
+                // Solange man nicht Projektadministrator ist, soll man nur sich selbst bearbeiten können?
+                let index = userAccounts.findIndex(key => key["id"] === user);
+                if (index >= 0) {
+                    let content = "<div><label for='userNameInput' class='form-label'>Benutzername:</label><input type='text' class='form-control' id='userNameInput' placeholder='Benutzernamen eingeben'></div>";
+                    content += "<div class='mt-3'><label for='userSurnameInput' class='form-label'>Nachname:</label><input type='text' class='form-control' id='userSurnameInput' placeholder='Nachnamen eingeben'></div>";
+                    content += "<div class='mt-3'><label for='userFornameInput' class='form-label'>Vorname:</label><input type='text' class='form-control' id='userFornameInput' placeholder='Vornamen eingeben'></div>";
+                    content += "<div class='mt-3'><label for='oldPasswordInput' class='form-label'>Altes Passwort:</label><input type='password' class='form-control' id='oldPasswordInput' placeholder='Altes Passwort eingeben'></div>";
+                    content += "<div class='mt-3'><label for='newPasswordInput' class='form-label'>Neues Passwort:</label><input type='password' class='form-control' id='newPasswordInput' placeholder='Neues Passwort eingeben'></div>";
+                    let data = {
+                        modal: {
+                            name: "editUser"
+                        },
+                        title: {
+                            text: "Benutzer " + userAccounts[index]["fullname"] + " (ID: " + userAccounts[index]["id"] + ") bearbeiten"
+                        },
+                        content: {
+                            text: content
+                        },
+                        footer: {
+                            buttons: {
+                                default: {
+                                    text: "Abbrechen",
+                                    class: "btn-danger"
+                                },
+                                custom: [
+                                    {
+                                        text: "Speichern",
+                                        class: "btn-primary",
+                                        attributes: {
+                                            id: "saveEditedUserButton"
+                                        },
+                                        actions: [
+                                            {
+                                                click: [
+                                                    {
+                                                        function: function() {
+                                                            if ($("#body-overlay").length == 0) {
+                                                                $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
+                                                            }
+                                                            if ($("#saveEditedUserButton").find("[data-processing='true']").length == 0) {
+                                                                $("#saveEditedUserButton").attr("disabled", "disabled").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
+                                                            }
+                                                            $("#mainModal .modal-footer > button").attr("disabled", "disabled");
+                                                            $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
+                                                            $("#mainModal .modal-body > .alert").remove();
+                                                            $.post("lol", {
+                                                                user: userAccounts[index]["id"],
+                                                                username: $("#userNameInput").val(),
+                                                                surname: $("#userSurnameInput").val(),
+                                                                forename: $("#userFornameInput").val()
+                                                            }).done(function(response) {
+                                                            }).fail(function(response) {
+                                                                $("#mainModal .modal-body").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
+                                                            }).always(function() {
+                                                                $("#saveEditedUserButton").find("[data-processing='true']").remove();
+                                                                $("#saveEditedUserButton").removeAttr("disabled");
+                                                                $("#body-overlay").remove();
+                                                                $("#mainModal .modal-footer > [data-bs-dismiss='modal']").removeAttr("disabled");
+                                                                $("#mainModal .modal-header > [data-bs-dismiss='modal']").removeAttr("disabled");
+                                                            });
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                    Modal.create(data);
+                };
             }
             function createNewUser() {
                 let content = "<div><label for='newUserUsernameInput' class='form-label'>Benutzername:</label><input type='text' class='form-control' id='newUserUsernameInput' placeholder='Benutzername eingeben'></div>";
@@ -882,7 +954,7 @@
                 Modal.create(data);
             }
             function wtf() {
-                $.ajax("http://BINF02P268:3000/api/data/sensors", {
+                $.ajax("http://127.0.0.1:3000/api/data/sensors", {
                     data: JSON.stringify({amount: 50}),
                     type: "POST",
                     processData: false,
@@ -974,114 +1046,120 @@
                 Modal.create(data);
             }
             async function confirmPlantDeletion(plant) {
-                let prompt = new Promise(function(resolve) {
-                    confirmation({
-                        title: "Pflanze entfernen bestätigen",
-                        content: "Soll die Pflanze &quot;"  + plant + "&quot; wirklich entfernt werden?"
-                    },
-                    resolve);
-                });
-                let result = await prompt;
-                if (result) {
-                    if ($("#body-overlay").length == 0) {
-                        $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
-                    }
-                    if ($("#confirmationButton").find("[data-processing='true']").length == 0) {
-                        $("#confirmationButton").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
-                    }
-                    $("#mainModal .modal-footer > button").attr("disabled", "disabled");
-                    $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
-                    $("#mainModal .modal-body > .alert").remove();
-                    let data = {
-                        plant: plant
-                    }
-                    $.post("lol", {
-                        _token: authToken,
-                        data: JSON.stringify(data)
-                    }).done(function(response) {
-                        bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
-                    }).fail(function(response) {
-                        $("#mainModal .modal-body").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
-                    }).always(function() {
-                        $("#confirmationButton").find("[data-processing='true']").remove();
-                        $("#body-overlay").remove();
-                        $("#mainModal .modal-footer > button").removeAttr("disabled");
-                        $("#mainModal .modal-header > [data-bs-dismiss='modal']").removeAttr("disabled");
+                let index = plantProperties.findIndex(key => key["id"] === plant);
+                if (index >= 0) {
+                    let prompt = new Promise(function(resolve) {
+                        confirmation({
+                            title: "Pflanze entfernen bestätigen",
+                            content: "Soll die Pflanze &quot;"  + plant + "&quot; wirklich entfernt werden?"
+                        },
+                        resolve);
                     });
+                    if (await prompt) {
+                        if ($("#body-overlay").length == 0) {
+                            $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
+                        }
+                        if ($("#confirmationButton").find("[data-processing='true']").length == 0) {
+                            $("#confirmationButton").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
+                        }
+                        $("#mainModal .modal-footer > button").attr("disabled", "disabled");
+                        $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
+                        $("#mainModal .modal-body > .alert").remove();
+                        let data = {
+                            plant: plant
+                        }
+                        $.post("lol", {
+                            _token: authToken,
+                            data: JSON.stringify(data)
+                        }).done(function(response) {
+                            bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
+                        }).fail(function(response) {
+                            $("#mainModal .modal-body").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
+                        }).always(function() {
+                            $("#confirmationButton").find("[data-processing='true']").remove();
+                            $("#body-overlay").remove();
+                            $("#mainModal .modal-footer > button").removeAttr("disabled");
+                            $("#mainModal .modal-header > [data-bs-dismiss='modal']").removeAttr("disabled");
+                        });
+                    }
                 }
             }
             async function confirmUserDeletion(user) {
-                let prompt = new Promise(function(resolve) {
-                    confirmation({
-                        title: "Benutzer entfernen bestätigen",
-                        content: "Soll der Benutzer &quot;"  + user + "&quot; wirklich entfernt werden?"
-                    },
-                    resolve);
-                });
-                let result = await prompt;
-                if (result) {
-                    if ($("#body-overlay").length == 0) {
-                        $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
-                    }
-                    if ($("#confirmationButton").find("[data-processing='true']").length == 0) {
-                        $("#confirmationButton").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
-                    }
-                    $("#mainModal .modal-footer > button").attr("disabled", "disabled");
-                    $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
-                    $("#mainModal .modal-body > .alert").remove();
-                    let data = {
-                        user: user
-                    }
-                    $.post("lol", {
-                        _token: authToken,
-                        data: JSON.stringify(data)
-                    }).done(function(response) {
-                        bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
-                    }).fail(function(response) {
-                        $("#mainModal .modal-body").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
-                    }).always(function() {
-                        $("#confirmationButton").find("[data-processing='true']").remove();
-                        $("#body-overlay").remove();
-                        $("#mainModal .modal-footer > button").removeAttr("disabled");
-                        $("#mainModal .modal-header > [data-bs-dismiss='modal']").removeAttr("disabled");
+                let index = userAccounts.findIndex(key => key["id"] === user);
+                if (index >= 0) {
+                    let prompt = new Promise(function(resolve) {
+                        confirmation({
+                            title: "Benutzer entfernen bestätigen",
+                            content: "Soll der Benutzer &quot;"  + userAccounts[index]["fullname"] + "&quot; (ID: " + user + ") wirklich entfernt werden?"
+                        },
+                        resolve);
                     });
+                    if (await prompt) {
+                        if ($("#body-overlay").length == 0) {
+                            $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
+                        }
+                        if ($("#confirmationButton").find("[data-processing='true']").length == 0) {
+                            $("#confirmationButton").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
+                        }
+                        $("#mainModal .modal-footer > button").attr("disabled", "disabled");
+                        $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
+                        $("#mainModal .modal-body > .alert").remove();
+                        let data = {
+                            user: user
+                        }
+                        $.post("lol", {
+                            _token: authToken,
+                            data: JSON.stringify(data)
+                        }).done(function(response) {
+                            bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
+                        }).fail(function(response) {
+                            $("#mainModal .modal-body").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
+                        }).always(function() {
+                                $("#confirmationButton").find("[data-processing='true']").remove();
+                            $("#body-overlay").remove();
+                            $("#mainModal .modal-footer > button").removeAttr("disabled");
+                            $("#mainModal .modal-header > [data-bs-dismiss='modal']").removeAttr("disabled");
+                        });
+                    }
                 }
             }
             async function confirmEventDeletion(event) {
-                let prompt = new Promise(function(resolve) {
-                    confirmation({
-                        title: "Ereignis entfernen bestätigen",
-                        content: "Soll das Ereignis &quot;"  + plant + "&quot; wirklich entfernt werden?"
-                    },
-                    resolve);
-                });
-                let result = await prompt;
-                if (result) {
-                    if ($("#body-overlay").length == 0) {
-                        $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
-                    }
-                    if ($("#confirmationButton").find("[data-processing='true']").length == 0) {
-                        $("#confirmationButton").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
-                    }
-                    $("#mainModal .modal-footer > button").attr("disabled", "disabled");
-                    $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
-                    $("#mainModal .modal-body > .alert").remove();
-                    let data = {
-                        event: event
-                    }
-                    $.post("lol", {
-                        _token: authToken,
-                        data: JSON.stringify(data)
-                    }).done(function(response) {
-                        bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
-                    }).fail(function(response) {
-                        $("#mainModal .modal-body").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
-                    }).always(function() {
-                        $("#confirmationButton").find("[data-processing='true']").remove();
-                        $("#body-overlay").remove();
-                        $("#mainModal .modal-footer > button").removeAttr("disabled");
-                        $("#mainModal .modal-header > [data-bs-dismiss='modal']").removeAttr("disabled");
+                let index = events.findIndex(key => key["id"] === event);
+                if (index >= 0) {
+                    let prompt = new Promise(function(resolve) {
+                        confirmation({
+                            title: "Ereignis entfernen bestätigen",
+                            content: "Soll das Ereignis &quot;"  + event[index]["name"] + "&quot; (ID: " + event + ") wirklich entfernt werden?"
+                        },
+                        resolve);
                     });
+                    if (await prompt) {
+                        if ($("#body-overlay").length == 0) {
+                            $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
+                        }
+                        if ($("#confirmationButton").find("[data-processing='true']").length == 0) {
+                            $("#confirmationButton").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
+                        }
+                        $("#mainModal .modal-footer > button").attr("disabled", "disabled");
+                        $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
+                        $("#mainModal .modal-body > .alert").remove();
+                        let data = {
+                            event: event
+                        }
+                        $.post("lol", {
+                            _token: authToken,
+                            data: JSON.stringify(data)
+                        }).done(function(response) {
+                            bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
+                        }).fail(function(response) {
+                            $("#mainModal .modal-body").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
+                        }).always(function() {
+                            $("#confirmationButton").find("[data-processing='true']").remove();
+                            $("#body-overlay").remove();
+                            $("#mainModal .modal-footer > button").removeAttr("disabled");
+                            $("#mainModal .modal-header > [data-bs-dismiss='modal']").removeAttr("disabled");
+                        });
+                    }
                 }
             }
             async function confirmDiscardPlantEditing() {
@@ -1092,8 +1170,7 @@
                     },
                     resolve);
                 });
-                let result = await prompt;
-                if (result) {
+                if (await prompt) {
                     $("#newPlantContainer input[type='text']").val("");
                     isPlantEditingActive = false;
                     $("a[href='#plantsAdminCreationContainer']").html("Erstellen");
@@ -1113,10 +1190,20 @@
                 if (Number.isSafeInteger(currentChartPlant)) {
                     let index = plantProperties.findIndex(key => key["id"] === currentChartPlant);
                     if (index >= 0) {
+                        let title = "";
+                        let content = "";
+                        if (wtf === index) {
+                            title = "Pflanzenbearbeitung neu starten bestätigen";
+                            content = "Die Bearbeitung der Pflanze " + plantProperties[wtf]["name"] + " (ID: " + plantProperties[wtf]["id"] + ") ist bereits aktiv. Soll diese neu gestartet werden?"
+                        }
+                        else {
+                            title = "Pflanzenbearbeitung abbrechen bestätigen";
+                            content = "Zurzeit ist die Bearbeitung der Pflanze " + plantProperties[index]["name"] + " (ID: " + currentChartPlant + ") aktiv. Soll diese abgebrochen und stattdessen die Pflanze " + plantProperties[wtf]["name"] + " (ID: " + plantProperties[wtf]["id"] + ") bearbeitet werden?";
+                        }
                         let prompt = new Promise(function(resolve) {
                             confirmation({
-                                title: "Pflanze entfernen bestätigen",
-                                content: "Zurzeit ist die Bearbeitung der Pflanze " + plantProperties[index]["name"] + " (ID: " + currentChartPlant + ") aktiv. Soll diese abgebrochen und stattdessen die Pflanze " + plantProperties[wtf]["name"] + " (ID: " + plantProperties[wtf]["id"] + ") bearbeitet werden?"
+                                title: title,
+                                content: content
                             },
                             resolve);
                         });
@@ -1141,39 +1228,28 @@
             document.addEventListener("DOMContentLoaded", function() {
                 // Hier alle Skripte ausführen, die auf DOM zugreifen sollen, bevor Bilder und Ähnliches geladen wurden 
                 $("a[href='#systemInfos']").click(function() {
-                    let content = "<table class='table-sm w-100'>";
-                    content += "<thead>";
-                    content += "<tr>";
-                    content += "<th class='w-25'>Eigenschaft</th>";
-                    content +=" <th>Wert</th>";
-                    content += "</tr>";
-                    content += "</thead>";
-                    content += "<tbody id='systemInfosTable'>";
-                    content += "</tbody>";
-                    content += "</table>";
+                    let content = "<table class='table-sm w-100'><thead>";
+                    content += "<tr><th class='w-25'>Eigenschaft</th><th>Wert</th></tr>";
+                    content += "</thead><tbody id='systemInfosTable'></tbody></table>";
                     let data = {
                         modal: {
                             name: "systemInfos",
-                            events: [
-                                {
-                                    hide: {
-                                        function: function() {
-                                            if (systemInfosTimer !== null) {
-                                                clearInterval(systemInfosTimer);
-                                                systemInfosTimer = null;
-                                            }
+                            events: {
+                                hide: {
+                                    function: function(a) {
+                                        if (systemInfosTimer !== null) {
+                                            clearInterval(systemInfosTimer);
+                                            systemInfosTimer = null;
                                         }
                                     }
                                 },
-                                {
-                                    shown: {
-                                        function: function() {
-                                            updateSystemInfos();
-                                            systemInfosTimer = setInterval(updateSystemInfos, 5000);
-                                        }
+                                shown: {
+                                    function: function(o) {
+                                        updateSystemInfos();
+                                        systemInfosTimer = setInterval(updateSystemInfos, 5000);
                                     }
                                 }
-                            ]
+                            }
                         },
                         title: {
                             text: "Systeminformationen"
@@ -1218,15 +1294,13 @@
                         modal: {
                             size: "lg",
                             name: "about",
-                            events: [
-                                {
-                                    hide: {
-                                        function: function() {
-                                            $("#hydroPocLogo").off("click animationend");
-                                        }
+                            events: {
+                                hide: {
+                                    function: function() {
+                                        $("#hydroPocLogo").off("click animationend");
                                     }
                                 }
-                            ]
+                            }
                         },
                         title: {
                             text: "Über"
@@ -2865,6 +2939,7 @@
                 grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
                 /* Breite */ 
                 grid-gap: 10px;
+                margin-top: 10px;
                 align-content: flex-start;
                 justify-content: space-between
             }
@@ -3409,20 +3484,9 @@
                 .formContainer, .legendContainer {
                     flex-direction: column;
                 }
-                .formContainer > label {
-                    margin-right: 0;
+                .formContainer > label + select:not(:last-child), .formContainer > button:not(:last-child) {
+                    margin-bottom: 0.5rem;
                 }
-                .formContainer > label:not(:first-child), .formContainer > select:not(:first-child), .formContainer > input:not(:first-child), .formContainer > button:not(:first-child) {
-                    margin-left: 0;
-                    margin-top: 0.5rem;
-                }
-                /*
-                .legendContainer > label {
-                    margin-top: 0.5rem;
-                }
-                .legendContainer div.legendItem {
-                    width: 100%;
-                }*/
                 table.dataTable:not(.table-borderless) > tbody > tr:first-of-type > td:first-of-type {
                     border-top-left-radius: 1px;
                     border-top-right-radius: 1px;
@@ -3499,12 +3563,8 @@
                 .formContainer, .legendContainer {
                     flex-direction: column;
                 }
-                .formContainer > label {
-                    margin-right: 0;
-                }
-                .formContainer > label:not(:first-child), .formContainer > select:not(:first-child), .formContainer > input:not(:first-child), .formContainer > button:not(:first-child) {
-                    margin-left: 0;
-                    margin-top: 0.5rem;
+                .formContainer > label + select:not(:last-child), .formContainer > button:not(:last-child) {
+                    margin-bottom: 0.5rem;
                 }
                 table.dataTable:not(.table-borderless) > tbody > tr:first-of-type > td:first-of-type {
                     border-top-left-radius: 1px;
@@ -3530,10 +3590,7 @@
                 }
                 .legendContainer {
                     margin-top: 0;
-                }/*
-                .legendContainer .legendItem {
-                    width: 100%;
-                }*/
+                }
                 .form-placeholder {
                     display: none !important;
                 }
@@ -3554,6 +3611,9 @@
                 }
                 *:not(h1, h2, h3, h4, h5, h6, .messageboxIcon > i, h1 > span, h2 > span, h3 > span, h4 > span, h5 > span, h6 > span, h1 > i, h2 > i, h3 > i, h4 > i, h5 > i, h6 > i) {
                     font-size: 14px !important;
+                }
+                .formContainer > label + select:not(:last-child), .formContainer > button:not(:last-child) {
+                    margin-bottom: 0.5rem;
                 }
                 .legendContainer {
                     margin-top: 0;
@@ -3590,9 +3650,9 @@
                 .legendContainer .legendItem {
                     width: auto;
                 }
-                .formContainer > label:not(:first-child), .formContainer > select:not(:first-child), .formContainer > input:not(:first-child), .formContainer > button:not(:first-child) {
-                    margin-left: 0.5rem;
-                    margin-top: 0.5rem;
+                .formContainer > * {
+                    margin-top: 0;
+                    margin-bottom: 0 !important;
                 }
                 .legendContainer {
                     margin-top: 0;
@@ -3624,14 +3684,15 @@
                 *:not(h1, h2, h3, h4, h5, h6, .messageboxIcon > i, h1 > span, h2 > span, h3 > span, h4 > span, h5 > span, h6 > span, h1 > i, h2 > i, h3 > i, h4 > i, h5 > i, h6 > i) {
                     font-size: 16px !important;
                 }
-                .formContainer > label, .formContainer > select, .formContainer > input, .formContainer > button {
+                .formContainer > * {
                     margin-top: 0;
+                    margin-bottom: 0;
                 }
                 .legendContainer .legendItem {
                     width: auto;
                 }
             }
-            @media only screen and (min-width: 1281px) {
+            @media only screen and (min-width: 1285px) {
                 #newPlantForm input[type="text"] {
                     display: inline-block;
                 }
@@ -3702,10 +3763,10 @@
                     <div class="tab-content p-4 border">
                         <div class="tab-pane active" id="overview">
                             <div class="d-flex formContainer">
-                                <label for="plantSelection">Pflanze:</label>
-                                <select class="form-select w-auto d-inline-block" id="plantSelection"></select>
-                                <label for="plantProgramSelection">Programm:</label>
-                                <select class="form-select w-auto d-inline-block" id="plantProgramSelection"></select>
+                                <label for="plantSelection" class="me-2">Pflanze:</label>
+                                <select class="form-select w-auto d-inline-block me-2" id="plantSelection"></select>
+                                <label for="plantProgramSelection" class="me-2">Programm:</label>
+                                <select class="form-select w-auto d-inline-block me-2" id="plantProgramSelection"></select>
                                 <button type="button" class="btn btn-success align-baseline"><i class="fas fa-play"></i></button>
                                 <!--<button type="button" class="btn btn-warning ms-2"><i class="fas fa-pause"></i></button>-->
                             </div>
@@ -3720,7 +3781,7 @@
                                     <div class="legendItem"><div style="border: 1px dashed rgb(255, 115, 0);" class="d-inline-block legendIcon"></div><span class="ms-1">Warngrenze</span></div>
                                 </div>
                             </div>
-                            <div id="overviewPanel" class="mt-3">
+                            <div id="overviewPanel">
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-co2">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Co²-Gehalt</span>
@@ -3843,8 +3904,8 @@
                                                 </div>
                                                 <div class="tab-pane" id="plantsAdminCreationContainer">
                                                     <div class="d-flex formContainer mb-3">
-                                                        <label for="plantsAdminPlantSelection">Vorlage:</label>
-                                                        <select class="form-select w-auto d-inline-block" id="plantsAdminPlantSelection" data-old="0"></select>
+                                                        <label for="plantsAdminPlantSelection" class="me-2">Vorlage:</label>
+                                                        <select class="form-select w-auto d-inline-block me-2" id="plantsAdminPlantSelection" data-old="0"></select>
                                                         <button type="button" class="btn btn-primary align-top" id="applyPlantTemplateButton" disabled="disabled"><i class="fas fa-sync"></i> Übernehmen</button>
                                                     </div>
                                                     <div class="d-flex mt-3" id="newPlantMenu">
@@ -3872,9 +3933,6 @@
                                                                 <div class="row">
                                                                     <div class="col-md-12">
                                                                         <div class="col-md-6">
-                                                                            <label class="col-md-6">
-                                                                            <input type="text" class="form-control col-md-6 w-auto">
-                                                                            <label class="col-md-6">
                                                                             <div class="d-inline-flex align-items-center align-content-center mt-1 col-md-6">
                                                                                 <input class="form-check-input mt-0" type="checkbox" id="newPlantAutoIDCheck" value="1" checked="checked" onclick="toggleFormState(this, '#newPlantIdInput')">
                                                                                 <label class="form-check-label" id="newPlantAutoIDCheckLabel" for="newPlantAutoIDCheck">Automatisch</label>
@@ -4085,7 +4143,7 @@
                                     <div id="collapse-plants-programs-actions" class="collapse hide" data-bs-parent="#plants-programs-actions-accordion">
                                         <div class="card-body">
                                             <div class="d-flex formContainer mb-3">
-                                                <label for="plantProgramsAdminPlantSelection">Pflanze:</label>
+                                                <label for="plantProgramsAdminPlantSelection" class="me-2">Pflanze:</label>
                                                 <select class="form-select w-auto d-inline-block" id="plantProgramsAdminPlantSelection" data-old="0">
                                                     <option value="0">Alle</option>
                                                 </select>
@@ -4181,7 +4239,7 @@
                                     <div id="collapse-events-actions" class="collapse hide" data-bs-parent="#events-accordion">
                                         <div class="card-body">
                                             <div class="d-flex formContainer mb-3">
-                                                <label for="eventsAdminCategorySelection">Kategorie:</label>
+                                                <label for="eventsAdminCategorySelection" class="me-2">Kategorie:</label>
                                                 <select class="form-select w-auto d-inline-block" id="eventsAdminCategorySelection" data-old="0">
                                                     <option value="0">Alles</option>
                                                     <option value="1">Pflanzen</option>
@@ -4216,7 +4274,7 @@
                                     <div id="collapse-logs-actions" class="collapse hide" data-bs-parent="#logs-accordion">
                                         <div class="card-body">
                                             <div class="d-flex formContainer mb-3">
-                                                <label for="logsAdminCategorySelection">Kategorie:</label>
+                                                <label for="logsAdminCategorySelection" class="me-2">Kategorie:</label>
                                                 <select class="form-select w-auto d-inline-block" id="logsAdminCategorySelection" data-old="0">
                                                     <option value="0">Alles</option>
                                                     <option value="1">Aktoren</option>
@@ -4244,7 +4302,7 @@
                         </div>
                         <div class="tab-pane fade" id="historyGallery">
                             <div class="formContainer mb-3" id="historyGalleryTimespan">
-                                <label for="historyGalleryTimespanSelect">Zeitraum:</label>
+                                <label for="historyGalleryTimespanSelect" class="me-2">Zeitraum:</label>
                                 <select id="historyGalleryTimespanSelect">
                                     <option value="0">Gesamt</option>
                                     <option value="1">00:00-06:00 Uhr</option>
@@ -4258,46 +4316,7 @@
             </div>
         </main>
         <footer></footer>
-        <!-- Wenn überhaupt benötigt, mit Modal.create() erzeugen lassen! -->
-        <div class="modal fade" id="editUserModal">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">"Benutzer" bearbeiten</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <!-- Benutzername darf nur von Projektadmins verändert werden -->
-                        <div>
-                            <label for="usernameInput" class="form-label">Benutzername:</label>
-                            <input type="text" class="form-control" id="usernameInput" placeholder="Benutzername eingeben" readonly="readonly">
-                        </div>
-                        <div class="mt-3">
-                            <label for="usernameSurnameInput" class="form-label">Nachname:</label>
-                            <input type="text" class="form-control" id="usernameSurnameInput" placeholder="Nachnamen eingeben">
-                        </div>
-                        <div class="mt-3">
-                            <label for="usernameFornameInput" class="form-label">Vorname:</label>
-                            <input type="text" class="form-control" id="usernameFornameInput" placeholder="Vornamen eingeben">
-                        </div>
-                        <!-- Eigenes Passwort darf nur von Projektadmins und vom jeweiligen Benutzer geändert werden -->
-                        <div class="mt-3">
-                            <label for="oldPasswordInput" class="form-label">Altes Passwort:</label>
-                            <input type="password" class="form-control" id="oldPasswordInput" placeholder="Altes Passwort eingeben">
-                        </div>
-                        <div class="mt-3">
-                            <label for="newPasswordInput" class="form-label">Neues Passwort:</label>
-                            <input type="password" class="form-control" id="newPasswordInput" placeholder="Neues Passwort eingeben">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary"><span class="spinner-border spinner-border-sm"></span> Speichern</button>
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Abbrechen</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Mit Modal.create() erzeugen lassen! -->
+        <!-- Kann möglicherweise nicht mit Modal.create() erzeugt werden, ohne jedes Mal charts["history"] zu zerstören! -->
         <div class="modal fade" id="chartHistoryModal">
             <div class="modal-dialog modal-xl modal-dialog-centered">
                 <div class="modal-content">
