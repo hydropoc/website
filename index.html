@@ -3471,10 +3471,14 @@
                 #newPlantForm label {
                     padding-left: 0;
                 }
+                #newPlantForm input[type="text"] {
+                    width: 100%;
+                }
+                /*
                 #newPlantContainer *:not(input, label) {
                     padding-left: 0;
                     margin-left: 0;
-                }
+                }*/
                 #newPlantContainer {
                     width: 100%;
                     margin-top: 1rem;
@@ -3551,6 +3555,9 @@
                 #newPlantMenu {
                     flex-direction: column;
                 }
+                #newPlantForm input[type="text"] {
+                    width: 100%;
+                }
                 #newPlantNavigation {
                     width: 100%
                 }
@@ -3624,6 +3631,9 @@
                 .form-placeholder {
                     display: none !important;
                 }
+                #newPlantForm input[type="text"] {
+                    width: auto;
+                }
             }
             /* Large devices (laptops/desktops, 992px and up) */
             @media only screen and (min-width: 992px) {
@@ -3669,6 +3679,9 @@
                 .form-placeholder {
                     display: unset !important;
                 }
+                #newPlantForm input[type="text"] {
+                    width: auto;
+                }
             }
             /* Extra large devices (large laptops and desktops, 1200px and up) */
             @media only screen and (min-width: 1200px) {
@@ -3689,6 +3702,9 @@
                     margin-bottom: 0;
                 }
                 .legendContainer .legendItem {
+                    width: auto;
+                }
+                #newPlantForm input[type="text"] {
                     width: auto;
                 }
             }
@@ -3919,16 +3935,20 @@
                                                             <a class="list-group-item list-group-item-action" href="#newPlantWaterlevelSection">Wasserstand</a>
                                                             <a class="list-group-item list-group-item-action" href="#newPlantLightingSection">Beleuchtung</a>
                                                         </div>
-                                                        <div data-bs-spy="scroll" data-bs-target="#newPlantNavigation" data-bs-offset="0" class="p-3 col-md-10 position-relative" id="newPlantContainer">
-                                                            <form id="newPlantForm" class="row">
-                                                                <h5 id="newPlantGeneralSection" class="col-md-12">Allgemein</h5>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantDescriptionInput" class="col-form-label col-md-6">Bezeichnung:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantDescriptionInput" aria-label="Bezeichnung" aria-describedby="newPlantDescriptionInput">
+                                                        <div data-bs-spy="scroll" data-bs-target="#newPlantNavigation" data-bs-offset="0" class="col-md-10 position-relative" id="newPlantContainer">
+                                                            <form id="newPlantForm" class="p-3">
+                                                                <div class="row">
+                                                                    <h5 id="newPlantGeneralSection" class="col-md-12">Allgemein</h5>
                                                                 </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantIdInput" class="col-form-label col-md-6">ID:</label>
-                                                                    <input type="text" class="form-control w-auto col-md-4" id="newPlantIdInput" disabled="disabled">
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantDescriptionInput" class="col-form-label col-md-6">Bezeichnung:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantDescriptionInput" aria-label="Bezeichnung" aria-describedby="newPlantDescriptionInput">
+                                                                    </div>
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantIdInput" class="col-form-label col-md-6">ID:</label>
+                                                                        <input type="text" class="form-control col-md-4" id="newPlantIdInput" disabled="disabled">
+                                                                    </div>
                                                                 </div>
                                                                 <div class="row">
                                                                     <div class="col-md-12">
@@ -3957,167 +3977,201 @@
                                                                     </div>
                                                                 </div>-->
                                                                 <h5 id="newPlantCo2Section" class="mt-4 col-md-12">Co²-Gehalt</h5>
-                                                                <div class="row mt-2">
-                                                                    <div class="col-md-12">
-                                                                        <label for="newPlantCo2SetpointInput" class="col-form-label col-md-3">Sollwert:</label>
-                                                                        <input type="text" class="form-control w-auto col-md-6" id="newPlantCo2SetpointInput" aria-label="Co²-Gehalt Sollwert" aria-describedby="newPlantCo2SetpointInput">
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantCo2SetpointInput" class="col-form-label col-md-6">Sollwert:</label>
+                                                                        <input type="text" class="form-control col-md-6" id="newPlantCo2SetpointInput" aria-label="Co²-Gehalt Sollwert" aria-describedby="newPlantCo2SetpointInput">
                                                                     </div>
                                                                 </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantCo2UpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantCo2UpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Co²-Gehalt" aria-describedby="newPlantCo2UpperControlLimitInput">
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantCo2UpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantCo2UpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Co²-Gehalt" aria-describedby="newPlantCo2UpperControlLimitInput">
+                                                                    </div>
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantCo2LowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantCo2LowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Co²-Gehalt" aria-describedby="newPlantCo2LowerControlLimitInput">
+                                                                    </div>
                                                                 </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantCo2LowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                <input required type="text" class="form-control w-auto col-md-6" id="newPlantCo2LowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Co²-Gehalt" aria-describedby="newPlantCo2LowerControlLimitInput">
-                                                                </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantCo2UpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantCo2UpperWarningLimitInput" aria-label="Obere Warngrenze für Co²-Gehalt" aria-describedby="newPlantCo2UpperWarningLimitInput">
-                                                                </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantCo2LowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantCo2LowerWarningLimitInput" aria-label="Untere Warngrenze für Co²-Gehalt" aria-describedby="newPlantCo2LowerWarningLimitInput">
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantCo2UpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantCo2UpperWarningLimitInput" aria-label="Obere Warngrenze für Co²-Gehalt" aria-describedby="newPlantCo2UpperWarningLimitInput">
+                                                                    </div>
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantCo2LowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantCo2LowerWarningLimitInput" aria-label="Untere Warngrenze für Co²-Gehalt" aria-describedby="newPlantCo2LowerWarningLimitInput">
+                                                                    </div>
                                                                 </div>
                                                                 <h5 id="newPlantTemperatureSection" class="mt-4 col-md-12">Temperatur</h5>
-                                                                <div class="row mt-2">
-                                                                    <div class="col-md-12">
-                                                                        <label for="newPlantTemperatureSetpointInput" class="col-form-label col-md-3">Sollwert:</label>
-                                                                        <input required type="text" class="form-control w-auto col-md-6" id="newPlantTemperatureSetpointInput" aria-label="Sollwert für Temperatur" aria-describedby="newPlantTemperatureSetpointInput">
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantTemperatureSetpointInput" class="col-form-label col-md-6">Sollwert:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantTemperatureSetpointInput" aria-label="Sollwert für Temperatur" aria-describedby="newPlantTemperatureSetpointInput">
                                                                     </div>
                                                                 </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantTemperatureUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantTemperatureUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Temperatur" aria-describedby="newPlantTemperatureUpperControlLimitInput">
-                                                                </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantTemperatureLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantTemperatureLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Temperatur" aria-describedby="newPlantTemperatureLowerControlLimitInput">
-                                                                </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantTemperatureUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantTemperatureUpperWarningLimitInput" aria-label="Obere Warngrenze für Temperatur" aria-describedby="newPlantTemperatureUpperWarningLimitInput">
-                                                                </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantTemperatureLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantTemperatureLowerWarningLimitInput" aria-label="Untere Warngrenze für Temperatur" aria-describedby="newPlantTemperatureLowerWarningLimitInput">
-                                                                </div>
-                                                                <h5 id="newPlantphSection" class="mt-4 col-md-12">pH-Wert</h5>
-                                                                <div class="row mt-2">
-                                                                    <div class="col-md-12">
-                                                                        <label for="newPlantPhSetpointInput" class="col-form-label col-md-3">Sollwert:</label>
-                                                                        <input required type="text" class="form-control w-auto col-md-6" id="newPlantPhSetpointInput" aria-label="Sollwert für Temperatur" aria-describedby="newPlantPhSetpointInput">
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantTemperatureUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantTemperatureUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Temperatur" aria-describedby="newPlantTemperatureUpperControlLimitInput">
+                                                                    </div>
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantTemperatureLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantTemperatureLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Temperatur" aria-describedby="newPlantTemperatureLowerControlLimitInput">
                                                                     </div>
                                                                 </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantPhUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantPhUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Temperatur" aria-describedby="newPlantPhUpperControlLimitInput">
-                                                                </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantPhLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantPhLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Temperatur" aria-describedby="newPlantPhLowerControlLimitInput">
-                                                                </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantPhUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantPhUpperWarningLimitInput" aria-label="Obere Warngrenze für Temperatur" aria-describedby="newPlantPhUpperWarningLimitInput">
-                                                                </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantPhLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantPhLowerWarningLimitInput" aria-label="Untere Warngrenze für Temperatur" aria-describedby="newPlantPhLowerWarningLimitInput">
-                                                                </div>
-                                                                <div class="mt-4 col-md-12">
-                                                                    <h5 id="newPlantSalinitySection" class="col-md-12">Salzgehalt</h5>
-                                                                </div>
-                                                                <div class="row mt-2">
-                                                                    <div class="col-md-12">
-                                                                        <label for="newPlantSalinitySetpointInput" class="col-form-label col-md-3">Sollwert:</label>
-                                                                        <input required type="text" class="form-control w-auto col-md-6" id="newPlantSalinitySetpointInput" aria-label="Sollwert für Salzgehalt" aria-describedby="newPlantSalinitySetpointInput">
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantTemperatureUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantTemperatureUpperWarningLimitInput" aria-label="Obere Warngrenze für Temperatur" aria-describedby="newPlantTemperatureUpperWarningLimitInput">
+                                                                    </div>
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantTemperatureLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantTemperatureLowerWarningLimitInput" aria-label="Untere Warngrenze für Temperatur" aria-describedby="newPlantTemperatureLowerWarningLimitInput">
                                                                     </div>
                                                                 </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantSalinityUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantSalinityUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Salzgehalt" aria-describedby="newPlantSalinityUpperControlLimitInput">
+                                                                <div class="row">
+                                                                    <h5 id="newPlantphSection" class="mt-4 col-md-12">pH-Wert</h5>
                                                                 </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantSalinityLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantSalinityLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Salzgehalt" aria-describedby="newPlantSalinityLowerControlLimitInput">
-                                                                </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantSalinityUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantSalinityUpperWarningLimitInput" aria-label="Obere Warngrenze für Salzgehalt" aria-describedby="newPlantSalinityUpperWarningLimitInput">
-                                                                </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantSalinityLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantSalinityLowerWarningLimitInput" aria-label="Untere Warngrenze für Salzgehalt" aria-describedby="newPlantSalinityLowerWarningLimitInput">
-                                                                </div>
-                                                                <h5 id="newPlantHumiditySection" class="mt-4 col-md-12">Luftfeuchtigkeit</h5>
-                                                                <div class="row mt-2">
-                                                                    <div class="col-md-12">
-                                                                        <label for="newPlantHumiditySetpointInput" class="col-form-label col-md-3">Sollwert:</label>
-                                                                        <input required type="text" class="form-control w-auto col-md-6" id="newPlantHumiditySetpointInput" aria-label="Sollwert für Luftfeuchtigkeit" aria-describedby="newPlantHumiditySetpointInput">
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantPhSetpointInput" class="col-form-label col-md-6">Sollwert:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantPhSetpointInput" aria-label="Sollwert für Temperatur" aria-describedby="newPlantPhSetpointInput">
                                                                     </div>
                                                                 </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantHumidityUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantHumidityUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Luftfeuchtigkeit" aria-describedby="newPlantHumidityUpperControlLimitInput">
-                                                                </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantHumidityLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantHumidityLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Luftfeuchtigkeit" aria-describedby="newPlantHumidityLowerControlLimitInput">
-                                                                </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantHumidityUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantHumidityUpperWarningLimitInput" aria-label="Obere Warngrenze für Luftfeuchtigkeit" aria-describedby="newPlantHumidityUpperWarningLimitInput">
-                                                                </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantHumidityLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantHumidityLowerWarningLimitInput" aria-label="Untere Warngrenze für Luftfeuchtigkeit" aria-describedby="newPlantHumidityLowerWarningLimitInput">
-                                                                </div>
-                                                                <h5 id="newPlantWaterlevelSection" class="mt-4 col-md-12">Wasserstand</h5>
-                                                                <div class="row mt-2">
-                                                                    <div class="col-md-12">
-                                                                        <label for="newPlantWaterlevelSetpointInput" class="col-form-label col-md-3">Sollwert:</label>
-                                                                        <input required type="text" class="form-control w-auto col-md-6" id="newPlantWaterlevelSetpointInput" aria-label="Sollwert für Wasserstand" aria-describedby="newPlantWaterlevelSetpointInput">
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantPhUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantPhUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Temperatur" aria-describedby="newPlantPhUpperControlLimitInput">
+                                                                    </div>
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantPhLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantPhLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Temperatur" aria-describedby="newPlantPhLowerControlLimitInput">
                                                                     </div>
                                                                 </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantWaterlevelUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantWaterlevelUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Wasserstand" aria-describedby="newPlantWaterlevelUpperControlLimitInput">
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantPhUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantPhUpperWarningLimitInput" aria-label="Obere Warngrenze für Temperatur" aria-describedby="newPlantPhUpperWarningLimitInput">
+                                                                    </div>
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantPhLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantPhLowerWarningLimitInput" aria-label="Untere Warngrenze für Temperatur" aria-describedby="newPlantPhLowerWarningLimitInput">
+                                                                    </div>
                                                                 </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantWaterlevelLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantWaterlevelLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Wasserstand" aria-describedby="newPlantWaterlevelLowerControlLimitInput">
+                                                                <div class="row">
+                                                                    <h5 id="newPlantSalinitySection" class="mt-4 col-md-12">Salzgehalt</h5>
                                                                 </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantWaterlevelUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantWaterlevelUpperWarningLimitInput" aria-label="Obere Warngrenze für Wasserstand" aria-describedby="newPlantWaterlevelUpperWarningLimitInput">
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantSalinitySetpointInput" class="col-form-label col-md-6">Sollwert:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantSalinitySetpointInput" aria-label="Sollwert für Salzgehalt" aria-describedby="newPlantSalinitySetpointInput">
+                                                                    </div>
                                                                 </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantWaterlevelLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantWaterlevelLowerWarningLimitInput" aria-label="Untere Warngrenze für Wasserstand" aria-describedby="newPlantWaterlevelLowerWarningLimitInput">
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantSalinityUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantSalinityUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Salzgehalt" aria-describedby="newPlantSalinityUpperControlLimitInput">
+                                                                    </div>
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantSalinityLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantSalinityLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Salzgehalt" aria-describedby="newPlantSalinityLowerControlLimitInput">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantSalinityUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantSalinityUpperWarningLimitInput" aria-label="Obere Warngrenze für Salzgehalt" aria-describedby="newPlantSalinityUpperWarningLimitInput">
+                                                                    </div>
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantSalinityLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantSalinityLowerWarningLimitInput" aria-label="Untere Warngrenze für Salzgehalt" aria-describedby="newPlantSalinityLowerWarningLimitInput">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <h5 id="newPlantHumiditySection" class="mt-4 col-md-12">Luftfeuchtigkeit</h5>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantHumiditySetpointInput" class="col-form-label col-md-6">Sollwert:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantHumiditySetpointInput" aria-label="Sollwert für Luftfeuchtigkeit" aria-describedby="newPlantHumiditySetpointInput">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantHumidityUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantHumidityUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Luftfeuchtigkeit" aria-describedby="newPlantHumidityUpperControlLimitInput">
+                                                                    </div>
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantHumidityLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantHumidityLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Luftfeuchtigkeit" aria-describedby="newPlantHumidityLowerControlLimitInput">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantHumidityUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantHumidityUpperWarningLimitInput" aria-label="Obere Warngrenze für Luftfeuchtigkeit" aria-describedby="newPlantHumidityUpperWarningLimitInput">
+                                                                    </div>
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantHumidityLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantHumidityLowerWarningLimitInput" aria-label="Untere Warngrenze für Luftfeuchtigkeit" aria-describedby="newPlantHumidityLowerWarningLimitInput">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <h5 id="newPlantWaterlevelSection" class="mt-4 col-md-12">Wasserstand</h5>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantWaterlevelSetpointInput" class="col-form-label col-md-6">Sollwert:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantWaterlevelSetpointInput" aria-label="Sollwert für Wasserstand" aria-describedby="newPlantWaterlevelSetpointInput">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantWaterlevelUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantWaterlevelUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Wasserstand" aria-describedby="newPlantWaterlevelUpperControlLimitInput">
+                                                                    </div>
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantWaterlevelLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantWaterlevelLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Wasserstand" aria-describedby="newPlantWaterlevelLowerControlLimitInput">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantWaterlevelUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantWaterlevelUpperWarningLimitInput" aria-label="Obere Warngrenze für Wasserstand" aria-describedby="newPlantWaterlevelUpperWarningLimitInput">
+                                                                    </div>
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantWaterlevelLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantWaterlevelLowerWarningLimitInput" aria-label="Untere Warngrenze für Wasserstand" aria-describedby="newPlantWaterlevelLowerWarningLimitInput">
+                                                                    </div>
                                                                 </div>
                                                                 <h5 id="newPlantLightingSection" class="mt-4 col-md-12">Beleuchtung</h5>
-                                                                <div class="row mt-2">
-                                                                    <div class="col-md-12">
-                                                                        <label for="newPlantLightingSetpointInput" class="col-form-label col-md-3">Sollwert:</label>
-                                                                        <input required type="text" class="form-control w-auto col-md-6" id="newPlantLightingSetpointInput" aria-label="Sollwert für Wasserstand" aria-describedby="newPlantLightingSetpointInput">
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantLightingSetpointInput" class="col-form-label col-md-6">Sollwert:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantLightingSetpointInput" aria-label="Sollwert für Wasserstand" aria-describedby="newPlantLightingSetpointInput">
                                                                     </div>
                                                                 </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantLightingUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantLightingUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Wasserstand" aria-describedby="newPlantLightingUpperControlLimitInput">
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantLightingUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantLightingUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Wasserstand" aria-describedby="newPlantLightingUpperControlLimitInput">
+                                                                    </div>
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantLightingLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantLightingLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Wasserstand" aria-describedby="newPlantLightingLowerControlLimitInput">
+                                                                    </div>
                                                                 </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantLightingLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantLightingLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Wasserstand" aria-describedby="newPlantLightingLowerControlLimitInput">
-                                                                </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantLightingUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantLightingUpperWarningLimitInput" aria-label="Obere Warngrenze für Wasserstand" aria-describedby="newPlantLightingUpperWarningLimitInput">
-                                                                </div>
-                                                                <div class="mt-2 col-md-6">
-                                                                    <label for="newPlantLightingLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control w-auto col-md-6" id="newPlantLightingLowerWarningLimitInput" aria-label="Untere Warngrenze für Wasserstand" aria-describedby="newPlantLightingLowerWarningLimitInput">
+                                                                <div class="row">
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantLightingUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantLightingUpperWarningLimitInput" aria-label="Obere Warngrenze für Wasserstand" aria-describedby="newPlantLightingUpperWarningLimitInput">
+                                                                    </div>
+                                                                    <div class="mt-2 col-md-6">
+                                                                        <label for="newPlantLightingLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
+                                                                        <input required type="text" class="form-control col-md-6" id="newPlantLightingLowerWarningLimitInput" aria-label="Untere Warngrenze für Wasserstand" aria-describedby="newPlantLightingLowerWarningLimitInput">
+                                                                    </div>
                                                                 </div>
                                                             </form>
                                                         </div>
