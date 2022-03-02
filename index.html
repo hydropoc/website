@@ -757,7 +757,7 @@
                 }
             }
             class Alert {
-                static create(type, message, closeable = true, classes = "") {
+                static create(type, message, closeable = true, classes = "", id = null) {
                     type = type.toLowerCase();
                     let icons = {
                         danger: "fas fa-exclamation-circle",
@@ -768,7 +768,7 @@
                     if (!["primary", "success", "danger", "warning"].includes(type)) {
                         type = "primary";
                     }
-                    return "<div class='" + (closeable ? "alert-dismissible " : "") + "alert alert-" + type + " messageboxContainer " + classes + "' role='alert'><div class='messageboxIcon " + type + "'><i class='" + icons[type] + "'></i></div><div class='messageboxText'>" + message + (closeable ? "</div><button type='button' class='btn-close position-static align-self-start' data-bs-dismiss='alert' aria-label='Schließen'></button>" : "") + "</div></div>";
+                    return "<div class='" + (closeable ? "alert-dismissible " : "") + "alert alert-" + type + " messageboxContainer " + classes + "' role='alert'" + (id !== null ? " id='" + id + "'" : "") + "><div class='messageboxIcon " + type + "'><i class='" + icons[type] + "'></i></div><div class='messageboxText'>" + message + (closeable ? "</div><button type='button' class='btn-close position-static align-self-start' data-bs-dismiss='alert' aria-label='Schließen'></button>" : "") + "</div></div>";
                 }
             }
             async function editPlant(wtf) {
@@ -974,11 +974,11 @@
                     if (isPlantEditingActive) {
                         $("#newPlantIdInput").val(wtf);
                         $("#newPlantDescriptionInput").val(plantProperties[index]["name"]);
-                        if ($("#editPlantHeader").length == 0) {
-                            $("#plantsAdminCreationContainer").prepend("<h4 class='mt-3 mb-4' id='editPlantHeader'>Pflanze &quot;" + plantProperties[index]["name"] + "&quot; bearbeiten</h4>")
+                        if ($("#editPlantAlert").length == 0) {
+                            $("#plantsAdminCreationContainer").prepend(Alert.create("primary", "Zurzeit ist die Bearbeitung der Pflanze &quot;" + plantProperties[index]["name"] + "&quot; (ID: " + plantProperties[index]["id"] + ") aktiv.", false, "", "editPlantAlert"));
                         }
                         else {
-                            $("#editPlantHeader").html("Pflanze &quot;" + plantProperties[index]["name"] + "&quot; bearbeiten");
+                            $("#editPlantAlert > .messageboxText").html("Zurzeit ist die Bearbeitung der Pflanze &quot;" + plantProperties[index]["name"] + "&quot; (ID: " + plantProperties[index]["id"] + ") aktiv.");
                         }
                     }
                     let properties = Object.getOwnPropertyNames(plantProperties[index]["properties"]);
@@ -1180,7 +1180,7 @@
                     $("#newPlantAutoIDCheck").prop("checked", true);
                     $("#newPlantAutoIDCheck").removeAttr("disabled");
                     $("#newPlantAutoIDCheckLabel").css("opacity", 1);
-                    $("#editPlantHeader").remove();
+                    $("#editPlantAlert").remove();
                     bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
                 }
             }
@@ -3359,7 +3359,7 @@
             table.dataTable:not(.table-borderless) > tbody > tr > td:only-of-type, table.dataTable:not(.table-borderless) > tbody > tr > td:last-of-type {
                 border-right: 1px solid var(--bs-gray-300, #dee2e6)
             }
-            .alert-info.messageboxContainer {
+            .alert-primary.messageboxContainer {
                 border-color: #bbd8e6
             }
             .alert-warning.messageboxContainer {
@@ -3378,9 +3378,9 @@
                 padding: 0.714rem 0.357rem;
                 align-self: stretch;
             }
-            .messageboxIcon.info {
-                background-color: #bbd8e6;
-                color: #437b95
+            .messageboxIcon.primary {
+                background-color: #c3d3ed;
+                color: #52709d
             }
             .messageboxIcon.danger {
                 background-color: #e5babe;
