@@ -1051,7 +1051,7 @@
                     let prompt = new Promise(function(resolve) {
                         confirmation({
                             title: "Pflanze entfernen bestätigen",
-                            content: "Soll die Pflanze &quot;"  + plant + "&quot; wirklich entfernt werden?"
+                            content: "Soll die Pflanze &quot;"  + plantProperties[index]["name"] + "&quot; (ID: " + plant + ") wirklich entfernt werden?"
                         },
                         resolve);
                     });
@@ -1194,7 +1194,7 @@
                         let content = "";
                         if (wtf === index) {
                             title = "Pflanzenbearbeitung neu starten bestätigen";
-                            content = "Die Bearbeitung der Pflanze " + plantProperties[wtf]["name"] + " (ID: " + plantProperties[wtf]["id"] + ") ist bereits aktiv. Soll diese neu gestartet werden?"
+                            content = "Die Bearbeitung der Pflanze &quot;" + plantProperties[wtf]["name"] + "&quot; (ID: " + plantProperties[wtf]["id"] + ") ist bereits aktiv. Soll diese neu gestartet werden?"
                         }
                         else {
                             title = "Pflanzenbearbeitung abbrechen bestätigen";
@@ -1264,12 +1264,16 @@
                     Modal.create(data);
                 });
                 $("a[href='#staff']").click(function() {
-                    let content = "<table class='table-borderless'><thead></thead><tbody><tr><td class='align-text-top pe-3'>Projektleitung</td><td>Luca Israel<br>Jessica Gerken</td></tr>";
-                    content += "<tr><td class='align-text-top pe-3'>Konstruktion</td><td>Ali Fikdusimir<br>Mahatma Buddah Meimuddah</td></tr><tr><td class='align-text-top pe-3'>Materialbeschaffung</td>";
-                    content += "<td>Mario Nette<br>Peter Silie</td></tr><tr><td class='align-text-top pe-3'>Backend-Entwicklung</td><td>Paul Jongmanns<br>Lars Friedrich<br>Fabian</td></tr>";
-                    content += "<tr><td class='align-text-top pe-3'>Datenbankentwicklung</td><td>Lars<br>Kevin Müller<br>Jan<br>Deon<br>Emanuel<br>René<br>Milan</td></tr><tr><td class='align-text-top pe-3'>Frontend-Entwicklung</td>";
-                    content += "<td>Milan Kola<br>Christian Sander<br>Jan Bremen<br>Deon Gulbinat</td></tr><tr><td class='align-text-top pe-3'>Elektronik</td><td>Matties<br>Tristan<br>Marvin<br>";
-                    content += "Calvin</td></tr></tbody></table>";
+                    let content = "<table class='table-borderless'><thead></thead><tbody><tr><td class='align-text-top pe-3'>Projektleitung</td><td>Luca Israel<br>Jessica Gerken<br>Nils Harder<br>Fabian Beckmann<br>Darlien Rienits</td></tr>";
+                    content += "<tr><td class='align-text-top pe-3'>Konstruktion</td><td>Nils Berger<br>Kevin Gerken<br>Thees Brünjes<br>Abdul Al Akhdar</td></tr>";
+                    content += "<tr><td class='align-text-top pe-3'>Materialbeschaffung</td><td>Joris Dröge<br>Henrik Jarz<br>Nilds Harder<br>Tammo Karsten<br><s>Bim Töttger</s> Tim Böttger<br>Ali Daham</td></tr>";
+                    content += "<tr><td class='align-text-top pe-3'>Backend-Entwicklung</td><td>Paul Jongmanns<br>Fabian Beckmann</td></tr>";
+                    content += "<tr><td class='align-text-top pe-3'>Frontend-Entwicklung</td><td>Milan Kovacevic<br>Christian Sander<br>Fabian Rose</td></tr>";
+                    content += "<tr><td class='align-text-top pe-3'>Datenbankentwicklung</td><td>Lars Friedrich<br>Kevin Müller<br>Jan Breninek<br>Deon Gulbinat</td></tr>";
+                    content += "<tr><td class='align-text-top pe-3'>Elektronik</td><td>Matties Oldenburg<br>Tristan Muschalla<br>Marvin Bentley<br>Calvin Stelljes<br>Sandro Wriggers</td></tr>";
+                    content += "<tr><td class='align-text-top pe-3'>Statistik</td><td>Kevin Müller<br>Milan Kovacevic<br>René Schäfer<br>Emanuel Kass<br>Jan Breninek<br>Deon Gulbinat</td></tr>";
+                    content += "<tr><td class='align-text-top pe-3'>Dokumentation</td><td>Jessica Gerken</td></tr>";
+                    content += "</tbody></table>";
                     let data = {
                         modal: {
                             name: "staff"
@@ -3360,7 +3364,7 @@
                 border-right: 1px solid var(--bs-gray-300, #dee2e6)
             }
             .alert-primary.messageboxContainer {
-                border-color: #bbd8e6
+                border-color: #52709d
             }
             .alert-warning.messageboxContainer {
                 border-color: #f2e7c4
