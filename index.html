@@ -440,25 +440,31 @@
                 Modal.create(data);
             }
             function login(wtf) {
-                if ($("#mainModal").hasClass("show") && $("#mainModal").attr("data-name") == "login") {
+                if ($("#mainModal").hasClass("show") && $("#mainModal").attr("data-name") === "login") {
                     if ($("#body-overlay").length == 0) {
                         $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
                     }
-                    if ($(wtf).find("[data-processing='true']").length == 0) {
+                    if ($(wtf).find("[data-processing='true']").length === 0) {
                         $(wtf).attr("disabled", "disabled").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
                     }
                     $("#mainModal .modal-footer > button").attr("disabled", "disabled");
                     $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
                     $("#mainModal .modal-body > .alert").remove();
-                    $.post("lol", {
-                        username: $("#username").val(),
-                        password: $("#password").val()
+                    $.post({
+                        url: "http://192.168.100.187:3000/api/user/login",
+                        //data: JSON.stringify({email: "paul", password: "12345678"}),
+                        data: JSON.stringify({email: $("#username").val(), password: $("#password").val()}),
+                        processData: false,
+                        contentType: "application/json",
+                        crossDomain: true
                     }).done(function(response) {
-                        //cookies setzen
-                        //document.cookie = "username=John Doe; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/";
-                        //anmeldeknopf durch abmeldeknopf ersetzen
+                        let date = new Date();
+                        date.setHours(date.getHours() + 168); // = 1 Woche
+                        document.cookie = "authToken=" + response["authentification"] + "; expires=" + date.toUTCString() + "; path=/";
+                        $("a[href='#login']").attr("href", "#logout").html("<i class='fas fa-sign-out-alt'></i> Abmelden");
+                        $("#second-navbar").prepend("<span class='navbar-text' id='loggedInUser'><i class='fas fa-user-injured'></i> " + 9999999 + "</span>");
                     }).fail(function(response) {
-                        $("#mainModal .modal-body").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
+                        $("#mainModal .modal-body").prepend(Alert.create("danger", (Number.parseInt(response["status"]) === 401 ? "Ungültige Anmeldedaten" : response["status"] + ": " + response["statusText"])));
                     }).always(function() {
                         $(wtf).find("[data-processing='true']").remove();
                         $(wtf).removeAttr("disabled");
@@ -953,8 +959,9 @@
                 };
                 Modal.create(data);
             }
+            //192.168.100.187:3000/api/data/sensors
             function wtf() {
-                $.ajax("http://127.0.0.1:3000/api/data/sensors", {
+                $.ajax("http://192.168.100.187:3000/api/data/sensors", {
                     data: JSON.stringify({amount: 50}),
                     type: "POST",
                     processData: false,
@@ -1211,6 +1218,20 @@
                     }
                 }
             }
+            function getCookie(cname) {
+                let name = cname + "=";
+                let ca = document.cookie.split(";");
+                for (let i = 0; i < ca.length; i++) {
+                    let c = ca[i];
+                    while (c.charAt(0) == " ") {
+                        c = c.substring(1);
+                    }
+                    if (c.indexOf(name) == 0) {
+                        return c.substring(name.length, c.length);
+                    }
+                }
+                return "";
+            }
             $(window).on("load", function() {
                 $("#body-overlay").empty();
                 $("#body-overlay").css("opacity", 0).on("transitionend", function() {
@@ -1225,7 +1246,7 @@
                     }
                 }
             });
-            document.addEventListener("DOMContentLoaded", function() {
+            $(document).on("DOMContentLoaded", function() {
                 // Hier alle Skripte ausführen, die auf DOM zugreifen sollen, bevor Bilder und Ähnliches geladen wurden 
                 $("a[href='#systemInfos']").click(function() {
                     let content = "<table class='table-sm w-100'><thead>";
@@ -1362,7 +1383,7 @@
                         $("#discardPlantButton").removeAttr("disabled");
                     });
                 });
-                $("a[href='#login']").click(function() {
+                $("a[href='#login']").on("click", function() {
                     let content = "<div><label for='username' class='form-label'>Benutzername:</label>";
                     content += "<input type='text' class='form-control' id='username' placeholder='Benutzernamen eingeben'></div>";
                     content += "<div class='mt-3'><label for='password' class='form-label'>Passwort:</label>";
@@ -1381,6 +1402,10 @@
                         }
                     };
                     Modal.create(data);
+                });
+                $("a[href='#logout']").on("click", function() {
+                    console.log(getCookie("authToken"));
+
                 });
                 $(".config-chart-button").click(function() {
                     $("#chartHistoryElementTitle").html($(this).attr("data-chart-title"));
@@ -3100,7 +3125,7 @@
             #navigation > ul > li > a {
                 text-shadow: 0 1px 0 black
             }
-            #navigation > ul > li > a:not(.disabled):hover, #navigation > ul > li > a:not(.disabled):active, #navigation > ul > li > a.active {
+            #navigation > ul > li > a:not(.disabled):hover, #navigation > ul > li > a:not(.disabled):active, #navigation > ul > li > a.active, #navigation .navbar-text {
                 color: black !important;
                 background-color: #f6ffff;
                 box-shadow: 0 1px 1px 0px rgba(0, 0, 0, 0.5);
@@ -3742,10 +3767,6 @@
                 <ul class="navbar-nav mt-auto me-2 mb-auto ms-auto" id="second-navbar">
                     <li class="nav-item">
                         <a class="nav-link rounded-3" href="#login"><i class="fas fa-sign-in-alt"></i> Anmelden</a>
-                    </li>
-                    <!-- Es darf immer nur eine Aktion möglich sein -->
-                    <li class="nav-item d-none">
-                        <a class="nav-link rounded-3" href="#"><i class="fas fa-sign-out-alt"></i> Abmelden</a>
                     </li>
                 </ul>
                 <div class="dropdown" id="mobile-navbar">
