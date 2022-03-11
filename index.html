@@ -135,17 +135,19 @@
                     language: dataTablesLocalisation,
                     columns: [
                         {
-                            name: "displayname",
-                            data: "displayname"
+                            name: "username",
+                            data: "username"
                         },
                         {
-                            name: "uid",
-                            data: "uid"
+                            name: "email",
+                            data: "email"
                         },
                         {
                             name: "creation",
-                            data: "creation"
-                        },
+                            data: function(row, type, set, meta) {
+                                return row["creation_date"];
+                            }
+                        }/*,
                         {
                             name: "status",
                             data: "status"
@@ -164,14 +166,23 @@
                                 buttons += "</div>";
                                 return buttons;
                             }
-                        }
+                        }*/
                     ],
-                    ajax: {
-                        url: "dataTables_test.php",
-                        type: "GET",
-                        data: {
-                            type: "useraccounts"
-                        }
+                    ajax: function(data, callback, settings) {
+                        $.post({
+                            url: "http://192.168.100.187:3000/api/user/userlist",
+                            processData: false,
+                            contentType: "application/json",
+                            crossDomain: true,
+                            timeout: 10000,
+                            data: JSON.stringify({
+                                authentification: decodeURIComponent(getCookie("authToken"))
+                            })
+                        }).done(function(response) {
+                            callback(response);
+                        }).fail(function(response) {
+                            callback(null);
+                        });
                     },
                     drawCallback: function(settings) {
                         $("#userAccountsAdminTable").parent().addClass("table-container");
@@ -452,17 +463,22 @@
                     $("#mainModal .modal-body > .alert").remove();
                     $.post({
                         url: "http://192.168.100.187:3000/api/user/login",
-                        //data: JSON.stringify({email: "paul", password: "12345678"}),
                         data: JSON.stringify({email: $("#username").val(), password: $("#password").val()}),
                         processData: false,
                         contentType: "application/json",
-                        crossDomain: true
+                        crossDomain: true,
+                        timeout: 10000
                     }).done(function(response) {
                         let date = new Date();
                         date.setHours(date.getHours() + 168); // = 1 Woche
-                        document.cookie = "authToken=" + response["authentification"] + "; expires=" + date.toUTCString() + "; path=/";
-                        $("a[href='#login']").attr("href", "#logout").html("<i class='fas fa-sign-out-alt'></i> Abmelden");
-                        $("#second-navbar").prepend("<span class='navbar-text' id='loggedInUser'><i class='fas fa-user-injured'></i> " + 9999999 + "</span>");
+                        document.cookie = "authToken=" + encodeURIComponent(response["authentification"]) + "; expires=" + date.toUTCString() + "; path=/; SameSite=None; Secure";
+                        document.cookie = "username=" + encodeURIComponent(response["username"]) + "; expires=" + date.toUTCString() + "; path=/; SameSite=None; Secure";
+                        $("a[href='#login']").addClass("d-none");
+                        $("a[href='#logout']").removeClass("d-none");
+                        if ($("#loggedInUser").length === 0) {
+                            $("#second-navbar").prepend("<span class='navbar-text me-2' id='loggedInUser'><i class='fas fa-user-injured'></i> " + response["username"] + "</span>");
+                        }
+                        bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
                     }).fail(function(response) {
                         $("#mainModal .modal-body").prepend(Alert.create("danger", (Number.parseInt(response["status"]) === 401 ? "Ungültige Anmeldedaten" : response["status"] + ": " + response["statusText"])));
                     }).always(function() {
@@ -481,10 +497,6 @@
                 else {
                     $(wtf).removeAttr("disabled");
                 }
-            }
-            function logout(wtf) {
-                //cookies löschen
-                //abmeldeknopf durch anmeldeknopf ersetzen (auch in mobiler ansicht)
             }
             function createNewEvent(wtf = null) {
                 //
@@ -961,7 +973,8 @@
             }
             //192.168.100.187:3000/api/data/sensors
             function wtf() {
-                $.ajax("http://192.168.100.187:3000/api/data/sensors", {
+                $.post({
+                    url: "http://192.168.100.187:3000/api/data/sensors",
                     data: JSON.stringify({amount: 50}),
                     type: "POST",
                     processData: false,
@@ -1247,7 +1260,12 @@
                 }
             });
             $(document).on("DOMContentLoaded", function() {
-                // Hier alle Skripte ausführen, die auf DOM zugreifen sollen, bevor Bilder und Ähnliches geladen wurden 
+                // Hier alle Skripte ausführen, die auf DOM zugreifen sollen, bevor Bilder und Ähnliches geladen wurden
+                if (getCookie("authToken").length >= 1 && getCookie("username").length >= 1) {
+                    $("a[href='#login']").addClass("d-none");
+                    $("a[href='#logout']").removeClass("d-none");
+                    $("#second-navbar").prepend("<span class='navbar-text me-2' id='loggedInUser'><i class='fas fa-user-injured'></i> " + getCookie("username") + "</span>");
+                } 
                 $("a[href='#systemInfos']").click(function() {
                     let content = "<table class='table-sm w-100'><thead>";
                     content += "<tr><th class='w-25'>Eigenschaft</th><th>Wert</th></tr>";
@@ -1384,7 +1402,7 @@
                     });
                 });
                 $("a[href='#login']").on("click", function() {
-                    let content = "<div><label for='username' class='form-label'>Benutzername:</label>";
+                    let content = "<div><label for='username' class='form-label'>E-Mail:</label>";
                     content += "<input type='text' class='form-control' id='username' placeholder='Benutzernamen eingeben'></div>";
                     content += "<div class='mt-3'><label for='password' class='form-label'>Passwort:</label>";
                     content += "<input type='password' class='form-control' id='password' placeholder='Passwort eingeben'></div>";
@@ -1404,8 +1422,11 @@
                     Modal.create(data);
                 });
                 $("a[href='#logout']").on("click", function() {
-                    console.log(getCookie("authToken"));
-
+                    document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=None; Secure";
+                    document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=None; Secure";
+                    $("#loggedInUser").remove();
+                    $("a[href='#login']").removeClass("d-none");
+                    $("a[href='#logout']").addClass("d-none");
                 });
                 $(".config-chart-button").click(function() {
                     $("#chartHistoryElementTitle").html($(this).attr("data-chart-title"));
@@ -1713,7 +1734,7 @@
                         if (data["images"].length >= 1) {
                             let images = "";
                             for (image of data["images"]) {
-                                images += "<div class='historyGalleryItem d-flex flex-column p-1' onclick='showHistoryGalleryImage(this)'><img src='img/" + image + "'>";
+                                images += "<div class='historyGalleryItem d-flex flex-column p-1 justify-content-between' onclick='showHistoryGalleryImage(this)'><img src='img/" + image + "'>";
                                 images += "<article><span class='text-secondary'>verdammt</span><br>01.01.1970, 11:11:11 Uhr</article></div>";
                             }
                             $("#historyGalleryPanel").html(images);
@@ -3122,10 +3143,10 @@
             #navigation > ul > li > a:not(.disabled), #navigation > ul > li > a:not(.disabled):visited {
                 color: white;
             }
-            #navigation > ul > li > a {
+            #navigation > ul > li > a, #navigation .navbar-text {
                 text-shadow: 0 1px 0 black
             }
-            #navigation > ul > li > a:not(.disabled):hover, #navigation > ul > li > a:not(.disabled):active, #navigation > ul > li > a.active, #navigation .navbar-text {
+            #navigation > ul > li > a:not(.disabled):hover, #navigation > ul > li > a:not(.disabled):active, #navigation > ul > li > a.active {
                 color: black !important;
                 background-color: #f6ffff;
                 box-shadow: 0 1px 1px 0px rgba(0, 0, 0, 0.5);
@@ -3768,6 +3789,9 @@
                     <li class="nav-item">
                         <a class="nav-link rounded-3" href="#login"><i class="fas fa-sign-in-alt"></i> Anmelden</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link rounded-3 d-none" href="#logout"><i class="fas fa-sign-out-alt"></i> Abmelden</a>
+                    </li>
                 </ul>
                 <div class="dropdown" id="mobile-navbar">
                     <button type="button" class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" style="box-shadow: 0 0 1px 0 black">
@@ -3779,6 +3803,7 @@
                         <li><a class="dropdown-item" href="#about"><i class="fas fa-info-circle"></i> Über</a></li>
                         <li><div class="dropdown-divider"></div></li> 
                         <li><a class="dropdown-item" href="#login"><i class="fas fa-sign-in-alt"></i> Anmelden</a></li>
+                        <li><a class="dropdown-item d-none" href="#logout"><i class="fas fa-sign-out-alt"></i> Abmelden</a></li>
                     </ul>
                 </div> 
             </nav>
@@ -4281,11 +4306,11 @@
                                             <table class="table table-sm w-100 mt-3" id="userAccountsAdminTable">
                                                 <thead>
                                                     <tr>
-                                                        <th>Echter Name</th>
                                                         <th>Benutzername</th>
+                                                        <th>E-Mail</th>
                                                         <th>Erstellt</th>
-                                                        <th>Status</th>
-                                                        <th>Optionen</th>
+                                                        <!--<th>Status</th>
+                                                        <th>Optionen</th>-->
                                                     </tr>
                                                 </thead>
                                                 <tbody>
