@@ -124,6 +124,10 @@
                         type: 'GET',
                         data: {
                             type: "plantdetails"
+                        },
+                        dataSrc: function(response) {
+                            Object.assign(plantProperties, response["data"]);
+                            return response["data"];
                         }
                     },
                     drawCallback: function(settings) {
@@ -220,6 +224,10 @@
                         type: 'GET',
                         data: {
                             type: "plantPrograms"
+                        },
+                        dataSrc: function(response) {
+                            Object.assign(plantPrograms, response["data"]);
+                            return response["data"];
                         }
                     },
                     drawCallback: function(settings) {
@@ -252,6 +260,10 @@
                         type: 'GET',
                         data: {
                             type: "pumps"
+                        },
+                        dataSrc: function(response) {
+                            Object.assign(pumps, response["data"]);
+                            return response["data"];
                         }
                     },
                     drawCallback: function(settings) {
@@ -301,6 +313,10 @@
                         type: 'GET',
                         data: {
                             type: "events"
+                        },
+                        dataSrc: function(response) {
+                            Object.assign(events, response["data"]);
+                            return response["data"];
                         }
                     },
                     drawCallback: function(settings) {
@@ -333,6 +349,9 @@
                         type: "GET",
                         data: {
                             type: "logs"
+                        },
+                        dataSrc: function(response) {
+                            return response["data"];
                         }
                     },
                     drawCallback: function(settings) {
@@ -1589,10 +1608,6 @@
                     if (!DataTable.isDataTable("#plantProgramsAdminTable")) {
                         let options = {};
                         Object.assign(options, dataTablesAdminOptions["plantPrograms"]);
-                        options["ajax"]["dataSrc"] = function(response) {
-                            Object.assign(plantPrograms, response["data"]);
-                            return response["data"];
-                        };
                         options["rowGroup"] = {
                             dataSrc: "plantID",
                             className: "bg-gray-200",
@@ -1624,13 +1639,7 @@
                 });
                 $("#pump-actions-accordion").on("shown.bs.collapse", function() {
                     if (!DataTable.isDataTable("#pumpsAdminTable")) {
-                        let options = {};
-                        Object.assign(options, dataTablesAdminOptions["pumps"]);
-                        options["ajax"]["dataSrc"] = function(response) {
-                            Object.assign(pumps, response["data"]);
-                            return response["data"];
-                        };
-                        adminDataTables["pumps"] = $("#pumpsAdminTable").DataTable(options);
+                        adminDataTables["pumps"] = $("#pumpsAdminTable").DataTable(dataTablesAdminOptions["pumps"]);
                     } 
                     else {
                         $("#pumpsAdminTable").DataTable().ajax.reload();
@@ -1640,10 +1649,6 @@
                     if (!DataTable.isDataTable("#eventsAdminTable")) {
                         let options = {};
                         Object.assign(options, dataTablesAdminOptions["events"]);
-                        options["ajax"]["dataSrc"] = function(response) {
-                            Object.assign(events, response["data"]);
-                            return response["data"];
-                        };
                         options["rowGroup"] = {
                             dataSrc: "category",
                             className: "bg-gray-200",
@@ -1670,11 +1675,7 @@
                 });
                 $("#collapse-logs-actions").on("shown.bs.collapse", function() {
                     if (!DataTable.isDataTable("#logsAdminTable")) {
-                        let options = {};
                         Object.assign(options, dataTablesAdminOptions["logs"]);
-                        options["ajax"]["dataSrc"] = function(response) {
-                            return response["data"];
-                        };
                         options["rowGroup"] = {
                             dataSrc: "category",
                             className: "bg-gray-200",
@@ -1693,13 +1694,7 @@
                 $("#collapse-plants-actions").on("shown.bs.collapse", function(element) {
                     if ($(element["target"]).attr("data-bs-parent") == "#plants-accordion") {
                         if (!DataTable.isDataTable("#plantsAdminTable")) {
-                            let options = {};
-                            Object.assign(options, dataTablesAdminOptions["plants"]);
-                            options["ajax"]["dataSrc"] = function(response) {
-                                Object.assign(plantProperties, response["data"]);
-                                return response["data"];
-                            };
-                            adminDataTables["plants"] = $("#plantsAdminTable").DataTable(options);
+                            adminDataTables["plants"] = $("#plantsAdminTable").DataTable(dataTablesAdminOptions["plants"]);
                         }
                         else {
                             $("#plantsAdminTable").DataTable().ajax.reload();
@@ -3855,10 +3850,10 @@
                     <div class="tab-content p-4 border">
                         <div class="tab-pane active" id="overview">
                             <div class="d-flex formContainer">
-                                <label for="plantSelection" class="me-2">Pflanze:</label>
-                                <select class="form-select w-auto d-inline-block me-2" id="plantSelection"></select>
-                                <label for="plantProgramSelection" class="me-2">Programm:</label>
-                                <select class="form-select w-auto d-inline-block me-2" id="plantProgramSelection"></select>
+                                <label for="plantSelection" class="col-form-label me-2">Pflanze:</label>
+                                <select class="form-select w-auto d-inline-block" id="plantSelection"></select>
+                                <label for="plantProgramSelection" class="col-form-label me-2">Programm:</label>
+                                <select class="form-select w-auto d-inline-block" id="plantProgramSelection me-2"></select>
                                 <button type="button" class="btn btn-success align-baseline"><i class="fas fa-play"></i></button>
                                 <!--<button type="button" class="btn btn-warning ms-2"><i class="fas fa-pause"></i></button>-->
                             </div>
@@ -3996,8 +3991,8 @@
                                                 </div>
                                                 <div class="tab-pane" id="plantsAdminCreationContainer">
                                                     <div class="d-flex formContainer mb-3">
-                                                        <label for="plantsAdminPlantSelection" class="me-2">Vorlage:</label>
-                                                        <select class="form-select w-auto d-inline-block me-2" id="plantsAdminPlantSelection" data-old="0"></select>
+                                                        <label for="plantsAdminPlantSelection" class="col-form-label">Vorlage:</label>
+                                                        <select class="form-select w-auto d-inline-block" id="plantsAdminPlantSelection" data-old="0"></select>
                                                         <button type="button" class="btn btn-primary align-top" id="applyPlantTemplateButton" disabled="disabled"><i class="fas fa-sync"></i> Übernehmen</button>
                                                     </div>
                                                     <div class="d-flex mt-3" id="newPlantMenu">
@@ -4245,7 +4240,7 @@
                                     <div id="collapse-plants-programs-actions" class="collapse hide" data-bs-parent="#plants-programs-actions-accordion">
                                         <div class="card-body">
                                             <div class="d-flex formContainer mb-3">
-                                                <label for="plantProgramsAdminPlantSelection" class="me-2">Pflanze:</label>
+                                                <label for="plantProgramsAdminPlantSelection" class="col-form-label">Pflanze:</label>
                                                 <select class="form-select w-auto d-inline-block" id="plantProgramsAdminPlantSelection" data-old="0">
                                                     <option value="0">Alle</option>
                                                 </select>
@@ -4343,7 +4338,7 @@
                                     <div id="collapse-events-actions" class="collapse hide" data-bs-parent="#events-accordion">
                                         <div class="card-body">
                                             <div class="d-flex formContainer mb-3">
-                                                <label for="eventsAdminCategorySelection" class="me-2">Kategorie:</label>
+                                                <label for="eventsAdminCategorySelection" class="col-form-label">Kategorie:</label>
                                                 <select class="form-select w-auto d-inline-block" id="eventsAdminCategorySelection" data-old="0">
                                                     <option value="0">Alles</option>
                                                     <option value="1">Pflanzen</option>
@@ -4378,7 +4373,7 @@
                                     <div id="collapse-logs-actions" class="collapse hide" data-bs-parent="#logs-accordion">
                                         <div class="card-body">
                                             <div class="d-flex formContainer mb-3">
-                                                <label for="logsAdminCategorySelection" class="me-2">Kategorie:</label>
+                                                <label for="logsAdminCategorySelection" class="col-form-label">Kategorie:</label>
                                                 <select class="form-select w-auto d-inline-block" id="logsAdminCategorySelection" data-old="0">
                                                     <option value="0">Alles</option>
                                                     <option value="1">Aktoren</option>
@@ -4406,7 +4401,7 @@
                         </div>
                         <div class="tab-pane fade" id="historyGallery">
                             <div class="formContainer mb-3" id="historyGalleryTimespan">
-                                <label for="historyGalleryTimespanSelect" class="me-2">Zeitraum:</label>
+                                <label for="historyGalleryTimespanSelect" class="col-form-label">Zeitraum:</label>
                                 <select id="historyGalleryTimespanSelect">
                                     <option value="0">Gesamt</option>
                                     <option value="1">00:00-06:00 Uhr</option>
