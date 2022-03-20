@@ -18,6 +18,7 @@
         <script src="js/dataTables.bootstrap5.min.js"></script>
         <script src="js/chart.min.js"></script>
         <script src="js/bootstrap4-toggle.min.js"></script>
+        <script src="js/litepicker.js"></script>
         <script>
             Chart.register("filler");
             const charts = {
@@ -411,6 +412,7 @@
             var systemInfosTimer = null;
             var isPlantEditingActive = false;
             var isLoadingSystemInfos = false;
+            var picker = null;
             function switchAlert(element, type) {
                 type = type.toLowerCase();
                 element = $("#section-" + element)[0];
@@ -816,13 +818,66 @@
                     return "<div class='" + (closeable ? "alert-dismissible " : "") + "alert alert-" + type + " messageboxContainer " + classes + "' role='alert'" + (id !== null ? " id='" + id + "'" : "") + "><div class='messageboxIcon " + type + "'><i class='" + icons[type] + "'></i></div><div class='messageboxText'>" + message + (closeable ? "</div><button type='button' class='btn-close position-static align-self-start' data-bs-dismiss='alert' aria-label='Schließen'></button>" : "") + "</div></div>";
                 }
             }
-            async function editPlant(wtf) {
+            function getGalleryItems() {
+                $("#getGalleryItemsButton").attr("disabled", "disabled");
+                $("#historyGalleryTimespanSelect").attr("disabled", "disabled");
+                if ($("#getGalleryItemsButton").find("[data-processing='true']").length == 0) {
+                    $("#getGalleryItemsButton").prepend("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary'></span>");
+                }
+                let startDate = picker.getStartDate();
+                let endDate = picker.getEndDate();
+                if (startDate == null || endDate == null) {
+                    startDate = new Date();
+                    endDate = new Date();
+                    startDate.setDate(1);
+                    startDate.setHours(0, 0, 0);
+                    endDate.setMonth(endDate.getMonth() +1);
+                    endDate.setDate(0);
+                    endDate.setHours(23, 59, 59);
+                }
+                else {
+                    startDate.setHours(0, 0, 0);
+                    endDate.setHours(0, 0, 0);
+                }
+                let data = {
+                    startDate: startDate.getTime(), // Zeitspanne; 0 = alles
+                    endDate: endDate.getTime()
+                }
+                $.post({
+                    url: "gallery.php",
+                    data: JSON.stringify(data),
+                    processData: false,
+                    contentType: "application/json",
+                    crossDomain: true,
+                    timeout: 10000
+                }).done(function(response) {
+                    let data = JSON.parse(response);
+                    if (data["images"].length >= 1) {
+                        let images = "";
+                        for (image of data["images"]) {
+                            images += "<div class='historyGalleryItem d-flex flex-column p-1 justify-content-between' onclick='showHistoryGalleryImage(this)'><img src='img/" + image + "'>";
+                            images += "<article><span class='text-secondary'>verdammt</span><br>01.01.1970, 11:11:11 Uhr</article></div>";
+                        }
+                        $("#historyGalleryPanel").html(images);
+                    }
+                // img.naturalWidth and img.naturalHeight
+                }).fail(function(response) {
+                    $("#historyGallery").prepend(Alert.create("danger", (statusCodes.hasOwnProperty(response["status"]) ? statusCodes[response["status"]] : response["status"] + ": " + response["statusText"])));
+                }).always(function() {
+                    $("#getGalleryItemsButton").removeAttr("disabled").find("[data-processing='true']").remove();
+                    $("#historyGalleryTimespanSelect").removeAttr("disabled");
+                });
+            }
+            function editPlant(wtf) {
                 let plant = Number.parseInt(wtf);
                 if (Number.isSafeInteger(plant)) {
                     let index = plantProperties.findIndex(key => key["id"] === plant);
                     if (index >= 0) {
                         if (isPlantEditingActive) {
-                            if (await confirmReplacePlantEditing(index)) {
+                            let prompt = new Promise(function(resolve) {
+                                resolve(confirmReplacePlantEditing(index));
+                            });
+                            prompt.then(function(value) {
                                 $("#savePlantButton").attr("data-plant-id", wtf);
                                 let tab = $("a[href='#plantsAdminCreationContainer']")[0];
                                 $(tab).html("Bearbeitung");
@@ -831,7 +886,7 @@
                                 fillPlantInputs(wtf);
                                 new bootstrap.Tab(tab).show();
                                 bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
-                            }
+                            });
                         }
                         else {
                             isPlantEditingActive = true;
@@ -1085,7 +1140,7 @@
                 };
                 Modal.create(data);
             }
-            async function confirmPlantDeletion(plant) {
+            function confirmPlantDeletion(plant) {
                 let index = plantProperties.findIndex(key => key["id"] === plant);
                 if (index >= 0) {
                     let prompt = new Promise(function(resolve) {
@@ -1095,7 +1150,7 @@
                         },
                         resolve);
                     });
-                    if (await prompt) {
+                    prompt.then(function(value) {
                         if ($("#body-overlay").length == 0) {
                             $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
                         }
@@ -1126,7 +1181,7 @@
                             $("#mainModal .modal-footer > button").removeAttr("disabled");
                             $("#mainModal .modal-header > [data-bs-dismiss='modal']").removeAttr("disabled");
                         });
-                    }
+                    });
                 }
             }
             /*
@@ -1170,7 +1225,7 @@
                 }
             }
             */
-            async function confirmEventDeletion(event) {
+            function confirmEventDeletion(event) {
                 let index = events.findIndex(key => key["id"] === event);
                 if (index >= 0) {
                     let prompt = new Promise(function(resolve) {
@@ -1180,7 +1235,7 @@
                         },
                         resolve);
                     });
-                    if (await prompt) {
+                    prompt.then(function(value) {
                         if ($("#body-overlay").length == 0) {
                             $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
                         }
@@ -1210,10 +1265,10 @@
                             $("#mainModal .modal-footer > button").removeAttr("disabled");
                             $("#mainModal .modal-header > [data-bs-dismiss='modal']").removeAttr("disabled");
                         });
-                    }
+                    });
                 }
             }
-            async function confirmDiscardPlantEditing() {
+            function confirmDiscardPlantEditing() {
                 let prompt = new Promise(function(resolve) {
                     confirmation({
                         title: "Pflanzenbearbeitung abbrechen",
@@ -1221,7 +1276,7 @@
                     },
                     resolve);
                 });
-                if (await prompt) {
+                prompt.then(function(value) {
                     $("#newPlantContainer input[type='text']").val("");
                     isPlantEditingActive = false;
                     $("a[href='#plantsAdminCreationContainer']").html("Erstellen");
@@ -1229,10 +1284,10 @@
                     $(this).html("<i class='fas fa-trash-alt'></i> Löschen");
                     $("#editPlantAlert").remove();
                     bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
-                }
+                });
             }
             // wtf = Index der zu bearbeitenden Pflanze!
-            async function confirmReplacePlantEditing(wtf) {
+            function confirmReplacePlantEditing(wtf) {
                 let currentPlant = Number.parseInt($("#savePlantButton").attr("data-plant-id"));
                 if (Number.isSafeInteger(currentChartPlant)) {
                     let index = plantProperties.findIndex(key => key["id"] === currentChartPlant);
@@ -1254,7 +1309,7 @@
                             },
                             resolve);
                         });
-                        return await prompt;
+                        return prompt;
                     }
                 }
             }
@@ -1292,7 +1347,15 @@
                     $("a[href='#login']").addClass("d-none");
                     $("a[href='#logout']").removeClass("d-none");
                     $("[data-current-user]").removeClass("d-none").html("<i class='fas fa-user-injured'></i> " + getCookie("username"));
-                } 
+                }
+                picker = new Litepicker({ 
+                    element: $("#historyGalleryTimespanSelect")[0],
+                    lang: "de-de",
+                    maxDays: 31,
+                    singleMode: false,
+                    tooltipText: {"one":"Tag", "other":"Tage"},
+                    resetButton: true
+                });
                 $("a[href='#systemInfos']").click(function() {
                     let content = "<table class='table-sm w-100'><thead>";
                     content += "<tr><th class='w-25'>Eigenschaft</th><th>Wert</th></tr>";
@@ -1429,6 +1492,10 @@
                         $("#savePlantButton").removeAttr("disabled");
                         $("#discardPlantButton").removeAttr("disabled");
                     });
+                    return false;
+                });
+                $("#historyGalleryTimespan").submit(function() {
+                    getGalleryItems();
                     return false;
                 });
                 $("a[href='#login']").on("click", function() {
@@ -1726,27 +1793,7 @@
                 });
                 // Bilderlinks laden
                 $("a[href='#historyGallery']").on("shown.bs.tab", function() {
-                    $("#historyGalleryTimespanSelect").attr("disabled", "disabled").after("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary'></span>");
-                       $.get("gallery.php", {
-                        span: 0 // Zeitspanne; 0 = alles
-                        // timespan geht nicht, vielleicht $.ajax mit processData-Option verwenden?
-                    }).done(function(response) {
-                        let data = JSON.parse(response);
-                        if (data["images"].length >= 1) {
-                            let images = "";
-                            for (image of data["images"]) {
-                                images += "<div class='historyGalleryItem d-flex flex-column p-1 justify-content-between' onclick='showHistoryGalleryImage(this)'><img src='img/" + image + "'>";
-                                images += "<article><span class='text-secondary'>verdammt</span><br>01.01.1970, 11:11:11 Uhr</article></div>";
-                            }
-                            $("#historyGalleryPanel").html(images);
-                        }
-                            // img.naturalWidth and img.naturalHeight
-                        }).fail(function(response) {
-                            $("#historyGallery").prepend(Alert.create("danger", (statusCodes.hasOwnProperty(response["status"]) ? statusCodes[response["status"]] : response["status"] + ": " + response["statusText"])));
-                        }).always(function() {
-                            $("#historyGalleryTimespan").find("[data-processing='true']").remove();
-                            $("#historyGalleryTimespanSelect").removeAttr("disabled");
-                        });
+                    getGalleryItems();
                 });
                 // Aktuell
                 charts["current"]["co2"] = new Chart($("#co2-chart-current")[0].getContext("2d"), {
@@ -3089,64 +3136,69 @@
                 border-top-right-radius: 5px;
                 box-shadow: 0 1px 4px 0px var(--bs-gray-600, #6c757d);
             }
-            #tabNavigation {
+            .nav-tabs {
                 border-bottom-width: 0 !important;
             }
-            #tabNavigation .nav-link.active::after {
+            .nav-tabs > .nav-item {
+                position: relative;
+                z-index: 2;
+            }
+            /* langer block unter erstem tab */
+            .nav-tabs > .nav-item:first-of-type > .nav-link.active::after {
                 content: "";
                 position: absolute;
                 width: 100%;
-                height: 15px;
-                left: 0;
-                bottom: -12px;
-                z-index: 10;
-                background-color: #fbfbfb;
-                display: block
-            }
-            #tabNavigation .nav-item {
-                position: relative
-            }
-            #tabNavigation .nav-item:first-of-type::after {
-                content: "";
-                position: absolute;
-                width: 6px;
-                height: 5px;
-                right: -3px;
-                bottom: -6px;
-                z-index: 10;
-                background-color: #fbfbfb;
-            }
-            #tabNavigation .nav-item:last-of-type::after {
-                content: "";
-                position: absolute;
-                width: 6px;
-                height: 5px;
-                right: -3px;
-                bottom: -6px;
-                z-index: 10;
-                background-color: #fbfbfb;
-            }
-            #tabNavigation .nav-item:first-of-type .nav-link.active::before {
-                content: "";
-                position: absolute;
-                width: 1px;
-                height: 40px;
+                height: 10px;
                 left: -1px;
-                bottom: -20px;
+                bottom: -10px;
                 z-index: 10;
-                background-color: var(--bs-gray-300, #dee2e6);
+                background-color: #fbfbfb;
+                border-left: 1px solid var(--bs-gray-300, #dee2e6);
             }
-            #tabNavigation .nav-link.active {
-                background-color: #fbfbfb !important;
-                border-bottom-color: #fbfbfb !important;
+            /* kleine blöcke VOR zwischen erstem und letztem tab */
+            .nav-tabs > .nav-item:not(:first-of-type)::before {
+                content: "";
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                left: -5px;
+                bottom: -11px;
+                z-index: 11;
+                background-color: #fbfbfb;
+            }
+            /* langer block unter nicht erstem tab */
+            .nav-tabs > .nav-item:not(:first-of-type) > .nav-link.active::after {
+                content: "";
+                position: absolute;
+                width: 100%;
+                height: 10px;
+                left: -1px;
+                bottom: -10px;
+                z-index: 10;
+                background-color: #fbfbfb;
+            }
+            /* kleiner block HINTER letztem tab */
+            .nav-tabs > .nav-item:last-of-type::after {
+                content: "";
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                right: -5px;
+                bottom: -11px;
+                z-index: 11;
+                background-color: #fbfbfb;
+            }
+            .nav-tabs > .nav-item > .nav-link.active {
+                box-shadow: 0 2px 5px 0px #00000057;
+                background-color: #fbfbfb;
+                border-bottom-color: #fbfbfb;
                 position: relative;
-                box-shadow: 0 1px 4px 0px var(--bs-gray-600, #6c757d)
             }
-            #tabNavigation .nav-link.disabled {
+            .nav-tabs > .nav-item > .nav-link.disabled {
                 border: 1px solid var(--bs-gray-200, #e9ecef) !important;
             }
-            #tabNavigation a.nav-link:not(.disabled, .active):hover, #tabNavigation a.nav-link:not(.disabled, .active):active,
-            #tabNavigation a.nav-link:not(.disabled, .active):focus {
+            .nav-tabs > .nav-item > a.nav-link:not(.disabled, .active):hover, .nav-tabs > .nav-item > a.nav-link:not(.disabled, .active):active,
+            .nav-tabs > .nav-item > a.nav-link:not(.disabled, .active):focus {
                 border: 1px solid var(--bs-gray-300, #dee2e6) !important;
                 border-bottom: 1px solid transparent !important
             }
@@ -3557,7 +3609,7 @@
                 .formContainer, .legendContainer {
                     flex-direction: column;
                 }
-                .formContainer > label + select:not(:last-child), .formContainer > button:not(:last-child) {
+                .formContainer > label + select:not(:last-child), .formContainer > label + input:not(:last-child), .formContainer > button:not(:last-child) {
                     margin-bottom: 0.5rem;
                 }
                 table.dataTable:not(.table-borderless) > tbody > tr:first-of-type > td:first-of-type {
@@ -3584,9 +3636,6 @@
                 }
                 .legendContainer {
                     margin-top: 0;
-                }
-                .form-placeholder {
-                    display: none !important;
                 }
             }
             /* Small devices (portrait tablets and large phones, 600px and up) */
@@ -3639,7 +3688,7 @@
                 .formContainer, .legendContainer {
                     flex-direction: column;
                 }
-                .formContainer > label + select:not(:last-child), .formContainer > button:not(:last-child) {
+                .formContainer > label + select:not(:last-child), .formContainer > label + input:not(:last-child), .formContainer > button:not(:last-child) {
                     margin-bottom: 0.5rem;
                 }
                 table.dataTable:not(.table-borderless) > tbody > tr:first-of-type > td:first-of-type {
@@ -3667,9 +3716,6 @@
                 .legendContainer {
                     margin-top: 0;
                 }
-                .form-placeholder {
-                    display: none !important;
-                }
             }
             /* Medium devices (landscape tablets, 768px and up) */
             @media only screen and (min-width: 768px) {
@@ -3696,9 +3742,6 @@
                 }
                 .legendContainer .legendItem {
                     width: auto;
-                }
-                .form-placeholder {
-                    display: none !important;
                 }
                 #newPlantFormContainer input[type="text"] {
                     width: auto;
@@ -3733,6 +3776,12 @@
                     margin-top: 0;
                     margin-bottom: 0 !important;
                 }
+                .formContainer label:not(:first-of-type) {
+                    margin-left: 1rem;
+                }
+                .formContainer button:not(:only-child) {
+                    margin-left: 0.5rem;
+                }
                 .legendContainer {
                     margin-top: 0;
                 }
@@ -3744,9 +3793,6 @@
                 }
                 .legendContainer > label {
                     margin-top: 0;
-                }
-                .form-placeholder {
-                    display: unset !important;
                 }
                 #newPlantFormContainer input[type="text"] {
                     width: auto;
@@ -3769,6 +3815,12 @@
                 .formContainer > * {
                     margin-top: 0;
                     margin-bottom: 0;
+                }
+                .formContainer label:not(:first-of-type) {
+                    margin-left: 1rem;
+                }
+                .formContainer button:not(:only-child) {
+                    margin-left: 0.5rem;
                 }
                 .legendContainer .legendItem {
                     width: auto;
@@ -3832,7 +3884,7 @@
         <main>
             <div class="row justify-content-center">
                 <div class="mt-4 p-0" id="panel">
-                    <ul class="nav nav-tabs" id="tabNavigation">
+                    <ul class="nav nav-tabs">
                         <li class="nav-item">
                           <a class="nav-link active" data-bs-toggle="tab" href="#overview">Übersicht</a>
                         </li>
@@ -3843,9 +3895,6 @@
                           <a class="nav-link" data-bs-toggle="tab" href="#administration">Administration</a>
                           <!-- class="nav-link disabled" -->
                         </li>
-                        <!--<li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#about">About</a>
-                        </li>-->
                     </ul>
                     <div class="tab-content p-4 border">
                         <div class="tab-pane active" id="overview">
@@ -3991,7 +4040,7 @@
                                                 </div>
                                                 <div class="tab-pane" id="plantsAdminCreationContainer">
                                                     <div class="d-flex formContainer mb-3">
-                                                        <label for="plantsAdminPlantSelection" class="col-form-label">Vorlage:</label>
+                                                        <label for="plantsAdminPlantSelection" class="col-form-label me-2">Vorlage:</label>
                                                         <select class="form-select w-auto d-inline-block" id="plantsAdminPlantSelection" data-old="0"></select>
                                                         <button type="button" class="btn btn-primary align-top" id="applyPlantTemplateButton" disabled="disabled"><i class="fas fa-sync"></i> Übernehmen</button>
                                                     </div>
@@ -4240,7 +4289,7 @@
                                     <div id="collapse-plants-programs-actions" class="collapse hide" data-bs-parent="#plants-programs-actions-accordion">
                                         <div class="card-body">
                                             <div class="d-flex formContainer mb-3">
-                                                <label for="plantProgramsAdminPlantSelection" class="col-form-label">Pflanze:</label>
+                                                <label for="plantProgramsAdminPlantSelection" class="col-form-label me-2">Pflanze:</label>
                                                 <select class="form-select w-auto d-inline-block" id="plantProgramsAdminPlantSelection" data-old="0">
                                                     <option value="0">Alle</option>
                                                 </select>
@@ -4338,7 +4387,7 @@
                                     <div id="collapse-events-actions" class="collapse hide" data-bs-parent="#events-accordion">
                                         <div class="card-body">
                                             <div class="d-flex formContainer mb-3">
-                                                <label for="eventsAdminCategorySelection" class="col-form-label">Kategorie:</label>
+                                                <label for="eventsAdminCategorySelection" class="col-form-label me-2">Kategorie:</label>
                                                 <select class="form-select w-auto d-inline-block" id="eventsAdminCategorySelection" data-old="0">
                                                     <option value="0">Alles</option>
                                                     <option value="1">Pflanzen</option>
@@ -4373,7 +4422,7 @@
                                     <div id="collapse-logs-actions" class="collapse hide" data-bs-parent="#logs-accordion">
                                         <div class="card-body">
                                             <div class="d-flex formContainer mb-3">
-                                                <label for="logsAdminCategorySelection" class="col-form-label">Kategorie:</label>
+                                                <label for="logsAdminCategorySelection" class="col-form-label me-2">Kategorie:</label>
                                                 <select class="form-select w-auto d-inline-block" id="logsAdminCategorySelection" data-old="0">
                                                     <option value="0">Alles</option>
                                                     <option value="1">Aktoren</option>
@@ -4400,14 +4449,11 @@
                             </div>
                         </div>
                         <div class="tab-pane fade" id="historyGallery">
-                            <div class="formContainer mb-3" id="historyGalleryTimespan">
-                                <label for="historyGalleryTimespanSelect" class="col-form-label">Zeitraum:</label>
-                                <select id="historyGalleryTimespanSelect">
-                                    <option value="0">Gesamt</option>
-                                    <option value="1">00:00-06:00 Uhr</option>
-                                    <option value="2">06:00-12:00 Uhr</option>
-                                </select>
-                            </div>
+                            <form enctype="text/plain" method="post" action="/" class="formContainer mb-3 w-100 d-flex" id="historyGalleryTimespan">
+                                <label for="historyGalleryTimespanSelect" class="col-form-label me-2">Zeitraum:</label>
+                                <input type="text" id="historyGalleryTimespanSelect" class="form-control w-auto d-inline-block">
+                                <button type="submit" class="btn btn-primary align-baseline" id="getGalleryItemsButton">Anzeigen</button>
+                            </form>
                             <div id="historyGalleryPanel" class="mt-3"></div>
                         </div>
                     </div>
