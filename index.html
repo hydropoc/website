@@ -222,13 +222,15 @@
                     ],
                     ajax: {
                         url: "dataTables_test.php",
-                        type: 'GET',
-                        data: {
-                            type: "plantPrograms"
+                        type: "POST",
+                        contentType: "application/json",
+                        data: function(data, settings) {
+                            data["type"] = "plantPrograms"; // Test
+                            data["authentification"] = decodeURIComponent(getCookie("authToken"));
+                            return JSON.stringify(data);
                         },
                         dataSrc: function(response) {
-                            Object.assign(plantPrograms, response["data"]);
-                            return response["data"];
+                            return response;
                         }
                     },
                     drawCallback: function(settings) {
@@ -258,13 +260,15 @@
                     ],
                     ajax: {
                         url: "dataTables_test.php",
-                        type: 'GET',
-                        data: {
-                            type: "pumps"
+                        type: "POST",
+                        contentType: "application/json",
+                        data: function(data, settings) {
+                            data["type"] = "pumps"; // Test
+                            data["authentification"] = decodeURIComponent(getCookie("authToken"));
+                            return JSON.stringify(data);
                         },
                         dataSrc: function(response) {
-                            Object.assign(pumps, response["data"]);
-                            return response["data"];
+                            return response;
                         }
                     },
                     drawCallback: function(settings) {
@@ -311,13 +315,15 @@
                     ],
                     ajax: {
                         url: "dataTables_test.php",
-                        type: 'GET',
-                        data: {
-                            type: "events"
+                        type: "POST",
+                        contentType: "application/json",
+                        data: function(data, settings) {
+                            data["type"] = "events"; // Test
+                            data["authentification"] = decodeURIComponent(getCookie("authToken"));
+                            return JSON.stringify(data);
                         },
                         dataSrc: function(response) {
-                            Object.assign(events, response["data"]);
-                            return response["data"];
+                            return response;
                         }
                     },
                     drawCallback: function(settings) {
@@ -347,12 +353,15 @@
                     ],
                     ajax: {
                         url: "dataTables_test.php",
-                        type: "GET",
-                        data: {
-                            type: "logs"
+                        type: "POST",
+                        contentType: "application/json",
+                        data: function(data, settings) {
+                            data["type"] = "logs"; // Test
+                            data["authentification"] = decodeURIComponent(getCookie("authToken"));
+                            return JSON.stringify(data);
                         },
                         dataSrc: function(response) {
-                            return response["data"];
+                            return response;
                         }
                     },
                     drawCallback: function(settings) {
@@ -438,7 +447,7 @@
                     $(parent).after("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary'></span>");
                 }
                 let data = {
-                    authentification: getCookie("authToken"),
+                    authentification: decodeURIComponent(getCookie("authToken")),
                     pump: $(pump).attr("id"),
                     state: $(pump).val()
                 }
@@ -1162,7 +1171,7 @@
                         $("#mainModal .modal-body > .alert").remove();
                         let data = {
                             plant: plant,
-                            authentification: getCookie("authToken")
+                            authentification: decodeURIComponent(getCookie("authToken"))
                         }
                         $.post({
                             url: "",
@@ -1246,7 +1255,8 @@
                         $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
                         $("#mainModal .modal-body > .alert").remove();
                         let data = {
-                            event: event
+                            event: event,
+                            authentification: decodeURIComponent(getCookie("authToken"))
                         }
                         $.post({
                             url: "",
@@ -2796,7 +2806,7 @@
                 $("#historyTimespan").change(function() {
                     $(this).attr("disabled", "disabled").after("<span class='spinner-border ms-2 text-primary kreiselchen' style='flex: 0 0 auto' data-processing='true'></span>");
                     let data = {
-                        authentification: getCookie("authToken"),
+                        authentification: decodeURIComponent(getCookie("authToken")),
                         chart: $(this).attr("data-chart"),
                         lol: $(this).val()
                     }
@@ -2831,7 +2841,7 @@
                     $("#historyGallery").find(".alert").remove();
                     $(this).attr("disabled", "disabled").after("<span class='spinner-border ms-2 text-primary kreiselchen' style='flex: 0 0 auto' data-processing='true'></span>");
                     let data = {
-                        authentification: getCookie("authToken"),
+                        authentification: decodeURIComponent(getCookie("authToken")),
                         history: $(this).val()
                     }
                     $.post({

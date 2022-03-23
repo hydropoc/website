@@ -1,7 +1,8 @@
 <?php
     $data = [];
+    $type = json_decode(file_get_contents("php://input"), true)["type"];
     //echo $_GET["type"];
-    switch ($_GET["type"]) {
+    switch ($type) {
         case "plantPrograms":
             $data[] = [
                 "id" => 1,
@@ -423,6 +424,6 @@
             $data = null;
             break;
     }
-    echo json_encode(["data" => $data]);
+    echo json_encode($data);
     return;
 ?>
