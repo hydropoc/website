@@ -574,7 +574,7 @@
                 for (collapse of collapses) {
                     element = $("a[href='" + collapse + "']");
                     tableName = $(element).attr("data-table");
-                    if ($(element).attr("aria-expanded") === "true") {
+                    if (DataTable.isDataTable(tableName) && $(element).attr("aria-expanded") === "true") {
                         adminDataTables[tableName].columns.adjust().draw();
                     }
                 }
@@ -686,15 +686,16 @@
                     $("#mainModal .modal-header > h4").empty();
                     $("#mainModal .modal-body").empty();
                     $("#mainModal .modal-footer").empty();
-                    if (data.hasOwnProperty("modal") && data["modal"].hasOwnProperty("name") && !["undefined", "", undefined, null].includes(data["title"]["text"])) {
-                        $("#mainModal").attr("data-name", data["modal"]["name"]);
-                        if (data["modal"].hasOwnProperty("size") && ["sm", "lg", "xl", "fullscreen"].includes(data["modal"]["size"])) {
-                            $("#mainModal > div:first-of-type").addClass("modal-" + data["modal"]["size"]);
+                    if (data.hasOwnProperty("name")) {
+                        $("#mainModal").attr("data-name", data["name"]);
+                        if (data.hasOwnProperty("size") && ["sm", "lg", "xl", "fullscreen"].includes(data["size"])) {
+                            $("#mainModal > div:first-of-type").addClass("modal-" + data["size"]);
                         }
-                        if (data["modal"].hasOwnProperty("static") && data["modal"]["static"]) {
+                        if (data.hasOwnProperty("static") && data["static"]) {
                             $("#mainModal").attr({"data-bs-backdrop":"static", "data-bs-keyboard":"false"});
                         }
                         if (data.hasOwnProperty("title")) {
+                            console.log(data.title);
                             if (data["title"].hasOwnProperty("text") && !["undefined", "", undefined, null].includes(data["title"]["text"])) {
                                 $("#mainModal .modal-header > h4").html(data["title"]["text"]);
                             }
@@ -787,19 +788,19 @@
                         else {
                             $("#mainModal .modal-footer").append("<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Schließen</button>");
                         }
-                        if (data["modal"].hasOwnProperty("events")) {
+                        if (data.hasOwnProperty("events")) {
                             let eventNames = {hide: "hide.bs.modal", hidden: "hidden.bs.modal", show: "show.bs.modal", shown: "shown.bs.modal", hidePrevented: "hidePrevented.bs.modal"};
-                            let events_ = Object.getOwnPropertyNames(data["modal"]["events"]);
+                            let events_ = Object.getOwnPropertyNames(data["events"]);
                             for (let event_ of events_) {
                                 if (eventNames.hasOwnProperty(event_)) {
-                                    if (data["modal"]["events"][event_].hasOwnProperty("args") && typeof(data["modal"]["events"][event_]["function"]) === "object") {
+                                    if (data["events"][event_].hasOwnProperty("args") && typeof(data["events"][event_]["function"]) === "object") {
                                         $("#mainModal").one(eventNames[event_], function() {
-                                            achso(data["modal"]["events"][event_]["function"], data["modal"]["events"][event_]["args"]);
+                                            achso(data["events"][event_]["function"], data["events"][event_]["args"]);
                                         });
                                     }
-                                    else if (typeof(data["modal"]["events"][event_]["function"]) === "function") {
+                                    else if (typeof(data["events"][event_]["function"]) === "function") {
                                         $("#mainModal").one(eventNames[event_], function() {
-                                            achso(data["modal"]["events"][event_]["function"]);
+                                            achso(data["events"][event_]["function"]);
                                         });
                                     }
                                 }
