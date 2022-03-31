@@ -505,8 +505,8 @@
                     }).done(function(response) {
                         let date = new Date();
                         date.setHours(date.getHours() + 168); // = 1 Woche
-                        document.cookie = "authToken=" + encodeURIComponent(response["authentification"]) + "; expires=" + date.toUTCString() + "; path=/; SameSite=None; Secure";
-                        document.cookie = "username=" + encodeURIComponent(response["username"]) + "; expires=" + date.toUTCString() + "; path=/; SameSite=None; Secure";
+                        document.cookie = "authToken=" + encodeURIComponent(response["authentification"]) + "; expires=" + date.toUTCString() + "; path=/"; //SameSite=None; Secure";
+                        document.cookie = "username=" + encodeURIComponent(response["username"]) + "; expires=" + date.toUTCString() + "; path=/"; // SameSite=None; Secure";
                         $("a[href='#login']").addClass("d-none");
                         $("a[href='#logout']").removeClass("d-none");
                         $("[data-current-user]").removeClass("d-none").html("<i class='fas fa-user-injured'></i> " + response["username"]);
