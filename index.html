@@ -193,8 +193,7 @@
                         },
                         {  
                             name: "plantID",
-                            data: "plantID",
-                            visible: false
+                            data: "plantID"
                         },
                         {
                             name: "name",
@@ -286,8 +285,7 @@
                         },
                         {
                             name: "category",
-                            data: "category",
-                            visible: false
+                            data: "category"
                         },
                         {
                             name: "condition",
@@ -342,8 +340,7 @@
                         {
                             name: "category",
                             data: "category",
-                            width: "25%",
-                            visible: false,
+                            width: "25%"
                         },
                         {
                             name: "message",
@@ -472,10 +469,8 @@
                 let url = $(img).attr("src");
                 let path = url.match(/([^\.\/\\]+)(\.[^\.]+)?$/i);
                 let data = {
-                    modal: {
-                        name: "showHistoryGalleryImage",
-                        size: "fullscreen"
-                    },
+                    name: "showHistoryGalleryImage",
+                    size: "fullscreen",
                     title: {
                         text: (path !== null && path.length >= 1 ? path[0] : "(Unbekannte Datei)")
                     },
@@ -536,10 +531,10 @@
                     $(wtf).removeAttr("disabled");
                 }
             }
-            function createNewEvent(wtf = null) {
+            function showEventCreationModal(wtf = null) {
                 //
             }
-            function createNewPlantProgram(wtf = null) {
+            function showPlantProgramCreationModal(wtf = null) {
                 //
             }
             Number.prototype.duration = function() {
@@ -1110,9 +1105,7 @@
             }
             function confirmation(options = {}, resolve) {
                 let data = {
-                    modal: {
-                        name: "confirmation"
-                    },
+                    name: "confirmation",
                     title: {
                         text: (options.hasOwnProperty("title") ? options["title"] : "Bestätigung")
                     },
@@ -1372,22 +1365,20 @@
                     content += "<tr><th class='w-25'>Eigenschaft</th><th>Wert</th></tr>";
                     content += "</thead><tbody id='systemInfosTable'></tbody></table>";
                     let data = {
-                        modal: {
-                            name: "systemInfos",
-                            events: {
-                                hide: {
-                                    function: function(a) {
-                                        if (systemInfosTimer !== null) {
-                                            clearInterval(systemInfosTimer);
-                                            systemInfosTimer = null;
-                                        }
+                        name: "systemInfos",
+                        events: {
+                            hide: {
+                                function: function(a) {
+                                    if (systemInfosTimer !== null) {
+                                        clearInterval(systemInfosTimer);
+                                        systemInfosTimer = null;
                                     }
-                                },
-                                shown: {
-                                    function: function(o) {
-                                        updateSystemInfos();
-                                        systemInfosTimer = setInterval(updateSystemInfos, 5000);
-                                    }
+                                }
+                            },
+                            shown: {
+                                function: function(o) {
+                                    updateSystemInfos();
+                                    systemInfosTimer = setInterval(updateSystemInfos, 5000);
                                 }
                             }
                         },
@@ -1415,9 +1406,7 @@
                     content += "<tr><td class='align-text-top pe-3'>Dokumentation</td><td>Jessica Gerken</td></tr>";
                     content += "</tbody></table>";
                     let data = {
-                        modal: {
-                            name: "staff"
-                        },
+                        name: "staff",
                         title: {
                             text: "Mitwirkende"
                         },
@@ -1435,14 +1424,12 @@
                     content += "<h4 class='mb-1'>Anschrift</h4><p>Berufliche Schule für Dienstleistung, Gewerbe und Gestaltung<br>Georg-Büchner-Str. 13<br>27574 Bremerhaven</p>";
                     content += "<h4 class='mb-1'>Kontakt</h4><p>Telefon: (0471) 30 94 650<br>Web: <a href='https://www.bsdgg.de' target='_blank'>https://www.bsdgg.de</a></p>";
                     let data = {
-                        modal: {
-                            size: "lg",
-                            name: "about",
-                            events: {
-                                hide: {
-                                    function: function() {
-                                        $("#hydroPocLogo").off("click animationend");
-                                    }
+                        size: "lg",
+                        name: "about",
+                        events: {
+                            hide: {
+                                function: function() {
+                                    $("#hydroPocLogo").off("click animationend");
                                 }
                             }
                         },
@@ -1469,11 +1456,11 @@
                 $("#applyPlantTemplateButton").click(function() {
                     fillPlantInputs($("#plantsAdminPlantSelection").val());
                 });
-                $("#newPlantForm").on("reset", function() {
+                $("#plantCreationForm").on("reset", function() {
                     confirmDiscardPlantEditing();
                     return false;
                 });
-                $("#newPlantForm").submit(function() {
+                $("#plantCreationForm").submit(function() {
                     $("#discardPlantButton").attr("disabled", "disabled");
                     if ($("#savePlantButton").find("[data-processing='true']").length == 0) {
                         $("#savePlantButton").attr("disabled", "disabled").prepend("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary'></span>");
@@ -1481,7 +1468,7 @@
                     let data = {
                         authentification: decodeURIComponent(getCookie("authToken"))
                     };
-                    let inputs = $("#newPlantFormContainer input");
+                    let inputs = $("#plantCreationFormContainer input");
                     for (input of inputs) {
                         data[$(input).attr("id").slice(8, -5)] = $(input).val();
                     }
@@ -1505,20 +1492,33 @@
                     });
                     return false;
                 });
-                $("#historyGalleryTimespan").submit(function() {
+                $("#historyGalleryTimespanForm").submit(function() {
                     getGalleryItems();
                     return false;
                 });
                 $("a[href='#login']").on("click", function() {
-                    let content = "<form enctype='text/plain' method='post' action='/' onsubmit='login(); return false;' class='w-100'><label for='mail' class='form-label'>E-Mail:</label>";
+                    let content = "<form enctype='text/plain' method='post' action='/' id='loginForm' class='w-100'><label for='mail' class='form-label'>E-Mail:</label>";
                     content += "<input type='text' class='form-control' id='mail' placeholder='E-Mail-Adresse eingeben' required></div>";
                     content += "<div class='mt-3'><label for='password' class='form-label'>Passwort:</label>";
                     content += "<input type='password' class='form-control' id='password' placeholder='Passwort eingeben' required></div>";
                     content += "<div class='d-flex mt-3 justify-content-between align-items-center'><button type='submit' class='btn btn-primary' id='loginButton'>Anmelden";
                     content += "</button><a href='#'>Ich habe mein Passwort vergessen!</a></form>";
                     let data = {
-                        modal: {
-                            name: "login"
+                        name: "login",
+                        events: {
+                            shown: {
+                                function: function() {
+                                    $("#loginForm").submit(function() {
+                                        login();
+                                        return false;
+                                    });
+                                }
+                            },
+                            hidden: {
+                                function: function() {
+                                    $("#loginForm").off("submit");
+                                }
+                            }
                         },
                         title: {
                             text: "Anmelden"
@@ -1582,7 +1582,7 @@
                             // render ist nur nötig, wenn in der Gruppe noch eigene Elemente stehen sollen
                             endRender: null,
                             startRender: function(rows, group) {
-                                return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + plantProperties[group] + "</td><td class='fritz'><button class='btn btn-sm btn-success' onclick='createNewEvent(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>");
+                                return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + plantProperties[group] + "</td><td class='fritz'><button class='btn btn-sm btn-success' onclick='showEventCreationModal(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>");
                             }
                         };
                         options["orderFixed"] = [0, "asc"];
@@ -1597,12 +1597,12 @@
                     $(this).attr("data-old", value);
                     adminDataTables["events"] = $("#eventsAdminTable").DataTable(options).on("draw", function(settings) {
                         if (!adminDataTables["events"].rowGroup().enabled()) {
-                            if ($("#createNewEventButton").length == 0) {
-                                $("#eventsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3' ><button type='button' class='btn btn-success' onclick='createNewEvent()' id='createNewEventButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
+                            if ($("#showEventCreationModalButton").length == 0) {
+                                $("#eventsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3' ><button type='button' class='btn btn-success' onclick='showEventCreationModal()' id='showEventCreationModalButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
                             }
                         }
                         else {
-                            $("#createNewEventButton").remove();
+                            $("#showEventCreationModalButton").remove();
                         }
                     });
                 });
@@ -1622,7 +1622,7 @@
                             // Wird nach Erzeugung ausgelöst!
                             startRender: function(rows, group) {
                                 let index = plantProperties.findIndex(key => key["id"] === group);
-                                return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + (plantProperties.hasOwnProperty(index) ? plantProperties[index]["name"] : "(Unbekannte Pflanzen-ID: " + group) + "</td><td class='fritz'><button class='btn btn-sm btn-success' onclick='createNewEvent(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>");
+                                return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + (plantProperties.hasOwnProperty(index) ? plantProperties[index]["name"] : "(Unbekannte Pflanzen-ID: " + group) + "</td><td class='fritz'><button class='btn btn-sm btn-success' onclick='showPlantProgramCreationModal(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>");
                             }
                         },
                         options["orderFixed"] = [0, "asc"];
@@ -1637,12 +1637,12 @@
                     $(this).attr("data-old", value);
                     adminDataTables["plantPrograms"] = $("#plantProgramsAdminTable").DataTable(options).on("draw", function(settings) {
                         if (!adminDataTables["plantPrograms"].rowGroup().enabled()) {
-                            if ($("#createNewPlantProgramButton").length == 0) {
-                                $("#plantProgramsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3'><button type='button' class='btn btn-success' onclick='createNewPlantProgram()' id='createNewPlantProgramButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
+                            if ($("#showPlantProgramCreationModalButton").length == 0) {
+                                $("#plantProgramsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3'><button type='button' class='btn btn-success' onclick='showPlantProgramCreationModal()' id='showPlantProgramCreationModalButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
                             }
                         }
                     	else {
-                            $("#createNewPlantProgramButton").remove();
+                            $("#showPlantProgramCreationModalButton").remove();
                         }
                     });
                 });
@@ -1693,21 +1693,22 @@
                             // Wird nach Erzeugung ausgelöst!
                             startRender: function(rows, group) {
                                 let index = plantProperties.findIndex(key => key["id"] === group);
-                                return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + (plantProperties.hasOwnProperty(index) ? plantProperties[index]["name"] : "(Unbekannte Pflanzen-ID: " + group) + "</td><td class='fritz'><button class='btn btn-sm btn-success' onclick='createNewEvent(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>");
+                                return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + (plantProperties.hasOwnProperty(index) ? plantProperties[index]["name"] : "(Unbekannte Pflanzen-ID: " + group) + "</td><td class='fritz'><button class='btn btn-sm btn-success' onclick='showPlantProgramCreationModal(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>");
                             }
                         };
                         options["orderFixed"] = [0, "asc"];
+                        options["columns"][1]["visible"] = false;
                         for (plant of plantProperties) {
                             $("#plantProgramsAdminPlantSelection").append("<option value='" + plant["id"] + "'>" + plant["name"] + "</option>");
                         }
                         adminDataTables["plantPrograms"] = $("#plantProgramsAdminTable").DataTable(options).on("draw", function(settings) {
                             if (!adminDataTables["plantPrograms"].rowGroup().enabled()) {
-                                if ($("#createNewPlantProgramButton").length == 0) {
-                                    $("#plantProgramsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3'><button type='button' class='btn btn-success' onclick='createNewPlantProgram()' id='createNewPlantProgramButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
+                                if ($("#showPlantProgramCreationModalButton").length == 0) {
+                                    $("#plantProgramsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3'><button type='button' class='btn btn-success' onclick='showPlantProgramCreationModal()' id='showPlantProgramCreationModalButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
                                 }
                             }
                             else {
-                                $("#createNewPlantProgramButton").remove();
+                                $("#showPlantProgramCreationModalButton").remove();
                             }
                         });
                     }
@@ -1732,18 +1733,19 @@
                             className: "bg-gray-200",
                             endRender: null,
                             startRender: function(rows, group) {
-                                return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + plantProperties[group] + "</td><td class='fritz'><button class='btn btn-sm btn-success' onclick='createNewEvent(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>");
+                                return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + plantProperties[group] + "</td><td class='fritz'><button class='btn btn-sm btn-success' onclick='showEventCreationModal(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>");
                             }
                         };
                         options["orderFixed"] = [0, "asc"];
+                        options["columns"][1]["visible"] = false;
                         adminDataTables["events"] = $("#eventsAdminTable").DataTable(options).on("draw", function(settings) {
                             if (!adminDataTables["events"].rowGroup().enabled()) {
-                                if ($("#createNewEventButton").length == 0) {
-                                    $("#eventsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3'><button type='button' class='btn btn-success' onclick='createNewEvent()' id='createNewEventButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
+                                if ($("#showEventCreationModalButton").length == 0) {
+                                    $("#eventsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3'><button type='button' class='btn btn-success' onclick='showEventCreationModal()' id='showEventCreationModalButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
                                 }
                             }
                             else {
-                                $("#createNewEventProgramButton").remove();
+                                $("#showEventCreationModalProgramButton").remove();
                             }
                         });
                     }
@@ -1763,6 +1765,7 @@
                             }
                         };
                         options["orderFixed"] = [0, "asc"];
+                        options["columns"][1]["visible"] = false;
                         adminDataTables["logs"] = $("#logsAdminTable").DataTable(options);
                     }
                     else {
@@ -3600,10 +3603,10 @@
                 #newPlantNavigation {
                     width: 100%
                 }
-                #newPlantFormContainer label {
+                #plantCreationFormContainer label {
                     padding-left: 0;
                 }
-                #newPlantFormContainer input[type="text"] {
+                #plantCreationFormContainer input[type="text"] {
                     width: 100%;
                 }
                 /*
@@ -3684,7 +3687,7 @@
                 #newPlantMenu {
                     flex-direction: column;
                 }
-                #newPlantFormContainer input[type="text"] {
+                #plantCreationFormContainer input[type="text"] {
                     width: 100%;
                 }
                 #newPlantNavigation {
@@ -3736,7 +3739,7 @@
                 #newPlantMenu {
                     flex-direction: column;
                 }
-                #newPlantFormContainer .form-check-label {
+                #plantCreationFormContainer .form-check-label {
                     padding-left: 0;
                 }
                 #mobile-navbar {
@@ -3754,7 +3757,7 @@
                 .legendContainer .legendItem {
                     width: auto;
                 }
-                #newPlantFormContainer input[type="text"] {
+                #plantCreationFormContainer input[type="text"] {
                     width: auto;
                 }
             }
@@ -3805,7 +3808,7 @@
                 .legendContainer > label {
                     margin-top: 0;
                 }
-                #newPlantFormContainer input[type="text"] {
+                #plantCreationFormContainer input[type="text"] {
                     width: auto;
                 }
             }
@@ -3836,12 +3839,12 @@
                 .legendContainer .legendItem {
                     width: auto;
                 }
-                #newPlantFormContainer input[type="text"] {
+                #plantCreationFormContainer input[type="text"] {
                     width: auto;
                 }
             }
             @media only screen and (min-width: 1285px) {
-                #newPlantFormContainer input[type="text"] {
+                #plantCreationFormContainer input[type="text"] {
                     display: inline-block;
                 }
             }
@@ -4066,9 +4069,9 @@
                                                             <a class="list-group-item list-group-item-action" href="#newPlantWaterlevelSection">Wasserstand</a>
                                                             <a class="list-group-item list-group-item-action" href="#newPlantLightingSection">Beleuchtung</a>
                                                         </div>
-                                                        <form enctype="text/plain" method="post" action="/" id="newPlantForm" class="w-100">
+                                                        <form enctype="text/plain" method="post" action="/" id="plantCreationForm" class="w-100">
                                                             <div data-bs-spy="scroll" data-bs-target="#newPlantNavigation" data-bs-offset="0" class="col-md-10 position-relative" id="newPlantContainer">
-                                                                <div id="newPlantFormContainer" class="p-3">
+                                                                <div id="plantCreationFormContainer" class="p-3">
                                                                     <div class="row">
                                                                         <h5 id="newPlantGeneralSection" class="col-md-12">Allgemein</h5>
                                                                     </div>
@@ -4460,7 +4463,7 @@
                             </div>
                         </div>
                         <div class="tab-pane fade" id="historyGallery">
-                            <form enctype="text/plain" method="post" action="/" class="formContainer mb-3 w-100 d-flex" id="historyGalleryTimespan">
+                            <form enctype="text/plain" method="post" action="/" class="formContainer mb-3 w-100 d-flex" id="historyGalleryTimespanForm">
                                 <label for="historyGalleryTimespanSelect" class="col-form-label me-2">Zeitraum:</label>
                                 <input type="text" id="historyGalleryTimespanSelect" class="form-control w-auto d-inline-block">
                                 <button type="submit" class="btn btn-primary align-baseline" id="getGalleryItemsButton">Anzeigen</button>
