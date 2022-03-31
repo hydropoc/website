@@ -168,7 +168,7 @@
                         }
                     ],
                     ajax: {
-                        url: "http://127.0.0.1:3000/api/user/userlist",
+                        url: "http://192.168.100.187:3000/api/user/userlist",
                         type: "POST",
                         contentType: "application/json",
                         data: function(data, settings) {
@@ -492,8 +492,8 @@
                     $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
                     $("#mainModal .modal-body > .alert").remove();
                     $.post({
-                        url: "http://127.0.0.1:3000/api/user/login",
-                        //url: "http://192.168.100.187:3000/api/user/login",
+                        //url: "http://127.0.0.1:3000/api/user/login",
+                        url: "http://192.168.100.187:3000/api/user/login",
                         data: JSON.stringify({
                             email: $("#mail").val(),
                             password: $("#password").val()
@@ -578,7 +578,7 @@
                 if ($("#mainModal").hasClass("show") && $("#mainModal").attr("data-name") === "systemInfos" && !isLoadingSystemInfos) {
                     isLoadingSystemInfos = true;
                     $.get({
-                        url: "http://127.0.0.1:3000/api/device/environment",
+                        url: "http://192.168.100.187:3000/api/device/environment",
                         crossDomain: true
                     }).done(function(response) {
                         let statsText = "";
@@ -1473,8 +1473,8 @@
                         data[$(input).attr("id").slice(8, -5)] = $(input).val();
                     }
                     $.post({
-                        url: "http://127.0.0.1:3000/api/plant/" + (isPlantEditingActive ? "update" : "create"),
-                        //url: "http://192.168.100.187:3000/api/plant/"+ (isPlantEditingActive ? "update" : "create"),
+                        //url: "http://127.0.0.1:3000/api/plant/" + (isPlantEditingActive ? "update" : "create"),
+                        url: "http://192.168.100.187:3000/api/plant/"+ (isPlantEditingActive ? "update" : "create"),
                         data: JSON.stringify(data),
                         processData: false,
                         contentType: "application/json",
