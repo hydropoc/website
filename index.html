@@ -349,8 +349,9 @@
                         }
                     ],
                     ajax: {
-                        url: "dataTables_test.php",
-                        type: "POST",
+                        //url: "dataTables_test.php",
+                        url: "http://192.168.100.187:3000/device/logs",
+                        type: "GET",
                         contentType: "application/json",
                         data: function(data, settings) {
                             data["type"] = "logs"; // Test
@@ -505,12 +506,17 @@
                     }).done(function(response) {
                         let date = new Date();
                         date.setHours(date.getHours() + 168); // = 1 Woche
-                        document.cookie = "authToken=" + encodeURIComponent(response["authentification"]) + "; expires=" + date.toUTCString() + "; path=/"; //SameSite=None; Secure";
-                        document.cookie = "username=" + encodeURIComponent(response["username"]) + "; expires=" + date.toUTCString() + "; path=/"; // SameSite=None; Secure";
-                        $("a[href='#login']").addClass("d-none");
-                        $("a[href='#logout']").removeClass("d-none");
-                        $("[data-current-user]").removeClass("d-none").html("<i class='fas fa-user-injured'></i> " + response["username"]);
-                        bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
+                        document.cookie = "authToken=" + encodeURIComponent(response["authentification"]) + "; expires=" + date.toUTCString() + "; path=/"; //SameSite=None; Secure"; geht nur bei HTTPS
+                        document.cookie = "username=" + encodeURIComponent(response["username"]) + "; expires=" + date.toUTCString() + "; path=/"; // SameSite=None; Secure"; geht nur bei HTTPS
+                        if (getCookie("authToken").length >= 1 && getCookie("username").length >= 1) {
+                            $("a[href='#login']").addClass("d-none");
+                            $("a[href='#logout']").removeClass("d-none");
+                            $("[data-current-user]").removeClass("d-none").html("<i class='fas fa-user-injured'></i> " + response["username"]);
+                            bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
+                        }
+                        else {
+                            //
+                        }
                     }).fail(function(response) {
                         $("#mainModal .modal-body").prepend(Alert.create("danger", (Number.parseInt(response["status"]) === 401 ? "Ungültige Anmeldedaten" : response["status"] + ": " + response["statusText"])));
                     }).always(function() {
