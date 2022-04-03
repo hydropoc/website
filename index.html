@@ -465,6 +465,24 @@
                 }).always(function() {
                 });
             }
+            function disableMainModal(mainButton) {
+                if ($("#body-overlay").length == 0) {
+                    $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
+                }
+                if ($(mainButton).find("[data-processing='true']").length == 0) {
+                    $(mainButton).prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
+                }
+                $("#mainModal .modal-footer > button").attr("disabled", "disabled");
+                $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
+                $("#mainModal .modal-body > .alert").remove();
+            }
+            function enableMainModal(mainButton) {
+                $(mainButton).find("[data-processing='true']").remove();
+                $(mainButton).removeAttr("disabled");
+                $("#body-overlay").remove();
+                $("#mainModal .modal-footer > [data-bs-dismiss='modal']").removeAttr("disabled");
+                $("#mainModal .modal-header > [data-bs-dismiss='modal']").removeAttr("disabled");
+            }
             function showHistoryGalleryImage(wtf) {
                 let img = $(wtf).find("img:first-of-type");
                 let url = $(img).attr("src");
@@ -483,15 +501,7 @@
             }
             function login() {
                 if ($("#mainModal").hasClass("show") && $("#mainModal").attr("data-name") === "login") {
-                    if ($("#body-overlay").length == 0) {
-                        $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
-                    }
-                    if ($("#loginButton").find("[data-processing='true']").length === 0) {
-                        $("#loginButton").attr("disabled", "disabled").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
-                    }
-                    $("#mainModal .modal-footer > button").attr("disabled", "disabled");
-                    $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
-                    $("#mainModal .modal-body > .alert").remove();
+                    disableMainModal("#loginButton");
                     $.post({
                         //url: "http://127.0.0.1:3000/api/user/login",
                         url: "http://192.168.100.187:3000/api/user/login",
@@ -520,11 +530,7 @@
                     }).fail(function(response) {
                         $("#mainModal .modal-body").prepend(Alert.create("danger", (Number.parseInt(response["status"]) === 401 ? "Ungültige Anmeldedaten" : response["status"] + ": " + response["statusText"])));
                     }).always(function() {
-                        $("#loginButton").find("[data-processing='true']").remove();
-                        $("#loginButton").removeAttr("disabled");
-                        $("#body-overlay").remove();
-                        $("#mainModal .modal-footer > [data-bs-dismiss='modal']").removeAttr("disabled");
-                        $("#mainModal .modal-header > [data-bs-dismiss='modal']").removeAttr("disabled");
+                        enableMainModal("#loginButton");
                     });
                 }
             }
@@ -754,21 +760,17 @@
                                             else {
                                                 $(currentButton).addClass("btn-primary");
                                             }
-                                            for (let action of customButton["actions"]) {
-                                                let events = Object.getOwnPropertyNames(action);
-                                                for (event of events) {
-                                                    for (let func of action[event]) {
-                                                        if (func.hasOwnProperty("args") && typeof(func["function"]) === "object") {
-                                                            $(currentButton).on(event, function() {
-                                                                achso(func["function"], func["args"]);
-                                                            });
-                                                        }
-                                                        else if (typeof(func["function"]) === "function") {
-                                                            $(currentButton).on(event, function() {
-                                                                achso(func["function"]);
-                                                            });
-                                                        }
-                                                    }
+                                            let actions = Object.getOwnPropertyNames(customButton["actions"]);
+                                            for (let action of actions) {
+                                                if (customButton["actions"][action].hasOwnProperty("args") && typeof(customButton["actions"][action]["function"]) === "object") {
+                                                    $(currentButton).on(action, function() {
+                                                        achso(customButton["actions"][action]["function"], customButton["actions"][action]["args"]);
+                                                    });
+                                                }
+                                                else if (typeof(customButton["actions"][action]["function"]) === "function") {
+                                                    $(currentButton).on(action, function() {
+                                                        achso(customButton["actions"][action]["function"]);
+                                                    });
                                                 }
                                             }
                                             if (customButton.hasOwnProperty("attributes")) {
@@ -1131,17 +1133,13 @@
                                     attributes: {
                                         id: "confirmationButton"
                                     },
-                                    actions: [
-                                        {
-                                            click: [
-                                                {
-                                                    function: function() {
-                                                        resolve(true);
-                                                    }
-                                                }
-                                            ]
+                                    actions: {
+                                        click: {
+                                            function: function() {
+                                                resolve(true);
+                                            }
                                         }
-                                    ]
+                                    }
                                 }
                             ]
                         }
@@ -3579,9 +3577,6 @@
                 main {
                     padding: 0 2%
                 }
-                .tab-content {
-                    padding: 1rem !important;
-                }
                 #overviewPanel {
                     grid-auto-rows: minmax(300px, auto);
                     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))
@@ -3665,9 +3660,6 @@
                 }
                 main {
                     padding: 0 2%
-                }
-                .tab-content {
-                    padding: 1rem !important;
                 }
                 #overviewPanel {
                     grid-auto-rows: minmax(300px, auto);
