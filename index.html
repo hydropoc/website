@@ -444,7 +444,7 @@
             function togglePump(pump) {
                 $(pump).attr("disabled", "disabled");
                 let parent = $(pump).parentsUntil("td");
-                if ($(parent).find("[data-processing='true']").length == 0) {
+                if ($(parent).find("[data-processing='true']").length === 0) {
                     $(parent).after("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary'></span>");
                 }
                 let data = {
@@ -472,7 +472,7 @@
                 if ($("#body-overlay").length == 0) {
                     $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
                 }
-                if ($(mainButton).find("[data-processing='true']").length == 0) {
+                if ($(mainButton).find("[data-processing='true']").length === 0) {
                     $(mainButton).prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
                 }
                 $("#mainModal .modal-footer > button").attr("disabled", "disabled");
@@ -506,7 +506,7 @@
                 if ($("#mainModal").hasClass("show") && $("#mainModal").attr("data-name") === "login") {
                     disableMainModal("#loginButton");
                     $.post({
-                        //url: "http://127.0.0.1:3000/api/user/login",
+                        //url: "http://127.0.0.1:3000/api/user/login", 10.20.45.111
                         url: "http://192.168.100.187:3000/api/user/login",
                         data: JSON.stringify({
                             email: $("#mail").val(),
@@ -594,7 +594,8 @@
                     isLoadingSystemInfos = true;
                     $.get({
                         url: "http://192.168.100.187:3000/api/device/environment",
-                        crossDomain: true
+                        crossDomain: true,
+                        timeout: 10000
                     }).done(function(response) {
                         let statsText = "";
                         if (response.hasOwnProperty("osname")) {
@@ -927,7 +928,7 @@
             function getGalleryItems() {
                 $("#getGalleryItemsButton").attr("disabled", "disabled");
                 $("#historyGalleryTimespanSelect").attr("disabled", "disabled");
-                if ($("#getGalleryItemsButton").find("[data-processing='true']").length == 0) {
+                if ($("#getGalleryItemsButton").find("[data-processing='true']").length === 0) {
                     $("#getGalleryItemsButton").prepend("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary'></span>");
                 }
                 let startDate = picker.getStartDate();
@@ -1175,7 +1176,7 @@
                 if (index >= 0) {
                     if (isPlantEditingActive) {
                         $("#newPlantDescriptionInput").val(plantProperties[index]["name"]);
-                        if ($("#editPlantAlert").length == 0) {
+                        if ($("#editPlantAlert").length === 0) {
                             $("#plantsAdminCreationContainer").prepend(Alert.create("primary", "Zurzeit ist die Bearbeitung der Pflanze &quot;" + plantProperties[index]["name"] + "&quot; (ID: " + plantProperties[index]["id"] + ") aktiv.", {id: "editPlantAlert"}));
                         }
                         else {
@@ -1198,7 +1199,7 @@
                 let index = plantProperties.findIndex(key => key["id"] === plant);
                 if (index >= 0) {
                     for (program of plantPrograms) {
-                        if (program["plantID"] == plant) {
+                        if (program["plantID"] === plant) {
                             $("#plantProgramSelection").append("<option value='" + program["id"] + "'>" + program["name"] + "</option>");
                         }
                     }
@@ -1254,7 +1255,7 @@
                         if ($("#body-overlay").length == 0) {
                             $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
                         }
-                        if ($("#confirmationButton").find("[data-processing='true']").length == 0) {
+                        if ($("#confirmationButton").find("[data-processing='true']").length === 0) {
                             $("#confirmationButton").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
                         }
                         $("#mainModal .modal-footer > button").attr("disabled", "disabled");
@@ -1263,7 +1264,7 @@
                         let data = {
                             plant: plant,
                             authentification: decodeURIComponent(getCookie("authToken"))
-                        }
+                        };
                         $.post({
                             url: "",
                             data: JSON.stringify(data),
@@ -1336,10 +1337,10 @@
                         resolve);
                     });
                     prompt.then(function(value) {
-                        if ($("#body-overlay").length == 0) {
+                        if ($("#body-overlay").length === 0) {
                             $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
                         }
-                        if ($("#confirmationButton").find("[data-processing='true']").length == 0) {
+                        if ($("#confirmationButton").find("[data-processing='true']").length === 0) {
                             $("#confirmationButton").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
                         }
                         $("#mainModal .modal-footer > button").attr("disabled", "disabled");
@@ -1419,10 +1420,10 @@
                 let ca = document.cookie.split(";");
                 for (let i = 0; i < ca.length; i++) {
                     let c = ca[i];
-                    while (c.charAt(0) == " ") {
+                    while (c.charAt(0) === " ") {
                         c = c.substring(1);
                     }
-                    if (c.indexOf(name) == 0) {
+                    if (c.indexOf(name) === 0) {
                         return c.substring(name.length, c.length);
                     }
                 }
@@ -1541,7 +1542,7 @@
                     $("#hydroPocLogo").on("click", function() {
                         $(this).addClass("contract");
                     }).on("animationend", function(wtf) {
-                        if (wtf["originalEvent"]["animationName"] == "contract") {
+                        if (wtf["originalEvent"]["animationName"] === "contract") {
                             $(this).removeClass("contract").addClass("boing");
                         }
                         else {
@@ -1562,7 +1563,7 @@
                 });
                 $("#plantCreationForm").submit(function() {
                     $("#discardPlantButton").attr("disabled", "disabled");
-                    if ($("#savePlantButton").find("[data-processing='true']").length == 0) {
+                    if ($("#savePlantButton").find("[data-processing='true']").length === 0) {
                         $("#savePlantButton").attr("disabled", "disabled").prepend("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary'></span>");
                     }
                     let data = {
@@ -1721,7 +1722,7 @@
                     $(this).attr("data-old", value);
                     adminDataTables["events"] = $("#eventsAdminTable").DataTable(options).on("draw", function(settings) {
                         if (!adminDataTables["events"].rowGroup().enabled()) {
-                            if ($("#showEventCreationModalButton").length == 0) {
+                            if ($("#showEventCreationModalButton").length === 0) {
                                 $("#eventsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3' ><button type='button' class='btn btn-success' onclick='showEventCreationModal()' id='showEventCreationModalButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
                             }
                         }
@@ -1757,7 +1758,7 @@
                     $(this).attr("data-old", value);
                     adminDataTables["plantPrograms"] = $("#plantProgramsAdminTable").DataTable(options).on("draw", function(settings) {
                         if (!adminDataTables["plantPrograms"].rowGroup().enabled()) {
-                            if ($("#showPlantProgramCreationModalButton").length == 0) {
+                            if ($("#showPlantProgramCreationModalButton").length === 0) {
                                 $("#plantProgramsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3'><button type='button' class='btn btn-success' onclick='showPlantProgramCreationModal()' id='showPlantProgramCreationModalButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
                             }
                         }
@@ -1819,7 +1820,7 @@
                         }
                         adminDataTables["plantPrograms"] = $("#plantProgramsAdminTable").DataTable(options).on("draw", function(settings) {
                             if (!adminDataTables["plantPrograms"].rowGroup().enabled()) {
-                                if ($("#showPlantProgramCreationModalButton").length == 0) {
+                                if ($("#showPlantProgramCreationModalButton").length === 0) {
                                     $("#plantProgramsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3'><button type='button' class='btn btn-success' onclick='showPlantProgramCreationModal()' id='showPlantProgramCreationModalButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
                                 }
                             }
@@ -1855,7 +1856,7 @@
                         options["orderFixed"] = [0, "asc"];
                         adminDataTables["events"] = $("#eventsAdminTable").DataTable(options).on("draw", function(settings) {
                             if (!adminDataTables["events"].rowGroup().enabled()) {
-                                if ($("#showEventCreationModalButton").length == 0) {
+                                if ($("#showEventCreationModalButton").length === 0) {
                                     $("#eventsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3'><button type='button' class='btn btn-success' onclick='showEventCreationModal()' id='showEventCreationModalButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
                                 }
                             }
@@ -1887,7 +1888,7 @@
                     }
                 });
                 $("#collapse-plants-actions").on("shown.bs.collapse", function(element) {
-                    if ($(element["target"]).attr("data-bs-parent") == "#plants-accordion") {
+                    if ($(element["target"]).attr("data-bs-parent") === "#plants-accordion") {
                         if (!DataTable.isDataTable("#plantsAdminTable")) {
                             adminDataTables["plants"] = $("#plantsAdminTable").DataTable(dataTablesAdminOptions["plants"]);
                         }
@@ -2919,7 +2920,7 @@
                     }
                 });
                 $("[data-bs-toggle='collapse']").click(function() {
-                    $(this).children("i:last-of-type").css("transform", ($(this).attr("aria-expanded") == "true" ? "rotate(180deg)" : "rotate(0deg)"));
+                    $(this).children("i:last-of-type").css("transform", ($(this).attr("aria-expanded") === "true" ? "rotate(180deg)" : "rotate(0deg)"));
                 });
                 $("#historyTimespan").change(function() {
                     $(this).attr("disabled", "disabled").after("<span class='spinner-border ms-2 text-primary kreiselchen' style='flex: 0 0 auto' data-processing='true'></span>");
@@ -2927,7 +2928,7 @@
                         authentification: decodeURIComponent(getCookie("authToken")),
                         chart: $(this).attr("data-chart"),
                         lol: $(this).val()
-                    }
+                    };
                     $.post({
                         url: "history_charts_data.php",
                         data: JSON.stringify(data),
@@ -2961,7 +2962,7 @@
                     let data = {
                         authentification: decodeURIComponent(getCookie("authToken")),
                         history: $(this).val()
-                    }
+                    };
                     $.post({
                         url: "history_charts_data.php",
                         data: JSON.stringify(data),
