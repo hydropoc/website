@@ -1439,9 +1439,9 @@
                         }
                     });
                 });
-                $("#applyPlantTemplateButton").click(function() {
+                /*$("#applyPlantTemplateButton").click(function() {
                     fillPlantInputs($("#plantsAdminPlantSelection").val());
-                });
+                });*/
                 $("#plantCreationForm").on("reset", function() {
                     confirmDiscardPlantEditing();
                     return false;
@@ -1485,7 +1485,8 @@
                     getGalleryItems();
                     return false;
                 });
-                $("#plantsAdminCreationForm").submit(function() {
+                $("#plantsAdminTemplateForm").submit(function() {
+                    fillPlantInputs($("#plantsAdminPlantSelection").val());
                     return false;
                 });
                 $("a[href='#login']").on("click", function() {
@@ -1547,7 +1548,6 @@
                 $("a[href='#logout']").on("click", function() {
                     document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
                     document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
-                    $("#loggedInUser").remove();
                     $("a[href='#login']").removeClass("d-none");
                     $("a[href='#logout']").addClass("d-none");
                     $("[data-current-user]").addClass("d-none").html("");
@@ -1575,7 +1575,7 @@
                 let date = new Date();
                 $("footer").html("&copy; " + "2021-" + date.getFullYear() + " BSDGG/IN20");
                 $("#plantSelection").change(function() {
-                    $("#plantProgramSelection").empty().attr("disabled", "disabled");;
+                    $("#plantProgramSelection").empty().attr("disabled", "disabled");
                     $(this).attr("disabled", "disabled");
                     let id = Number.parseInt($(this).val());
                     fillPlantProgramsSelect(id);
@@ -3986,10 +3986,10 @@
                                                     </table>
                                                 </div>
                                                 <div class="tab-pane" id="plantsAdminCreationContainer">
-                                                    <form enctype="text/plain" id="plantsAdminCreationForm" method="post" action="/" class="w-100 d-flex formContainer mb-3 justify-content-center">
+                                                    <form enctype="text/plain" id="plantsAdminTemplateForm" method="post" action="/" class="w-100 d-flex formContainer mb-3 justify-content-center">
                                                         <label for="plantsAdminPlantSelection" class="col-form-label me-2">Vorlage:</label>
                                                         <select class="form-select w-auto d-inline-block" id="plantsAdminPlantSelection" data-old="0"></select>
-                                                        <button type="button" class="btn btn-primary align-top" id="applyPlantTemplateButton" disabled="disabled"><i class="fas fa-sync"></i> Übernehmen</button>
+                                                        <button type="submit" class="btn btn-primary align-top" id="applyPlantTemplateButton" disabled="disabled"><i class="fas fa-sync"></i> Übernehmen</button>
                                                     </form>
                                                     <div class="d-flex mt-3" id="newPlantMenu">
                                                         <div id="newPlantNavigation" class="list-group col-md-2 position-relative align-self-start">
