@@ -21,6 +21,7 @@
         <script src="js/litepicker.js"></script>
         <script>
             Chart.register("filler");
+            const apiURL = "http://api.hydropoc.jongmans.net/api";
             const charts = {
                 current: {
                     co2: {},
@@ -153,7 +154,7 @@
                             render: function(data, type, row) {
                                 if (type === "display" || type === "filter") {
                                     let date = new Date(Number.parseInt(data));
-                                    return date.getDate() + "." + ("00" + (date.getMonth() +1).toString()).substr(-2, 2) + "." + date.getFullYear() + ", " + ("00" + (date.getHours().toString())).substr(-2, 2) + ":" + ("00" + (date.getMinutes().toString())).substr(-2, 2) + ":" + ("00" + (date.getSeconds().toString())).substr(-2, 2);
+                                    return ("00" + date.getDate().toString()).substr(-2, 2) + "." + ("00" + (date.getMonth() +1).toString()).substr(-2, 2) + "." + date.getFullYear() + ", " + ("00" + (date.getHours().toString())).substr(-2, 2) + ":" + ("00" + (date.getMinutes().toString())).substr(-2, 2) + ":" + ("00" + (date.getSeconds().toString())).substr(-2, 2);
                                 }
                                 return data;
                             }
@@ -275,17 +276,23 @@
                 logs: {
                     order: [0, "asc"],
                     language: dataTablesLocalisation,
+                    serverSide: true,
                     columns: [
+                        {
+                            name: "id",
+                            data: "id",
+                            visible: false
+                        },
+                        {
+                            name: "type",
+                            data: "type",
+                            width: "25%",
+                            visible: false
+                        },
                         {
                             name: "timestamp",
                             data: "timestamp",
                             width: "25%"
-                        },
-                        {
-                            name: "category",
-                            data: "category",
-                            width: "25%",
-                            visible: false
                         },
                         {
                             name: "message",
@@ -295,16 +302,17 @@
                     ],
                     ajax: {
                         //url: "dataTables_test.php",
-                        url: "http://192.168.100.187:3000/device/logs",
-                        type: "GET",
+                        url: apiURL + "/device/logs",
+                        type: "POST",
                         contentType: "application/json",
                         data: function(data, settings) {
-                            data["type"] = "logs"; // Test
+                            data["type"] = $("#logsAdminCategorySelection").val();
                             data["authentification"] = decodeURIComponent(getCookie("authToken"));
+                            console.log(data);
                             return JSON.stringify(data);
                         },
                         dataSrc: function(response) {
-                            return response;
+                            return response["data"];
                         }
                     },
                     drawCallback: function(settings) {
@@ -1694,9 +1702,10 @@
                 });
                 $("#collapse-logs-actions").on("shown.bs.collapse", function() {
                     if (!DataTable.isDataTable("#logsAdminTable")) {
+                        let options = {};
                         Object.assign(options, dataTablesAdminOptions["logs"]);
                         options["rowGroup"] = {
-                            dataSrc: "category",
+                            dataSrc: "type",
                             className: "bg-gray-200",
                             endRender: null,
                             startRender: function(rows, group) {
@@ -3088,6 +3097,9 @@
             .nav-tabs {
                 border-bottom-width: 0 !important;
             }
+            .nav-tabs > .nav-item > .nav-link:focus-visible, .nav-pills > .nav-item > .nav-link:focus-visible, .navbar-nav > .nav-item > .nav-link:focus-visible {
+                outline-style: none;
+            }
             .nav-tabs > .nav-item {
                 position: relative;
                 z-index: 2;
@@ -4207,16 +4219,17 @@
                                                 <label for="logsAdminCategorySelection" class="col-form-label me-2">Kategorie:</label>
                                                 <select class="form-select w-auto d-inline-block" id="logsAdminCategorySelection" data-old="0">
                                                     <option value="0">Alles</option>
-                                                    <option value="1">Erfolgreich</option>
-                                                    <option value="2">Fehler</option>
-                                                    <option value="3">Information</option>
+                                                    <option value="success">Erfolgreich</option>
+                                                    <option value="error">Fehler</option>
+                                                    <option value="info">Information</option>
                                                 </select>
                                             </div>
                                             <table class="table table-sm w-100 mt-3" id="logsAdminTable">
                                                 <thead>
                                                     <tr>
+                                                        <th>ID</th>
+                                                        <th>Typ</th>
                                                         <th>Zeitpunkt</th>
-                                                        <th></th>
                                                         <th>Nachricht</th>
                                                     </tr>
                                                 </thead>
