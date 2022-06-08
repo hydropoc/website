@@ -167,11 +167,11 @@
                         }
                     ],
                     ajax: {
-                        url: "http://192.168.100.187:3000/api/user/userlist",
+                        url: apiURL + "/user/userlist",
                         type: "POST",
                         contentType: "application/json",
                         data: function(data, settings) {
-                            data["authentification"] = decodeURIComponent(getCookie("authToken"));
+                            data["authentification"] = getCookie("authToken");
                             return JSON.stringify(data);
                         },
                         dataSrc: function(response) {
@@ -225,7 +225,7 @@
                         contentType: "application/json",
                         data: function(data, settings) {
                             data["type"] = "plantPrograms"; // Test
-                            data["authentification"] = decodeURIComponent(getCookie("authToken"));
+                            data["authentification"] = getCookie("authToken");
                             return JSON.stringify(data);
                         },
                         dataSrc: function(response) {
@@ -263,7 +263,7 @@
                         contentType: "application/json",
                         data: function(data, settings) {
                             data["type"] = "pumps"; // Test
-                            data["authentification"] = decodeURIComponent(getCookie("authToken"));
+                            data["authentification"] = getCookie("authToken");
                             return JSON.stringify(data);
                         },
                         dataSrc: function(response) {
@@ -288,13 +288,20 @@
                         {
                             name: "type",
                             data: "type",
-                            width: "25%",
+                            width: "10%",
                             visible: false
                         },
                         {
                             name: "timestamp",
                             data: "timestamp",
-                            width: "25%"
+                            width: "25%",
+                            render: function(data, type, row) {
+                                if (type === "display" || type === "filter") {
+                                    let date = new Date(Math.trunc(Number.parseInt(data) /1000));
+                                    return ("00" + date.getDate().toString()).substr(-2, 2) + "." + ("00" + (date.getMonth() +1).toString()).substr(-2, 2) + "." + date.getFullYear() + ", " + ("00" + (date.getHours().toString())).substr(-2, 2) + ":" + ("00" + (date.getMinutes().toString())).substr(-2, 2) + ":" + ("00" + (date.getSeconds().toString())).substr(-2, 2);
+                                }
+                                return data;
+                            }
                         },
                         {
                             name: "message",
@@ -304,13 +311,12 @@
                         }
                     ],
                     ajax: {
-                        //url: "dataTables_test.php",
                         url: apiURL + "/device/logs",
                         type: "POST",
                         contentType: "application/json",
                         data: function(data, settings) {
                             data["type"] = $("#logsAdminCategorySelection").val();
-                            data["authentification"] = decodeURIComponent(getCookie("authToken"));
+                            data["authentification"] = getCookie("authToken");
                             console.log(data);
                             return JSON.stringify(data);
                         },
@@ -334,19 +340,12 @@
                     //
                 }
             };
+            /*
             const plantPrograms = [];
             const plantProperties = [];
             const userAccounts = [];
             const pumps = [];
-            const plantPropertyNames = {
-                co2: "Co²-Gehalt",
-                temperature: "Temperatur",
-                salinity: "Salzgehalt",
-                ph: "pH-Wert",
-                humidity: "Luftfeuchtigkeit",
-                lighting: "Beleuchtung",
-                waterlevel: "Wasserstand"
-            };
+            */
             const statusCodes = {
                 0: "Unbekannter Fehler aufgetreten.",
                 400: "Die Anfrage ist fehlerhaft.",
@@ -354,21 +353,9 @@
                 403: "Der Zugriff auf die angeforderte Ressource ist nicht erlaubt.",
                 404: "Die angeforderte Ressource wurde nicht gefunden.",
             }
-            // Aktorensimulation
-            const actuators = {
-                co2: {enabled: 0},
-                temperature: {enabled: 0},
-                salinity: {enabled: 0},
-                ph: {enabled: 0},
-                waterlevel: {enabled: 0},
-                ventilation: {enabled: 0},
-                brightness: {enabled: 0}
-            };
-            var viewportWidth = visualViewport["width"];
+            //var viewportWidth = visualViewport["width"];
             var isLoadingCurrentChartData = false;
-            var currentChartPlant = null; // Aktuell gewählte Pflanze für Diagramme
             var systemInfosTimer = null;
-            var isPlantEditingActive = false;
             var isLoadingSystemInfos = false;
             var picker = null;
             function switchAlert(element, type) {
@@ -396,7 +383,7 @@
                     $(parent).after("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary'></span>");
                 }
                 let data = {
-                    authentification: decodeURIComponent(getCookie("authToken")),
+                    authentification: getCookie("authToken"),
                     pump: $(pump).attr("id"),
                     state: $(pump).val()
                 }
@@ -454,8 +441,7 @@
                 if ($("#mainModal").hasClass("show") && $("#mainModal").attr("data-name") === "login") {
                     disableMainModal("#loginButton");
                     $.post({
-                        //url: "http://127.0.0.1:3000/api/user/login", 10.20.45.111
-                        url: "http://192.168.100.187:3000/api/user/login",
+                        url: apiURL + "/user/login",
                         data: JSON.stringify({
                             email: $("#mail").val(),
                             password: $("#password").val()
@@ -538,7 +524,7 @@
                 if ($("#mainModal").hasClass("show") && $("#mainModal").attr("data-name") === "systemInfos" && !isLoadingSystemInfos) {
                     isLoadingSystemInfos = true;
                     $.get({
-                        url: "http://192.168.100.187:3000/api/device/environment",
+                        url: apiURL + "/device/environment",
                         crossDomain: true,
                         timeout: 10000
                     }).done(function(response) {
@@ -922,6 +908,7 @@
             }
             function editPlant(wtf) {
                 let plant = Number.parseInt(wtf);
+                /*
                 if (Number.isSafeInteger(plant)) {
                     let index = plantProperties.findIndex(key => key["id"] === plant);
                     if (index >= 0) {
@@ -930,10 +917,10 @@
                                 resolve(confirmReplacePlantEditing(index));
                             });
                             prompt.then(function(value) {
-                                $("#savePlantButton").attr("data-plant-id", wtf);
+                                $("#savePlantOptions").attr("data-plant-id", wtf);
                                 let tab = $("a[href='#plantsAdminOptionContainer']")[0];
                                 $(tab).html("Bearbeitung");
-                                $("#savePlantButton").html("<i class='fas fa-save'></i> Speichern");
+                                $("#savePlantOptions").html("<i class='fas fa-save'></i> Speichern");
                                 $("#discardPlantButton").html("<i class='fas fa-times'></i> Abbrechen");
                                 fillPlantInputs(wtf);
                                 new bootstrap.Tab(tab).show();
@@ -942,16 +929,17 @@
                         }
                         else {
                             isPlantEditingActive = true;
-                            $("#savePlantButton").attr("data-plant-id", wtf);
+                            $("#savePlantOptions").attr("data-plant-id", wtf);
                             let tab = $("a[href='#plantsAdminOptionContainer']")[0];
                             $(tab).html("Bearbeitung");
-                            $("#savePlantButton").html("<i class='fas fa-save'></i> Speichern");
+                            $("#savePlantOptions").html("<i class='fas fa-save'></i> Speichern");
                             $("#discardPlantButton").html("<i class='fas fa-times'></i> Abbrechen");
                             fillPlantInputs(wtf);
                             new bootstrap.Tab(tab).show();
                         }
                     }
                 }
+                */
             }
             /*
             function editUser(user) {
@@ -1099,28 +1087,14 @@
                 Modal.create(data);
             }
             */
-            //192.168.100.187:3000/api/data/sensors
-            function wtf() {
-                $.post({
-                    url: "http://192.168.100.187:3000/api/data/sensors",
-                    data: JSON.stringify({amount: 50}),
-                    type: "POST",
-                    processData: false,
-                    contentType: "application/json",
-                    crossDomain: true
-                    //Header set Access-Control-Allow-Origin "*"
-                }).done(function(response) {
-                    console.log(response);
-                }).fail(function(response) {
-                    console.log(response);
-                });
-            }
+
+            /*
             function fillPlantInputs(wtf = null) {
                 let selectedPlant = Number.parseInt(wtf);
                 let index = plantProperties.findIndex(key => key["id"] === selectedPlant);
                 if (index >= 0) {
                     if (isPlantEditingActive) {
-                        $("#newPlantDescriptionInput").val(plantProperties[index]["name"]);
+                        $("#plantOptionDescriptionInput").val(plantProperties[index]["name"]);
                         if ($("#editPlantAlert").length === 0) {
                             $("#plantsAdminOptionContainer").prepend(Alert.create("primary", "Zurzeit ist die Bearbeitung der Pflanze &quot;" + plantProperties[index]["name"] + "&quot; (ID: " + plantProperties[index]["id"] + ") aktiv.", {id: "editPlantAlert"}));
                         }
@@ -1134,12 +1108,13 @@
                         let values = Object.getOwnPropertyNames(plantProperties[index]["properties"][property]);
                         for (value of values) {
                             let inputName = value[0].toUpperCase() + value.substring(1, value.length);
-                            let inputElement = "#newPlant" + propertyName + inputName + "Input";
+                            let inputElement = "#plantOption" + propertyName + inputName + "Input";
                             $(inputElement).val(plantProperties[index]["properties"][property][value]);
                         }
                     }
                 }
             }
+            */
             function fillPlantProgramsSelect(plant) {
                 let index = plantProperties.findIndex(key => key["id"] === plant);
                 if (index >= 0) {
@@ -1208,7 +1183,7 @@
                         $("#mainModal .modal-body > .alert").remove();
                         let data = {
                             plant: plant,
-                            authentification: decodeURIComponent(getCookie("authToken"))
+                            authentification: getCookie("authToken")
                         };
                         $.post({
                             url: "",
@@ -1271,6 +1246,7 @@
                 }
             }
             */
+           /*
             function confirmDiscardPlantEditing() {
                 let prompt = new Promise(function(resolve) {
                     confirmation({
@@ -1280,10 +1256,10 @@
                     resolve);
                 });
                 prompt.then(function(value) {
-                    $("#newPlantContainer input[type='text']").val("");
+                    $("#plantOptionContainer input[type='text']").val("");
                     isPlantEditingActive = false;
                     $("a[href='#plantsAdminOptionContainer']").html("Erstellen");
-                    $("#savePlantButton").html("<i class='fas fa-plus'></i> Hinzufügen");
+                    $("#savePlantOptions").html("<i class='fas fa-plus'></i> Hinzufügen");
                     $(this).html("<i class='fas fa-trash-alt'></i> Löschen");
                     $("#editPlantAlert").remove();
                     bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
@@ -1291,7 +1267,7 @@
             }
             // wtf = Index der zu bearbeitenden Pflanze!
             function confirmReplacePlantEditing(wtf) {
-                let currentPlant = Number.parseInt($("#savePlantButton").attr("data-plant-id"));
+                let currentPlant = Number.parseInt($("#savePlantOptions").attr("data-plant-id"));
                 if (Number.isSafeInteger(currentChartPlant)) {
                     let index = plantProperties.findIndex(key => key["id"] === currentChartPlant);
                     if (index >= 0) {
@@ -1316,6 +1292,7 @@
                     }
                 }
             }
+            */
             function getCookie(cname) {
                 let name = cname + "=";
                 let ca = document.cookie.split(";");
@@ -1325,7 +1302,7 @@
                         c = c.substring(1);
                     }
                     if (c.indexOf(name) === 0) {
-                        return c.substring(name.length, c.length);
+                        return decodeURIComponent(c.substring(name.length, c.length));
                     }
                 }
                 return "";
@@ -1453,27 +1430,26 @@
                 /*$("#applyPlantTemplateButton").click(function() {
                     fillPlantInputs($("#plantsAdminPlantSelection").val());
                 });*/
-                $("#plantCreationForm").on("reset", function() {
+                $("#plantOptionsForm").on("reset", function() {
                     confirmDiscardPlantEditing();
                     return false;
                 });
-                $("#savePlantButton").click(function() {
-                    $("#newPlantSubmit").click();
+                $("#savePlantOptions").click(function() {
+                    $("#savePlantOptionsSubmit").click();
                 });
-                $("#plantCreationForm").submit(function() {
-                    $("#discardPlantButton").attr("disabled", "disabled");
-                    if ($("#savePlantButton").find("[data-processing='true']").length === 0) {
-                        $("#savePlantButton").attr("disabled", "disabled").prepend("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary'></span>");
+                $("#plantOptionsForm").submit(function() {
+                    //$("#discardPlantButton").attr("disabled", "disabled");
+                    if ($("#savePlantOptions").find("[data-processing='true']").length === 0) {
+                        $("#savePlantOptions").attr("disabled", "disabled").prepend("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary'></span>");
                     }
                     let data = {
-                        authentification: decodeURIComponent(getCookie("authToken"))
+                        authentification: getCookie("authToken")
                     };
-                    let inputs = $("#plantCreationFormContainer input");
+                    /*et inputs = $("#plantOptionsFormContainer input");
                     for (input of inputs) {
                         data[$(input).attr("id").slice(8, -5)] = $(input).val();
-                    }
+                    }*/
                     $.post({
-                        //url: "http://127.0.0.1:3000/api/plant/" + (isPlantEditingActive ? "update" : "create"),
                         url: "http://192.168.100.187:3000/api/plant/"+ (isPlantEditingActive ? "update" : "create"),
                         data: JSON.stringify(data),
                         processData: false,
@@ -1482,13 +1458,13 @@
                         timeout: 10000
                     }).done(function(response) {
                     }).fail(function(response) {
-                        $("#newPlantMenu").before(Alert.create("danger", response["status"] + ": " + response["statusText"], {class: "mt-3 position-relative"}));
+                        $("#plantOptionMenu").before(Alert.create("danger", response["status"] + ": " + response["statusText"], {class: "mt-3 position-relative"}));
                         scrollTo(0, $("#plantsAdminOptionContainer > .alert").last().offset()["top"] -10);
 
                     }).always(function() {
-                        $("#savePlantButton").find("[data-processing='true']").remove();
-                        $("#savePlantButton").removeAttr("disabled");
-                        $("#discardPlantButton").removeAttr("disabled");
+                        $("#savePlantOptions").find("[data-processing='true']").remove();
+                        $("#savePlantOptions").removeAttr("disabled");
+                        //$("#discardPlantButton").removeAttr("disabled");
                     });
                     return false;
                 });
@@ -1567,6 +1543,7 @@
                     $("#chartHistoryElementTitle").html($(this).attr("data-chart-title"));
                     $("#historyTimespan").attr("data-chart", $(this).attr("data-chart"));
                 });
+                /*
                 $.get("dataTables_test.php", {type: "plantdetails"}).done(function(response) {
                     let data = JSON.parse(response);
                     Object.assign(plantProperties, data["data"]);
@@ -1583,6 +1560,7 @@
                     let data = JSON.parse(response);
                     Object.assign(plantPrograms, data["data"]);
                 });
+                */
                 let date = new Date();
                 $("footer").html("&copy; " + "2021-" + date.getFullYear() + " BSDGG/IN20");
                 $("#plantSelection").change(function() {
@@ -1597,7 +1575,7 @@
                     let options = {};
                     let value = Number.parseInt($(this).val());
                     Object.assign(options, dataTablesAdminOptions["plantPrograms"]);
-                    if (Number.parseInt($(this).attr("data-old")) >= 1 && value <= 0) {
+                    if (!Number.isSafeInteger(Number.parseInt($(this).attr("data-old"))) && value <= 0) {
                         options["rowGroup"] = {
                             dataSrc: "plantID",
                             className: "bg-gray-200",
@@ -1633,7 +1611,7 @@
                     let options = {};
                     let value = Number.parseInt($(this).val());
                     Object.assign(options, dataTablesAdminOptions["logs"]);
-                    if (Number.parseInt($(this).attr("data-old")) >= 1 && value <= 0) {
+                    if (!Number.isSafeInteger(Number.parseInt($(this).attr("data-old"))) && value <= 0) {
                         options["rowGroup"] = {
                             dataSrc: "type",
                             className: "bg-gray-200",
@@ -1664,6 +1642,7 @@
                 });
                 $("#plants-programs-accordion").on("shown.bs.collapse", function() {
                     if (!DataTable.isDataTable("#plantProgramsAdminTable")) {
+                        $("#plantProgramsAdminPlantSelection").val("0");
                         let options = {};
                         Object.assign(options, dataTablesAdminOptions["plantPrograms"]);
                         options["rowGroup"] = {
@@ -1705,6 +1684,7 @@
                 });
                 $("#collapse-logs-actions").on("shown.bs.collapse", function() {
                     if (!DataTable.isDataTable("#logsAdminTable")) {
+                        $("#logsAdminCategorySelection").val("0");
                         let options = {};
                         Object.assign(options, dataTablesAdminOptions["logs"]);
                         options["rowGroup"] = {
@@ -1730,9 +1710,6 @@
                         else {
                             $("#plantsAdminTable").DataTable().ajax.reload();
                         }
-                        /*if ($("[href='#plantsAdminOptionContainer']").hasClass("active")) {
-                            $("#newPlantContainer").css("max-height", $("#newPlantNavigation").outerHeight(true) + "px");
-                        }*/
                     }
                 });
                 // DataTables-Layout neu berechnen, wenn sich die Bildschirmbreite ändert, wenn Administrationsseite nicht aktiv war 
@@ -1742,8 +1719,8 @@
                 $("a[href='#plantsAdminOverviewContainer']").on("shown.bs.tab", function () {
                     readjustTables();
                 });
+                /*
                 $("a[href='#plantsAdminOptionContainer']").on("shown.bs.tab", function() {
-                    //$("#newPlantContainer").css("max-height", $("#newPlantNavigation").outerHeight(true) + "px");
                     $("#plantsAdminPlantSelection").empty();
                     if (plantProperties.length >= 1) {
                         $("#applyPlantTemplateButton").removeAttr("disabled");
@@ -1752,6 +1729,7 @@
                         }
                     }
                 });
+                */
                 // Bilderlinks laden
                 $("a[href='#historyGallery']").on("shown.bs.tab", function() {
                     getGalleryItems();
@@ -1856,10 +1834,28 @@
                                 pointStyle: "line"
                             },
                             {
-                                label: "Aktoraktivität",
-                                stack: "actuator",
-                                borderColor: getCSSVar("--chart-actuator-border"),
+                                label: "Pumpenaktivität #1",
+                                stack: "pump-1",
+                                borderColor: getCSSVar("--chart-activity-1-border"),
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
+                                borderWidth: 1,
+                                pointStyle: "line",
+                                fill: {
+                                    target: "start",
+                                    above: function(context) {
+                                        let chart = context.chart;
+                                        if (!chart) {
+                                            return;
+                                        }
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(112, 146, 190, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                    }
+                                }
+                            },
+                            {
+                                label: "Pumpenaktivität #2",
+                                stack: "pump-2",
+                                borderColor: getCSSVar("--chart-activity-2-border"),
+                                backgroundColor: "rgba(142, 192, 109, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
                                 fill: {
@@ -1987,10 +1983,28 @@
                                 pointStyle: "line"
                             },
                             {
-                                label: "Aktoraktivität",
-                                stack: "actuator",
-                                borderColor: getCSSVar("--chart-actuator-border"),
+                                label: "Pumpenaktivität #1",
+                                stack: "pump-1",
+                                borderColor: getCSSVar("--chart-activity-1-border"),
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
+                                borderWidth: 1,
+                                pointStyle: "line",
+                                fill: {
+                                    target: "start",
+                                    above: function(context) {
+                                        let chart = context.chart;
+                                        if (!chart) {
+                                            return;
+                                        }
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(112, 146, 190, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                    }
+                                }
+                            },
+                            {
+                                label: "Pumpenaktivität #2",
+                                stack: "pump-2",
+                                borderColor: getCSSVar("--chart-activity-2-border"),
+                                backgroundColor: "rgba(142, 192, 109, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
                                 fill: {
@@ -2118,10 +2132,28 @@
                                 pointStyle: "line"
                             },
                             {
-                                label: "Aktoraktivität",
-                                stack: "actuator",
-                                borderColor: getCSSVar("--chart-actuator-border"),
+                                label: "Pumpenaktivität #1",
+                                stack: "pump-1",
+                                borderColor: getCSSVar("--chart-activity-1-border"),
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
+                                borderWidth: 1,
+                                pointStyle: "line",
+                                fill: {
+                                    target: "start",
+                                    above: function(context) {
+                                        let chart = context.chart;
+                                        if (!chart) {
+                                            return;
+                                        }
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(112, 146, 190, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                    }
+                                }
+                            },
+                            {
+                                label: "Pumpenaktivität #2",
+                                stack: "pump-2",
+                                borderColor: getCSSVar("--chart-activity-2-border"),
+                                backgroundColor: "rgba(142, 192, 109, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
                                 fill: {
@@ -2249,10 +2281,28 @@
                                 pointStyle: "line"
                             },
                             {
-                                label: "Aktoraktivität",
-                                stack: "actuator",
-                                borderColor: getCSSVar("--chart-actuator-border"),
+                                label: "Pumpenaktivität #1",
+                                stack: "pump-1",
+                                borderColor: getCSSVar("--chart-activity-1-border"),
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
+                                borderWidth: 1,
+                                pointStyle: "line",
+                                fill: {
+                                    target: "start",
+                                    above: function(context) {
+                                        let chart = context.chart;
+                                        if (!chart) {
+                                            return;
+                                        }
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(112, 146, 190, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                    }
+                                }
+                            },
+                            {
+                                label: "Pumpenaktivität #2",
+                                stack: "pump-2",
+                                borderColor: getCSSVar("--chart-activity-2-border"),
+                                backgroundColor: "rgba(142, 192, 109, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
                                 fill: {
@@ -2380,10 +2430,28 @@
                                 pointStyle: "line"
                             },
                             {
-                                label: "Aktoraktivität",
-                                stack: "actuator",
-                                borderColor: getCSSVar("--chart-actuator-border"),
+                                label: "Pumpenaktivität #1",
+                                stack: "pump-1",
+                                borderColor: getCSSVar("--chart-activity-1-border"),
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
+                                borderWidth: 1,
+                                pointStyle: "line",
+                                fill: {
+                                    target: "start",
+                                    above: function(context) {
+                                        let chart = context.chart;
+                                        if (!chart) {
+                                            return;
+                                        }
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(112, 146, 190, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                    }
+                                }
+                            },
+                            {
+                                label: "Pumpenaktivität #2",
+                                stack: "pump-2",
+                                borderColor: getCSSVar("--chart-activity-2-border"),
+                                backgroundColor: "rgba(142, 192, 109, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
                                 fill: {
@@ -2511,10 +2579,28 @@
                                 pointStyle: "line"
                             },
                             {
-                                label: "Aktoraktivität",
-                                stack: "actuator",
-                                borderColor: getCSSVar("--chart-actuator-border"),
+                                label: "Pumpenaktivität #1",
+                                stack: "pump-1",
+                                borderColor: getCSSVar("--chart-activity-1-border"),
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
+                                borderWidth: 1,
+                                pointStyle: "line",
+                                fill: {
+                                    target: "start",
+                                    above: function(context) {
+                                        let chart = context.chart;
+                                        if (!chart) {
+                                            return;
+                                        }
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(112, 146, 190, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                    }
+                                }
+                            },
+                            {
+                                label: "Pumpenaktivität #2",
+                                stack: "pump-2",
+                                borderColor: getCSSVar("--chart-activity-2-border"),
+                                backgroundColor: "rgba(142, 192, 109, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
                                 fill: {
@@ -2642,10 +2728,28 @@
                                 pointStyle: "line"
                             },
                             {
-                                label: "Aktoraktivität",
-                                stack: "actuator",
-                                borderColor: getCSSVar("--chart-actuator-border"),
+                                label: "Pumpenaktivität #1",
+                                stack: "pump-1",
+                                borderColor: getCSSVar("--chart-activity-1-border"),
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
+                                borderWidth: 1,
+                                pointStyle: "line",
+                                fill: {
+                                    target: "start",
+                                    above: function(context) {
+                                        let chart = context.chart;
+                                        if (!chart) {
+                                            return;
+                                        }
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(112, 146, 190, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                    }
+                                }
+                            },
+                            {
+                                label: "Pumpenaktivität #2",
+                                stack: "pump-2",
+                                borderColor: getCSSVar("--chart-activity-2-border"),
+                                backgroundColor: "rgba(142, 192, 109, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
                                 fill: {
@@ -2773,9 +2877,27 @@
                                 pointStyle: "line"
                             },
                             {
-                                label: "Aktoraktivität",
-                                stack: "actuator",
-                                borderColor: getCSSVar("--chart-actuator-border"),
+                                label: "Pumpenaktivität #1",
+                                stack: "pump-1",
+                                borderColor: getCSSVar("--chart-activity-2-border"),
+                                backgroundColor: "rgba(142, 192, 109, 0.75)",
+                                borderWidth: 1,
+                                pointStyle: "line",
+                                fill: {
+                                    target: "start",
+                                    above: function(context) {
+                                        let chart = context.chart;
+                                        if (!chart) {
+                                            return;
+                                        }
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(112, 146, 190, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                    }
+                                }
+                            },
+                            {
+                                label: "Pumpenaktivität #2",
+                                stack: "pump-2",
+                                borderColor: getCSSVar("--chart-activity-1-border"),
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
@@ -2899,10 +3021,28 @@
                                 pointStyle: "line"
                             },
                             {
-                                label: "Aktoraktivität",
-                                stack: "actuator",
-                                borderColor: getCSSVar("--chart-actuator-border"),
+                                label: "Pumpenaktivität #1",
+                                stack: "pump-1",
+                                borderColor: getCSSVar("--chart-activity-1-border"),
                                 backgroundColor: "rgba(112, 146, 190, 0.75)",
+                                borderWidth: 1,
+                                pointStyle: "line",
+                                fill: {
+                                    target: "start",
+                                    above: function(context) {
+                                        let chart = context.chart;
+                                        if (!chart) {
+                                            return;
+                                        }
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(112, 146, 190, 0.5)", 1: "rgba(255, 255, 255, 0.5)"});
+                                    }
+                                }
+                            },
+                            {
+                                label: "Pumpenaktivität #2",
+                                stack: "pump-2",
+                                borderColor: getCSSVar("--chart-activity-2-border"),
+                                backgroundColor: "rgba(142, 192, 109, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "line",
                                 fill: {
@@ -3019,7 +3159,7 @@
                 $("#historyTimespan").change(function() {
                     $(this).attr("disabled", "disabled").after("<span class='spinner-border ms-2 text-primary kreiselchen' style='flex: 0 0 auto' data-processing='true'></span>");
                     let data = {
-                        authentification: decodeURIComponent(getCookie("authToken")),
+                        authentification: getCookie("authToken"),
                         chart: $(this).attr("data-chart"),
                         lol: $(this).val()
                     };
@@ -3054,7 +3194,7 @@
                     $("#historyGallery").find(".alert").remove();
                     $(this).attr("disabled", "disabled").after("<span class='spinner-border ms-2 text-primary kreiselchen' style='flex: 0 0 auto' data-processing='true'></span>");
                     let data = {
-                        authentification: decodeURIComponent(getCookie("authToken")),
+                        authentification: getCookie("authToken"),
                         history: $(this).val()
                     };
                     $.post({
@@ -3082,64 +3222,119 @@
                         crossDomain: true,
                         timeout: 10000
                     }).done(function(response) {
+                        let types = Object.getOwnPropertyNames(response["limits"]);
                         let labels = [];
-                        //let timestamps = [];
+                        let indexCurrent = -1;
+                        for (let [iteration, sensor] of response["sensors"].entries()) {
+                            let date = new Date(Math.trunc(sensor["timestamp"] / 1000));
+                            if (labels.length <= 13) {
+                                labels.push(date.toLocaleTimeString());
+                            }
+                            for (type of types) {
+                                if (!["id", "timestamp"].includes(type) && charts["current"].hasOwnProperty(type)) {
+                                    //console.log(charts["current"][type]["data"]["labels"].length);
+                                    if (charts["current"][type]["data"]["labels"].length >= 13) {
+                                        charts["current"][type]["data"]["labels"] = [];
+                                    }
+                                    charts["current"][type]["data"]["labels"].push(date.toLocaleTimeString());
+                                    indexCurrent = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === "current");
+                                    let indexMiddle = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === "middle");
+                                    if (indexCurrent >= 0) {
+                                        if (charts["current"][type]["data"]["datasets"][indexCurrent]["data"].length >= 13) {
+                                            charts["current"][type]["data"]["datasets"][indexCurrent]["data"] = [];
+                                        }
+                                        charts["current"][type]["data"]["datasets"][indexCurrent]["data"].push({x: date.toLocaleTimeString(), y: sensor[type]});
+                                        for (pump of response["pumpactivity"]) {
+                                            if (pump["status"]) {
+                                                let indexPump = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === "pump-" + pump["id"].toString());
+                                                if (indexPump >= 0) {
+                                                    if (charts["current"][type]["data"]["datasets"][indexPump]["data"].length >= 13) {
+                                                        charts["current"][type]["data"]["datasets"][indexPump]["data"] = [];
+                                                    }
+                                                    charts["current"][type]["data"]["datasets"][indexPump]["data"].push({x: date.toLocaleTimeString(), y: sensor[type]});
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (indexMiddle >= 0) {
+                                        if (charts["current"][type]["data"]["datasets"][indexMiddle]["data"].length >= 13) {
+                                            charts["current"][type]["data"]["datasets"][indexMiddle]["data"] = [];
+                                        }
+                                        charts["current"][type]["data"]["datasets"][indexMiddle]["data"].push({x: date.toLocaleTimeString(), y: sensor[type]});
+                                    }
+                                    let limits = Object.getOwnPropertyNames(response["limits"][type]);
+                                    // grenzen in variable speichern, damit geprüft werden kann, ob der letzte messwert unter/über grenze ist!
+                                    for (limit of limits) {
+                                        let indexLimit = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === limit);
+                                        if (indexLimit >= 0) {
+                                            if (charts["current"][type]["data"]["datasets"][indexLimit]["data"].length >= 13) {
+                                                charts["current"][type]["data"]["datasets"][indexLimit]["data"] = [];
+                                            }
+                                            charts["current"][type]["data"]["datasets"][indexLimit]["data"].push({x: date.toLocaleTimeString(), y: response["limits"][type][limit]});
+                                        }
+                                    }
+                                    if (iteration === 12) {
+                                        charts["current"][type]["options"]["scales"]["x"]["min"] = labels[0];
+                                        charts["current"][type]["options"]["scales"]["x"]["max"] = labels[labels.length -1];
+                                        charts["current"][type].update("none"); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
+                                        $("#section-" + type + "> div:last-of-type > canvas").css("visibility", "visible");
+                                        $("#section-" + type + "> div:last-of-type > .chart-overlay ").css("display", "none");
+                                    }
+                                }
+                            }
+                        // messwerte
+                        //let ids = Object.getOwnPropertyNames(sensors); // sind nur ids!
+                        }
+                        /*
+                        let labels = [];
                         let sensors = {};
-                        let types = [];
                         // timestamps und diagramme
                         for (sensor of response["sensors"]) {
                             let currentSensor = {};
                             let date = new Date(Math.trunc(sensor["timestamp"] / 1000));
                             labels.push(date.toLocaleTimeString());
-                            //timestamps[sensor["id"]] = {date: date.toLocaleTimeString(), timestamp: sensor["timestamp"]};
-                            types = Object.getOwnPropertyNames(sensor);
-                            types.splice(types.indexOf("id"), 1);
-                            types.splice(types.indexOf("timestamp"), 1);
                             Object.assign(currentSensor, sensor);
                             delete currentSensor["timestamp"];
                             delete currentSensor["id"];
                             sensors[sensor["id"]] = currentSensor;
                         }
-                        console.log(sensors, types, labels);
+                        //console.log(sensors, types, labels);
 
                         // messwerte
                         let ids = Object.getOwnPropertyNames(sensors); // sind nur ids!
-                        // 3. schleife um an id zu gelangen?
-                        for (id of ids) {
+                        let types = Object.getOwnPropertyNames(response["limits"]);
+                        for (label of labels) {
                             for (type of types) {
-                                let index = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === "current");
-                                if (index >= 0) {
+                                let indexCurrent = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === "current");
+                                let indexMiddle = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === "middle");
+                                if (indexCurrent >= 0) {
                                     charts["current"][type]["data"]["labels"] = labels;
-                                    charts["current"][type]["data"]["datasets"][index]["data"] = [];
-                                    for (label of labels) {
-                                        //console.log(sensors[id]);
-                                        charts["current"][type]["data"]["datasets"][index]["data"].push({x: label, y: sensors[id][type]});
+                                    charts["current"][type]["data"]["datasets"][indexCurrent]["data"] = [];
+                                    for (id of ids) {
+                                        charts["current"][type]["data"]["datasets"][indexCurrent]["data"].push({x: label, y: sensors[id][type]});
                                     }
                                 }
-                            }
-                        }
-                        // grenzen
-                        let limits = Object.getOwnPropertyNames(response["limits"]);
-                        for (limit of limits) {
-                            if (charts["current"].hasOwnProperty(limit)) {
-                                let types = Object.getOwnPropertyNames(response["limits"][limit]);
-                                for (type of types) {
-                                    let index = charts["current"][limit]["data"]["datasets"].findIndex(key => key["stack"] === type);
-                                    if (index >= 0) {
-                                        charts["current"][limit]["data"]["labels"] = labels;
-                                        charts["current"][limit]["data"]["datasets"][index]["data"] = [];
-                                        for (label of labels) {
-                                            charts["current"][limit]["data"]["datasets"][index]["data"].push({x: label, y: response["limits"][limit][type]});
-                                        }
+                                if (indexMiddle >= 0) {
+                                    charts["current"][type]["data"]["labels"] = labels;
+                                    //charts["current"]["middle"]["data"]["datasets"][indexMiddle]["data"] = [];
+                                    charts["current"][type]["data"]["datasets"][indexMiddle]["data"].push({x: label, y: response["averages"][type]});
+                                }
+                                let lols = Object.getOwnPropertyNames(response["limits"][type]);
+                                for (lol of lols) {
+                                    let indexLimit = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === lol);
+                                    if (indexLimit >= 0) {
+                                        //charts["current"][type]["data"]["datasets"][indexLimit]["data"] = [];
+                                        charts["current"][type]["data"]["datasets"][indexLimit]["data"].push({x: label, y: response["limits"][type][lol]});
                                     }
                                 }
+                                charts["current"][type]["options"]["scales"]["x"]["min"] = labels[0];
+                                charts["current"][type]["options"]["scales"]["x"]["max"] = labels[labels.length -1];
+                                charts["current"][type].update("none"); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
+                                $("#section-" + type + "> div:last-of-type > canvas").css("visibility", "visible");
+                                $("#section-" + type + "> div:last-of-type > .chart-overlay ").css("display", "none");
                             }
-                            charts["current"][limit]["options"]["scales"]["x"]["min"] = labels[0];
-                            charts["current"][limit]["options"]["scales"]["x"]["max"] = labels[labels.length -1];
-                            charts["current"][limit].update("none"); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
-                            $("#section-" + limit + "> div:last-of-type > canvas").css("visibility", "visible");
-                            $("#section-" + limit + "> div:last-of-type > .chart-overlay ").css("display", "none");
                         }
+                        */
                     }).fail(function(response) {
                         $("#historyGallery").prepend(Alert.create("danger", (statusCodes.hasOwnProperty(response["status"]) ? statusCodes[response["status"]] : response["status"] + ": " + response["statusText"])));
                     }).always(function() {
@@ -3262,7 +3457,8 @@
                 --chart-middle-border: green;
                 --chart-warning-limit-border: rgb(255, 115, 0);
                 --chart-control-limit-border: rgb(220, 53, 69);
-                --chart-actuator-border: rgb(112, 146, 190);
+                --chart-activity-1-border: rgb(112, 146, 190);
+                --chart-activity-2-border: rgb(91, 166, 136);
                 --alert-color-warning: #cd853f;
                 --alert-background-warning: #f7e8cd;
                 --alert-color-danger: #dc143c;
@@ -3702,11 +3898,11 @@
             a[data-bs-toggle="pill"]:hover {
                 background-color: rgba(var(--bs-primary-rgb), 0.1);
             }
-            #newPlantContainer {
+            #plantOptionContainer {
                 overflow-y: scroll;
                 max-height: 400px;
             }
-            #newPlantContainer h5 {
+            #plantOptionContainer h5 {
                 font-weight: 600;
             }
             .accordion-flush > .accordion-item > .accordion-header > .accordion-button:focus, .accordion-flush .accordion-button:not(.collapsed) {
@@ -3880,24 +4076,24 @@
                     display: block;
                     margin: auto 20px auto auto;
                 }
-                #newPlantMenu {
+                #plantOptionMenu {
                     flex-direction: column;
                 }
-                #newPlantNavigation {
+                #plantOptionNavigation {
                     width: 100%
                 }
-                #plantCreationFormContainer label {
+                #plantOptionsFormContainer label {
                     padding-left: 0;
                 }
-                #plantCreationFormContainer input[type="text"] {
+                #plantOptionsFormContainer input[type="text"] {
                     width: 100%;
                 }
                 /*
-                #newPlantContainer *:not(input, label) {
+                #plantOptionContainer *:not(input, label) {
                     padding-left: 0;
                     margin-left: 0;
                 }*/
-                #newPlantContainer {
+                #plantOptionContainer {
                     width: 100%;
                     margin-top: 1rem;
                     border: 1px solid var(--bs-gray-300, #dee2e6);
@@ -3967,16 +4163,16 @@
                     display: block;
                     margin: auto 20px auto auto;
                 }
-                #newPlantMenu {
+                #plantOptionMenu {
                     flex-direction: column;
                 }
-                #plantCreationFormContainer input[type="text"] {
+                #plantOptionsFormContainer input[type="text"] {
                     width: 100%;
                 }
-                #newPlantNavigation {
+                #plantOptionNavigation {
                     width: 100%
                 }
-                #newPlantContainer {
+                #plantOptionContainer {
                     width: 100%;
                     margin-top: 1rem;
                     border: 1px solid var(--bs-gray-300, #dee2e6);
@@ -4019,10 +4215,10 @@
                 #first-navbar, #second-navbar {
                     display: flex;
                 }
-                #newPlantMenu {
+                #plantOptionMenu {
                     flex-direction: column;
                 }
-                #plantCreationFormContainer .form-check-label {
+                #plantOptionsFormContainer .form-check-label {
                     padding-left: 0;
                 }
                 #mobile-navbar {
@@ -4040,7 +4236,7 @@
                 .legendContainer .legendItem {
                     width: auto;
                 }
-                #plantCreationFormContainer input[type="text"] {
+                #plantOptionsFormContainer input[type="text"] {
                     width: auto;
                 }
             }
@@ -4049,13 +4245,13 @@
                 #first-navbar, #second-navbar {
                     display: flex;
                 }
-                #newPlantMenu {
+                #plantOptionMenu {
                     flex-direction: row;
                 }
-                #newPlantNavigation {
+                #plantOptionNavigation {
                     width: auto
                 }
-                #newPlantContainer {
+                #plantOptionContainer {
                     width: auto;
                     margin-top: 0;
                     margin-left: 0.5rem;
@@ -4091,7 +4287,7 @@
                 .legendContainer > label {
                     margin-top: 0;
                 }
-                #plantCreationFormContainer input[type="text"] {
+                #plantOptionsFormContainer input[type="text"] {
                     width: auto;
                 }
             }
@@ -4100,7 +4296,7 @@
                 #first-navbar, #second-navbar {
                     display: flex;
                 }
-                #newPlantMenu {
+                #plantOptionMenu {
                     flex-direction: row;
                 }
                 #mobile-navbar {
@@ -4122,12 +4318,12 @@
                 .legendContainer .legendItem {
                     width: auto;
                 }
-                #plantCreationFormContainer input[type="text"] {
+                #plantOptionsFormContainer input[type="text"] {
                     width: auto;
                 }
             }
             @media only screen and (min-width: 1285px) {
-                #plantCreationFormContainer input[type="text"] {
+                #plantOptionsFormContainer input[type="text"] {
                     display: inline-block;
                 }
             }
@@ -4205,19 +4401,19 @@
                                 <button type="button" class="btn btn-warning ms-2"><i class="fas fa-pause"></i></button>
                             </div>
                         -->
-                            <div class="d-flex legendContainer rounded-3 p-2 mt-3">
+                            <div class="d-flex legendContainer rounded-3 p-2">
                                 <label class="me-2">Legende:</label>
                                 <div id="section-legend" class="flex-wrap d-flex">
                                     <div class="legendItem"><div style="background-color: black;" class="d-inline-block legendIcon"></div><span class="ms-1">Messwert</span></div>
                                     <div class="legendItem"><div style="background-color: var(--chart-setpoint-border);" class="d-inline-block legendIcon"></div><span class="ms-1">Sollwert</span></div>
                                     <div class="legendItem"><div style="background-color: var(--chart-middle-border);" class="d-inline-block legendIcon"></div><span class="ms-1">Mittelwert</span></div>
-                                    <div class="legendItem"><div style="background-color: rgb(112, 146, 190);" class="d-inline-block legendIcon"></div><span class="ms-1">Aktoraktivität</span></div>
+                                    <div class="legendItem"><div style="background-color: rgb(112, 146, 190);" class="d-inline-block legendIcon"></div><span class="ms-1">Pumpenaktivität</span></div>
                                     <div class="legendItem"><div style="border: 2px dashed rgb(220, 53, 69);" class="d-inline-block legendIcon"></div><span class="ms-1">Eingriffsgrenze</span></div>
                                     <div class="legendItem"><div style="border: 1px dashed rgb(255, 115, 0);" class="d-inline-block legendIcon"></div><span class="ms-1">Warngrenze</span></div>
                                 </div>
                             </div>
                             <div id="overviewPanel">
-                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-co2">
+                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-co2_level">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Co²-Gehalt</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="co2" data-chart-title="Co²" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
@@ -4229,9 +4425,9 @@
                                         <canvas id="co2-chart-current"></canvas>
                                     </div>
                                 </div>
-                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-water-temperature">
+                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-temperature_water">
                                     <div class="position-relative w-100 text-center pt-2">
-                                        <span>Wassertemperatur</span>
+                                        <span>Wassertemperatur (°C)</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="water-temperature" data-chart-title="Wassertemperatur" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
@@ -4241,9 +4437,9 @@
                                         <canvas id="temperature-water-chart-current"></canvas>
                                     </div>
                                 </div>
-                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-air-temperature">
+                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-temperature_air">
                                     <div class="position-relative w-100 text-center pt-2">
-                                        <span>Lufttemperatur</span>
+                                        <span>Lufttemperatur (°C)</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="air-temperature" data-chart-title="Lufttemperatur" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
@@ -4255,7 +4451,7 @@
                                 </div>
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-humidity">
                                     <div class="position-relative w-100 text-center pt-2">
-                                        <span>Luftfeuchtigkeit</span>
+                                        <span>Luftfeuchtigkeit (%)</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="humidity" data-chart-title="Luftfeuchtigkeit" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
@@ -4265,7 +4461,7 @@
                                         <canvas id="humidity-chart-current"></canvas>
                                     </div>
                                 </div>
-                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-ph">
+                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-ph_value">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>pH-Wert</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ph" data-chart-title="pH-Wert" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
@@ -4277,9 +4473,9 @@
                                         <canvas id="ph-chart-current"></canvas>
                                     </div>
                                 </div>
-                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-ec">
+                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-ec_value">
                                     <div class="position-relative w-100 text-center pt-2">
-                                        <span>Elektrischer Leitwert</span>
+                                        <span>Elektrischer Leitwert (G)</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ec" data-chart-title="Elektrischer Leitwert" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
@@ -4289,9 +4485,9 @@
                                         <canvas id="ec-chart-current"></canvas>
                                     </div>
                                 </div>
-                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-swimmer-1">
+                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-swimmer_1">
                                     <div class="position-relative w-100 text-center pt-2">
-                                        <span>Wasserstand #1</span>
+                                        <span>Wasserstand #1 (L)</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="swimmer-1" data-chart-title="Wasserstand #1" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
@@ -4301,9 +4497,9 @@
                                         <canvas id="swimmer-1-chart-current"></canvas>
                                     </div>
                                 </div>
-                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-swimmer-2">
+                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-swimmer_2">
                                     <div class="position-relative w-100 text-center pt-2">
-                                        <span>Wasserstand #2</span>
+                                        <span>Wasserstand #2 (L)</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="swimmer-2" data-chart-title="Wasserstand #2" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     </div>   
                                     <div class="position-relative w-100 h-100">
@@ -4313,9 +4509,9 @@
                                         <canvas id="swimmer-2-chart-current"></canvas>
                                     </div>
                                 </div>
-                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-swimmer-3">
+                                <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-swimmer_3">
                                     <div class="position-relative w-100 text-center pt-2">
-                                        <span>Wasserstand #3</span>
+                                        <span>Wasserstand #3 (L)</span>
                                         <button class="btn btn-xs btn-secondary config-chart-button" data-chart="swimmer-3" data-chart-title="Wasserstand #3" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
                                     </div>   
                                     <div class="position-relative w-100 h-100">
@@ -4362,114 +4558,116 @@
                                                     </table>
                                                 </div>
                                                 <div class="tab-pane" id="plantsAdminOptionContainer">
+                                                    <!--
                                                     <form enctype="text/plain" id="plantsAdminTemplateForm" method="post" action="/" class="w-100 d-flex formContainer mb-3 justify-content-center">
                                                         <label for="plantsAdminPlantSelection" class="col-form-label me-2">Vorlage:</label>
                                                         <select class="form-select w-auto d-inline-block" id="plantsAdminPlantSelection" data-old="0"></select>
                                                         <button type="submit" class="btn btn-primary align-top" id="applyPlantTemplateButton" disabled="disabled"><i class="fas fa-sync"></i> Übernehmen</button>
                                                     </form>
-                                                    <div class="d-flex mt-3" id="newPlantMenu">
-                                                        <div id="newPlantNavigation" class="list-group col-md-2 position-relative align-self-start">
-                                                            <a class="list-group-item list-group-item-action" href="#newPlantGeneralSection">Allgemein</a>
-                                                            <a class="list-group-item list-group-item-action" href="#newPlantWaterTemperatureSection">Wassertemperatur</a>
-                                                            <a class="list-group-item list-group-item-action" href="#newPlantphSection">pH-Wert</a>
-                                                            <a class="list-group-item list-group-item-action" href="#newPlantSalinitySection">Salzgehalt</a>
+                                                    -->
+                                                    <div class="d-flex mt-3" id="plantOptionMenu">
+                                                        <div id="plantOptionNavigation" class="list-group col-md-2 position-relative align-self-start">
+                                                            <!--<a class="list-group-item list-group-item-action" href="#plantOptionGeneralSection">Allgemein</a>-->
+                                                            <a class="list-group-item list-group-item-action" href="#plantOptionWaterTemperatureSection">Wassertemperatur</a>
+                                                            <a class="list-group-item list-group-item-action" href="#plantOptionPhSection">pH-Wert</a>
+                                                            <a class="list-group-item list-group-item-action" href="#plantOptionSalinitySection">Salzgehalt</a>
                                                         </div>
-                                                        <div data-bs-spy="scroll" data-bs-target="#newPlantNavigation" data-bs-offset="0" class="col-md-10 position-relative" id="newPlantContainer">
-                                                            <div id="plantCreationFormContainer" class="p-3">
-                                                                <form enctype="text/plain" method="post" action="/" id="plantCreationForm" class="w-100">
-                                                                    <input type="submit" class="d-none" id="newPlantSubmit">
-                                                                    <div class="row">
-                                                                        <h5 id="newPlantGeneralSection" class="col-md-12">Allgemein</h5>
+                                                        <div data-bs-spy="scroll" data-bs-target="#plantOptionNavigation" data-bs-offset="0" class="col-md-10 position-relative" id="plantOptionContainer">
+                                                            <div id="plantOptionsFormContainer" class="p-3">
+                                                                <form enctype="text/plain" method="post" action="/" id="plantOptionsForm" class="w-100">
+                                                                    <input type="submit" class="d-none" id="savePlantOptionsSubmit">
+                                                                    <!--<div class="row">
+                                                                        <h5 id="plantOptionGeneralSection" class="col-md-12">Allgemein</h5>
                                                                     </div>
                                                                     <div class="row">
                                                                         <div class="mt-2 col-md-6">
-                                                                            <label for="newPlantDescriptionInput" class="col-form-label col-md-6">Bezeichnung:</label>
-                                                                            <input required type="text" class="form-control col-md-6" id="newPlantDescriptionInput" aria-label="Bezeichnung" aria-describedby="newPlantDescriptionInput">
+                                                                            <label for="plantOptionDescriptionInput" class="col-form-label col-md-6">Bezeichnung:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionDescriptionInput" aria-label="Bezeichnung" aria-describedby="plantOptionDescriptionInput">
                                                                         </div>
-                                                                    </div>
-                                                                    <h5 id="newPlantWaterTemperatureSection" class="mt-4 col-md-12">Wassertemperatur</h5>
+                                                                    </div>-->
+                                                                    <h5 id="plantOptionWaterTemperatureSection" class="mt-4 col-md-12">Wassertemperatur</h5>
                                                                     <div class="row">
                                                                         <div class="mt-2 col-md-6">
-                                                                            <label for="newPlantWaterTemperatureSetpointInput" class="col-form-label col-md-6">Sollwert:</label>
-                                                                            <input required type="text" class="form-control col-md-6" id="newPlantWaterTemperatureSetpointInput" aria-label="Sollwert für Temperatur" aria-describedby="newPlantWaterTemperatureSetpointInput">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="row">
-                                                                        <div class="mt-2 col-md-6">
-                                                                            <label for="newPlantWaterTemperatureUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                            <input required type="text" class="form-control col-md-6" id="newPlantWaterTemperatureUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Temperatur" aria-describedby="newPlantWaterTemperatureUpperControlLimitInput">
-                                                                        </div>
-                                                                        <div class="mt-2 col-md-6">
-                                                                            <label for="newPlantWaterTemperatureLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                            <input required type="text" class="form-control col-md-6" id="newPlantWaterTemperatureLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Temperatur" aria-describedby="newPlantWaterTemperatureLowerControlLimitInput">
+                                                                            <label for="plantOptionWaterTemperatureSetpointInput" class="col-form-label col-md-6">Sollwert:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionWaterTemperatureSetpointInput" aria-label="Sollwert für Temperatur" aria-describedby="plantOptionWaterTemperatureSetpointInput">
                                                                         </div>
                                                                     </div>
                                                                     <div class="row">
                                                                         <div class="mt-2 col-md-6">
-                                                                            <label for="newPlantWaterTemperatureUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                            <input required type="text" class="form-control col-md-6" id="newPlantWaterTemperatureUpperWarningLimitInput" aria-label="Obere Warngrenze für Temperatur" aria-describedby="newPlantWaterTemperatureUpperWarningLimitInput">
+                                                                            <label for="plantOptionWaterTemperatureUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionWaterTemperatureUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Temperatur" aria-describedby="plantOptionWaterTemperatureUpperControlLimitInput">
                                                                         </div>
                                                                         <div class="mt-2 col-md-6">
-                                                                            <label for="newPlantWaterTemperatureLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                            <input required type="text" class="form-control col-md-6" id="newPlantWaterTemperatureLowerWarningLimitInput" aria-label="Untere Warngrenze für Temperatur" aria-describedby="newPlantWaterTemperatureLowerWarningLimitInput">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="row">
-                                                                        <h5 id="newPlantphSection" class="mt-4 col-md-12">pH-Wert</h5>
-                                                                    </div>
-                                                                    <div class="row">
-                                                                        <div class="mt-2 col-md-6">
-                                                                            <label for="newPlantPhSetpointInput" class="col-form-label col-md-6">Sollwert:</label>
-                                                                            <input required type="text" class="form-control col-md-6" id="newPlantPhSetpointInput" aria-label="Sollwert für Temperatur" aria-describedby="newPlantPhSetpointInput">
+                                                                            <label for="plantOptionWaterTemperatureLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionWaterTemperatureLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Temperatur" aria-describedby="plantOptionWaterTemperatureLowerControlLimitInput">
                                                                         </div>
                                                                     </div>
                                                                     <div class="row">
                                                                         <div class="mt-2 col-md-6">
-                                                                            <label for="newPlantPhUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                            <input required type="text" class="form-control col-md-6" id="newPlantPhUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Temperatur" aria-describedby="newPlantPhUpperControlLimitInput">
+                                                                            <label for="plantOptionWaterTemperatureUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionWaterTemperatureUpperWarningLimitInput" aria-label="Obere Warngrenze für Temperatur" aria-describedby="plantOptionWaterTemperatureUpperWarningLimitInput">
                                                                         </div>
                                                                         <div class="mt-2 col-md-6">
-                                                                            <label for="newPlantPhLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                            <input required type="text" class="form-control col-md-6" id="newPlantPhLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Temperatur" aria-describedby="newPlantPhLowerControlLimitInput">
+                                                                            <label for="plantOptionWaterTemperatureLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionWaterTemperatureLowerWarningLimitInput" aria-label="Untere Warngrenze für Temperatur" aria-describedby="plantOptionWaterTemperatureLowerWarningLimitInput">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <h5 id="plantOptionPhSection" class="mt-4 col-md-12">pH-Wert</h5>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="mt-2 col-md-6">
+                                                                            <label for="plantOptionPhSetpointInput" class="col-form-label col-md-6">Sollwert:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionPhSetpointInput" aria-label="Sollwert für Temperatur" aria-describedby="plantOptionPhSetpointInput">
                                                                         </div>
                                                                     </div>
                                                                     <div class="row">
                                                                         <div class="mt-2 col-md-6">
-                                                                            <label for="newPlantPhUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                            <input required type="text" class="form-control col-md-6" id="newPlantPhUpperWarningLimitInput" aria-label="Obere Warngrenze für Temperatur" aria-describedby="newPlantPhUpperWarningLimitInput">
+                                                                            <label for="plantOptionPhUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionPhUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Temperatur" aria-describedby="plantOptionPhUpperControlLimitInput">
                                                                         </div>
                                                                         <div class="mt-2 col-md-6">
-                                                                            <label for="newPlantPhLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                            <input required type="text" class="form-control col-md-6" id="newPlantPhLowerWarningLimitInput" aria-label="Untere Warngrenze für Temperatur" aria-describedby="newPlantPhLowerWarningLimitInput">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="row">
-                                                                        <h5 id="newPlantSalinitySection" class="mt-4 col-md-12">Salzgehalt</h5>
-                                                                    </div>
-                                                                    <div class="row">
-                                                                        <div class="mt-2 col-md-6">
-                                                                            <label for="newPlantSalinitySetpointInput" class="col-form-label col-md-6">Sollwert:</label>
-                                                                            <input required type="text" class="form-control col-md-6" id="newPlantSalinitySetpointInput" aria-label="Sollwert für Salzgehalt" aria-describedby="newPlantSalinitySetpointInput">
+                                                                            <label for="plantOptionPhLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionPhLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Temperatur" aria-describedby="plantOptionPhLowerControlLimitInput">
                                                                         </div>
                                                                     </div>
                                                                     <div class="row">
                                                                         <div class="mt-2 col-md-6">
-                                                                            <label for="newPlantSalinityUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                            <input required type="text" class="form-control col-md-6" id="newPlantSalinityUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Salzgehalt" aria-describedby="newPlantSalinityUpperControlLimitInput">
+                                                                            <label for="plantOptionPhUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionPhUpperWarningLimitInput" aria-label="Obere Warngrenze für Temperatur" aria-describedby="plantOptionPhUpperWarningLimitInput">
                                                                         </div>
                                                                         <div class="mt-2 col-md-6">
-                                                                            <label for="newPlantSalinityLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                            <input required type="text" class="form-control col-md-6" id="newPlantSalinityLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Salzgehalt" aria-describedby="newPlantSalinityLowerControlLimitInput">
+                                                                            <label for="plantOptionPhLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionPhLowerWarningLimitInput" aria-label="Untere Warngrenze für Temperatur" aria-describedby="plantOptionPhLowerWarningLimitInput">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <h5 id="plantOptionSalinitySection" class="mt-4 col-md-12">Salzgehalt</h5>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="mt-2 col-md-6">
+                                                                            <label for="plantOptionSalinitySetpointInput" class="col-form-label col-md-6">Sollwert:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionSalinitySetpointInput" aria-label="Sollwert für Salzgehalt" aria-describedby="plantOptionSalinitySetpointInput">
                                                                         </div>
                                                                     </div>
                                                                     <div class="row">
                                                                         <div class="mt-2 col-md-6">
-                                                                            <label for="newPlantSalinityUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                            <input required type="text" class="form-control col-md-6" id="newPlantSalinityUpperWarningLimitInput" aria-label="Obere Warngrenze für Salzgehalt" aria-describedby="newPlantSalinityUpperWarningLimitInput">
+                                                                            <label for="plantOptionSalinityUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionSalinityUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Salzgehalt" aria-describedby="plantOptionSalinityUpperControlLimitInput">
                                                                         </div>
                                                                         <div class="mt-2 col-md-6">
-                                                                            <label for="newPlantSalinityLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                            <input required type="text" class="form-control col-md-6" id="newPlantSalinityLowerWarningLimitInput" aria-label="Untere Warngrenze für Salzgehalt" aria-describedby="newPlantSalinityLowerWarningLimitInput">
+                                                                            <label for="plantOptionSalinityLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionSalinityLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Salzgehalt" aria-describedby="plantOptionSalinityLowerControlLimitInput">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="mt-2 col-md-6">
+                                                                            <label for="plantOptionSalinityUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionSalinityUpperWarningLimitInput" aria-label="Obere Warngrenze für Salzgehalt" aria-describedby="plantOptionSalinityUpperWarningLimitInput">
+                                                                        </div>
+                                                                        <div class="mt-2 col-md-6">
+                                                                            <label for="plantOptionSalinityLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionSalinityLowerWarningLimitInput" aria-label="Untere Warngrenze für Salzgehalt" aria-describedby="plantOptionSalinityLowerWarningLimitInput">
                                                                         </div>
                                                                     </div>
                                                                 </form>
@@ -4477,8 +4675,8 @@
                                                         </div>
                                                     </div>
                                                     <div class="mt-4 d-flex align-content-center align-items-center justify-content-end" style="gap: 5px">
-                                                        <button type="button" class="btn btn-success" id="savePlantButton"><i class="fas fa-plus"></i> Hinzufügen</button>
-                                                        <button type="reset" class="btn btn-danger" id="discardPlantButton"><i class="fas fa-trash-alt"></i> Löschen</button>
+                                                        <button type="button" class="btn btn-success" id="savePlantOptions"><i class="fas fa-plus"></i> Speichern</button>
+                                                        <!--<button type="reset" class="btn btn-danger" id="discardPlantButton"><i class="fas fa-trash-alt"></i> Löschen</button>-->
                                                     </div>
                                                 </div>
                                             </div>
