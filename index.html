@@ -537,33 +537,32 @@
                 if ($("#mainModal").hasClass("show") && $("#mainModal").attr("data-name") === "systemInfos" && !isLoadingSystemInfos) {
                     isLoadingSystemInfos = true;
                     $.get({
-                        url: apiURL + "/device/environment",
+                        url: apiURL + "/device/informations",
                         crossDomain: true,
                         timeout: 10000
                     }).done(function(response) {
                         let statsText = "";
-                        if (response.hasOwnProperty("osname")) {
-                            statsText += "<tr><td class='align-top'>Betriebssystem</td><td>" + response["osname"] + "</td></tr>";
-                        }
-                        if (response.hasOwnProperty("arch")) {
-                            statsText += "<tr><td class='align-top'>Architektur</td><td>" + response["arch"] + "</td></tr>";
-                        }
-                        if (response.hasOwnProperty("cpus")) {
-                            statsText += "<tr><td class='align-top'>CPU</td><td>" + response["cpus"][0]["model"];
-                            for (let [index, cpu] of response["cpus"].entries()) {
-                                statsText += "<div>CPU #" + index + ":<div class='ps-3'>Takt: " + cpu["speed"] + "MHz</div></div>";
-                            }
-                            statsText += "</td></tr>";
-                        }
-                        if (response.hasOwnProperty("memory") && response.hasOwnProperty("totalmemory")) {
-                            statsText += "<tr><td class='align-top'>Speicher</td><td>" + Math.floor((response["memory"] / 1024) / 1024) + " MB/" + Math.floor((response["totalmemory"] / 1024) / 1024) + " MB (~" + Math.floor(((response["memory"] / response["totalmemory"]) *100)) + " %)</td></tr>";
-                        }
-                        if (response.hasOwnProperty("hostname")) {
-                            statsText += "<tr><td class='align-top'>Host</td><td>" + response["hostname"] + "</td></tr>";
-                        }
-                        if (response.hasOwnProperty("uptime")) {
-                            statsText += "<tr><td class='align-top'>Laufzeit</td><td>" + response["uptime"].duration() + "</td></tr>";
-                        }
+
+                        statsText += "<tr><td class='align-top'>Betriebssystem</td><td>" + response["type"] + " " + response["release"] + "</td></tr>";
+                        statsText += "<tr><td class='align-top'>Architektur</td><td>" + response["arch"] + "</td></tr>";
+                        statsText += "<tr><td class='align-top'>Hostname</td><td>" + response["hostname"] + "</td></tr>";
+                        statsText += "<tr><td class='align-top'>CPU</td><td>" + response["cpus"][0]["model"];
+                        
+                        for (let [index, cpu] of response["cpus"].entries()) {
+                            statsText += "<div>CPU #" + index + ":<div class='ps-3'>Takt: " + cpu["speed"] + "MHz</div></div>";
+                        }                        
+
+                        let totalMemory = (response["totalmem"] / 1024 / 1024 / 1024).toFixed(2);
+                        let totalMemoryFree = (response["freememory"] / 1024 / 1024 / 1024).toFixed(2);
+                        
+                        statsText += "<tr><td class='align-top'>RAM (Insgesamt)</td><td>" + totalMemory + " GB</td></tr>";
+                        statsText += "<tr><td class='align-top'>RAM (Verwendet)</td><td>" + (totalMemory - totalMemoryFree).toFixed(2) + " GB (~" + (((totalMemory - totalMemoryFree) / totalMemory) * 100).toFixed(2) + " %) </td></tr>";
+                        statsText += "<tr><td class='align-top'>Durchschnittslast (1 Minute)</td><td>" + response["loadavg"][0] + "</td></tr>";
+                        statsText += "<tr><td class='align-top'>Durchschnittslast (5 Minuten)</td><td>" + response["loadavg"][1] + "</td></tr>";
+                        statsText += "<tr><td class='align-top'>Durchschnittslast (15 Minuten)</td><td>" + response["loadavg"][2] + "</td></tr>";
+                        statsText += "<tr><td class='align-top'>Laufzeit</td><td>" + response["uptime"].duration() + "</td></tr>";
+                        statsText += "<tr><td class='align-top'>Backend Version</td><td>" + response["version"] + "</td></tr>";
+                        
                         $("#systemInfosTable").html(statsText);
                     }).fail(function(response) {
                         console.log(response);
