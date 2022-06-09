@@ -34,7 +34,18 @@
                     co2_level: {},
                     ec_value: {}
                 },
-                history: {}
+                history: {},
+                scales: {
+                    temperature_water: [0, 100],
+                    temperature_air: [0, 100],
+                    humidity: [0, 100],
+                    ph_value: [0, 14],
+                    swimmer_1: [0, 100],
+                    swimmer_2: [0, 100],
+                    swimmer_3: [0, 100],
+                    co2_level: [0, 1000],
+                    ec_value: [0, 100]
+                }
             };
             const dataTablesLocalisation = {
                 sEmptyTable: "Keine Daten vorhanden",
@@ -276,7 +287,6 @@
                     }
                 },
                 logs: {
-                    order: [0, "asc"],
                     language: dataTablesLocalisation,
                     serverSide: true,
                     columns: [
@@ -286,15 +296,9 @@
                             visible: false
                         },
                         {
-                            name: "type",
-                            data: "type",
-                            width: "10%",
-                            visible: false
-                        },
-                        {
                             name: "timestamp",
                             data: "timestamp",
-                            width: "25%",
+                            width: "15%",
                             render: function(data, type, row) {
                                 if (type === "display" || type === "filter") {
                                     let date = new Date(Math.trunc(Number.parseInt(data) /1000));
@@ -304,20 +308,28 @@
                             }
                         },
                         {
+                            name: "type",
+                            data: function(row, type, set, meta) {
+                                return dataTableTranslationStrings["logs"][row["type"]];
+                            },
+                            width: "8%"
+                        },
+                        {
                             name: "message",
                             data: "message",
                             width: "50%",
-                            orderable: true
+                            orderable: false
                         }
                     ],
+                    order: [1, "asc"],
                     ajax: {
                         url: apiURL + "/device/logs",
                         type: "POST",
                         contentType: "application/json",
                         data: function(data, settings) {
-                            data["type"] = $("#logsAdminCategorySelection").val();
+                            //data["type"] = $("#logsAdminCategorySelection").val();
                             data["authentification"] = getCookie("authToken");
-                            console.log(data);
+                            console.log(data.order);
                             return JSON.stringify(data);
                         },
                         dataSrc: function(response) {
@@ -329,8 +341,7 @@
                     }
                 }
             };
-            // Kann auch durch AJAX gefüllt werden!
-            const dataTablesRowGroupStrings = {
+            const dataTableTranslationStrings = {
                 logs: {
                     error: "Fehler",
                     success: "Erfolg",
@@ -345,7 +356,6 @@
             const plantProperties = [];
             const userAccounts = [];
             const pumps = [];
-            */
             const statusCodes = {
                 0: "Unbekannter Fehler aufgetreten.",
                 400: "Die Anfrage ist fehlerhaft.",
@@ -353,8 +363,10 @@
                 403: "Der Zugriff auf die angeforderte Ressource ist nicht erlaubt.",
                 404: "Die angeforderte Ressource wurde nicht gefunden.",
             }
+            */
             //var viewportWidth = visualViewport["width"];
             var isLoadingCurrentChartData = false;
+            var isLoadingHistoryChartData = false;
             var systemInfosTimer = null;
             var isLoadingSystemInfos = false;
             var picker = null;
@@ -398,7 +410,7 @@
                     $(pump).removeAttr("disabled");
                     $(parent).parent().find("[data-processing='true']").remove();
                 }).fail(function(response) {
-                    $("#pumpsAdminTable_wrapper").before(Alert.create("danger", (statusCodes.hasOwnProperty(response["status"]) ? statusCodes[response["status"]] : response["status"] + ": " + response["statusText"])));
+                    $("#pumpsAdminTable_wrapper").before(Alert.create("danger", response["status"] + ": " + response["statusText"]));
                     $("#pumpsAdminTable").DataTable().ajax.reload();
                 }).always(function() {
                 });
@@ -459,6 +471,7 @@
                             $("a[href='#login']").addClass("d-none");
                             $("a[href='#logout']").removeClass("d-none");
                             $("[data-current-user]").removeClass("d-none").html("<i class='fas fa-user-injured'></i> " + response["username"]);
+                            $("#mainTabNav > li:last-of-type").removeClass("d-none");
                             bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
                         }
                         else {
@@ -509,7 +522,7 @@
                 return duration.substr(0, duration.length -2);
             }
             function readjustTables() {
-                let collapses = ["#collapse-plants-actions", "#collapse-plants-programs-actions", "#collapse-user-actions", "#collapse-pump-actions"];
+                let collapses = ["#collapse-plants-actions", "#collapse-plants-programs-actions", "#collapse-user-actions", "#collapse-pump-actions", "#collapse-logs-actions"];
                 let element = null;
                 let tableName = null;
                 for (collapse of collapses) {
@@ -900,7 +913,7 @@
                     }
                 // img.naturalWidth and img.naturalHeight
                 }).fail(function(response) {
-                    $("#historyGallery").prepend(Alert.create("danger", (statusCodes.hasOwnProperty(response["status"]) ? statusCodes[response["status"]] : response["status"] + ": " + response["statusText"])));
+                    $("#historyGallery").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
                 }).always(function() {
                     $("#getGalleryItemsButton").removeAttr("disabled").find("[data-processing='true']").remove();
                     $("#historyGalleryTimespanSelect").removeAttr("disabled");
@@ -1313,11 +1326,6 @@
                     $(this).remove();
                     $("body").removeClass("overflow-hidden");
                 });
-            }).on("resize", function() {
-                // wtf?
-                if (visualViewport["width"] !== viewportWidth) {
-                    viewportWidth = visualViewport["width"];
-                }
             });
             $(document).on("DOMContentLoaded", function() {
                 // Hier alle Skripte ausführen, die auf DOM zugreifen sollen, bevor Bilder und Ähnliches geladen wurden
@@ -1325,6 +1333,7 @@
                     $("a[href='#login']").addClass("d-none");
                     $("a[href='#logout']").removeClass("d-none");
                     $("[data-current-user]").removeClass("d-none").html("<i class='fas fa-user-injured'></i> " + getCookie("username"));
+                    $("#mainTabNav > li:last-of-type").removeClass("d-none");
                 }
                 picker = new Litepicker({ 
                     element: $("#historyGalleryTimespanSelect")[0],
@@ -1538,10 +1547,12 @@
                     $("a[href='#login']").removeClass("d-none");
                     $("a[href='#logout']").addClass("d-none");
                     $("[data-current-user]").addClass("d-none").html("");
+                    $("#mainTabNav > li:last-of-type").addClass("d-none");
                 });
                 $(".config-chart-button").click(function() {
                     $("#chartHistoryElementTitle").html($(this).attr("data-chart-title"));
-                    $("#historyTimespan").attr("data-chart", $(this).attr("data-chart"));
+                    $("#chartHistoryModal").attr("data-chart", $(this).attr("data-chart"));
+                    new bootstrap.Modal($("#chartHistoryModal")[0]).show();
                 });
                 /*
                 $.get("dataTables_test.php", {type: "plantdetails"}).done(function(response) {
@@ -1563,14 +1574,15 @@
                 */
                 let date = new Date();
                 $("footer").html("&copy; " + "2021-" + date.getFullYear() + " BSDGG/IN20");
-                $("#plantSelection").change(function() {
+                /*$("#plantSelection").change(function() {
                     $("#plantProgramSelection").empty().attr("disabled", "disabled");
                     $(this).attr("disabled", "disabled");
                     let id = Number.parseInt($(this).val());
                     fillPlantProgramsSelect(id);
                     $(this).removeAttr("disabled");
                     $("#plantProgramSelection").removeAttr("disabled");
-                });
+                });*/
+                /*
                 $("#plantProgramsAdminPlantSelection").change(function() {
                     let options = {};
                     let value = Number.parseInt($(this).val());
@@ -1607,6 +1619,8 @@
                         }
                     });
                 });
+                */
+                /*
                 $("#logsAdminCategorySelection").change(function() {
                     let options = {};
                     let value = Number.parseInt($(this).val());
@@ -1617,7 +1631,7 @@
                             className: "bg-gray-200",
                             endRender: null,
                             startRender: function(rows, group) {
-                                return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + dataTablesRowGroupStrings["logs"][group] + "</td>");
+                                return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + dataTableTranslationStrings["logs"][group] + "</td>");
                             }
                         };
                         options["orderFixed"] = [1, "asc"];
@@ -1632,6 +1646,7 @@
                     $(this).attr("data-old", value);
                     adminDataTables["logs"] = $("#logsAdminTable").DataTable(options);
                 });
+                */
                 $("#user-actions-accordion").on("shown.bs.collapse", function() {
                     if (!DataTable.isDataTable("#userAccountsAdminTable")) {
                         adminDataTables["userAccounts"] = $("#userAccountsAdminTable").DataTable(dataTablesAdminOptions["userAccounts"]);
@@ -1684,18 +1699,18 @@
                 });
                 $("#collapse-logs-actions").on("shown.bs.collapse", function() {
                     if (!DataTable.isDataTable("#logsAdminTable")) {
-                        $("#logsAdminCategorySelection").val("0");
+                        //$("#logsAdminCategorySelection").val("0");
                         let options = {};
                         Object.assign(options, dataTablesAdminOptions["logs"]);
-                        options["rowGroup"] = {
-                            dataSrc: "type",
+                        /*options["rowGroup"] = {
+                            dataSrc: 2,
                             className: "bg-gray-200",
                             endRender: null,
                             startRender: function(rows, group) {
-                                return $("<tr>").append("<td colspan='2' class='align-middle' style='color: #282828'>" + dataTablesRowGroupStrings["logs"][group] + "</td>");
+                                return $("<tr>").append("<td colspan='2' class='align-middle' style='color: #282828'>" + dataTableTranslationStrings["logs"][group] + "</td>");
                             }
                         };
-                        options["orderFixed"] = [1, "asc"];
+                        options["orderFixed"] = [2, "asc"];*/
                         adminDataTables["logs"] = $("#logsAdminTable").DataTable(options);
                     }
                     else {
@@ -1734,6 +1749,30 @@
                 $("a[href='#historyGallery']").on("shown.bs.tab", function() {
                     getGalleryItems();
                 });
+                $("#chartHistoryModal").on("show.bs.modal", function() {
+                    let chart = $(this).attr("data-chart");
+                    if (!["undefined", "", undefined, null].includes(chart)) {
+                        if (!isLoadingHistoryChartData) {
+                            isLoadingHistoryChartData = true;
+                            $.post({
+                                url: apiURL + "/sensor/data",
+                                data: JSON.stringify({sensor: chart}),
+                                processData: false,
+                                contentType: "application/json",
+                                crossDomain: true,
+                                timeout: 10000
+                            }).done(function(response) {
+                            }).fail(function(response) {
+                                $("#history-chart").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
+                            }).always(function() {
+                                isLoadingHistoryChartData = false;
+                            });
+                        }
+                        charts["history"]["options"]["scales"]["y"]["min"] = charts["scales"][chart][0];
+                        charts["history"]["options"]["scales"]["y"]["max"] = charts["scales"][chart][1];
+                        charts["history"].update();
+                    }
+                });
                 // Aktuell
                 charts["current"]["co2_level"] = new Chart($("#co2-chart-current")[0].getContext("2d"), {
                     options: {
@@ -1760,9 +1799,9 @@
                                     }
                                 }
                             },
-                            y: { // defining min and max so hiding the dataset does not change scale range
-                                min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100,
+                            y: {
+                                min: charts["scales"]["co2_level"][0],
+                                max: charts["scales"]["co2_level"][1],
                                 ticks: {
                                     font: {
                                         family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
@@ -1909,9 +1948,9 @@
                                     }
                                 }
                             },
-                            y: { // defining min and max so hiding the dataset does not change scale range
-                                min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100,
+                            y: {
+                                min: charts["scales"]["temperature_water"][0],
+                                max: charts["scales"]["temperature_water"][1],
                                 ticks: {
                                     font: {
                                         family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
@@ -2058,9 +2097,9 @@
                                     }
                                 }
                             },
-                            y: { // defining min and max so hiding the dataset does not change scale range
-                                min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100,
+                            y: {
+                                min: charts["scales"]["temperature_air"][0],
+                                max: charts["scales"]["temperature_air"][1],
                                 ticks: {
                                     font: {
                                         family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
@@ -2207,9 +2246,9 @@
                                     }
                                 }
                             },
-                            y: { // defining min and max so hiding the dataset does not change scale range
-                                min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100,
+                            y: {
+                                min: charts["scales"]["swimmer_1"][0],
+                                max: charts["scales"]["swimmer_1"][1],
                                 ticks: {
                                     font: {
                                         family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
@@ -2356,9 +2395,9 @@
                                     }
                                 }
                             },
-                            y: { // defining min and max so hiding the dataset does not change scale range
-                                min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100,
+                            y: {
+                                min: charts["scales"]["ec_value"][0],
+                                max: charts["scales"]["ec_value"][1],
                                 ticks: {
                                     font: {
                                         family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
@@ -2505,9 +2544,9 @@
                                     }
                                 }
                             },
-                            y: { // defining min and max so hiding the dataset does not change scale range
-                                min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100,
+                            y: {
+                                min: charts["scales"]["humidity"][0],
+                                max: charts["scales"]["humidity"][1],
                                 ticks: {
                                     font: {
                                         family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
@@ -2654,9 +2693,9 @@
                                     }
                                 }
                             },
-                            y: { // defining min and max so hiding the dataset does not change scale range
-                                min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100,
+                            y: {
+                                min: charts["scales"]["ph_value"][0],
+                                max: charts["scales"]["ph_value"][1],
                                 ticks: {
                                     font: {
                                         family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
@@ -2803,9 +2842,9 @@
                                     }
                                 }
                             },
-                            y: { // defining min and max so hiding the dataset does not change scale range
-                                min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100,
+                            y: {
+                                min: charts["scales"]["swimmer_2"][0],
+                                max: charts["scales"]["swimmer_2"][1],
                                 ticks: {
                                     font: {
                                         family: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji','Segoe UI Symbol', 'Noto Color Emoji'"
@@ -2952,9 +2991,9 @@
                                     }
                                 }
                             },
-                            y: { // defining min and max so hiding the dataset does not change scale range
-                                min: 0, // muss individuell für jedes diagrammm festgelegt werden
-                                max: 100
+                            y: {
+                                min: charts["scales"]["swimmer_3"][0],
+                                max: charts["scales"]["swimmer_3"][1]
                             }
                         }
                     },
@@ -3059,7 +3098,7 @@
                         ]
                     }
                 });
-                charts["history"] = new Chart($("#charts-history")[0].getContext("2d"), {
+                charts["history"] = new Chart($("#history-chart")[0].getContext("2d"), {
                     type: "line",
                     options: {
                         plugins: {
@@ -3156,6 +3195,7 @@
                 $("[data-bs-toggle='collapse']").click(function() {
                     $(this).children("i:last-of-type").css("transform", ($(this).attr("aria-expanded") === "true" ? "rotate(180deg)" : "rotate(0deg)"));
                 });
+                /*
                 $("#historyTimespan").change(function() {
                     $(this).attr("disabled", "disabled").after("<span class='spinner-border ms-2 text-primary kreiselchen' style='flex: 0 0 auto' data-processing='true'></span>");
                     let data = {
@@ -3189,6 +3229,7 @@
                         $("#historyTimespan").removeAttr("disabled");
                     });
                 });
+                */
                 $("#historyGalleryTimespanSelect").change(function() {
                     let that = this;
                     $("#historyGallery").find(".alert").remove();
@@ -3206,7 +3247,7 @@
                         timeout: 10000
                     }).done(function(response) {
                     }).fail(function(response) {
-                        $("#historyGallery").prepend(Alert.create("danger", (statusCodes.hasOwnProperty(response["status"]) ? statusCodes[response["status"]] : response["status"] + ": " + response["statusText"])));
+                        $("#historyGallery").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
                     }).always(function() {
                         $(that).removeAttr("disabled");
                         $("#historyGallery").find("[data-processing='true']").remove();
@@ -3214,132 +3255,98 @@
                 });
                 // Neue Daten vom Server laden
                 setInterval(function() {
-                    $.post({
-                        url: apiURL + "/sensor/data",
-                        data: JSON.stringify({amount: 13}),
-                        processData: false,
-                        contentType: "application/json",
-                        crossDomain: true,
-                        timeout: 10000
-                    }).done(function(response) {
-                        let types = Object.getOwnPropertyNames(response["limits"]);
-                        let labels = [];
-                        let indexCurrent = -1;
-                        for (let [iteration, sensor] of response["sensors"].entries()) {
-                            let date = new Date(Math.trunc(sensor["timestamp"] / 1000));
-                            if (labels.length <= 13) {
-                                labels.push(date.toLocaleTimeString());
-                            }
-                            for (type of types) {
-                                if (!["id", "timestamp"].includes(type) && charts["current"].hasOwnProperty(type)) {
-                                    //console.log(charts["current"][type]["data"]["labels"].length);
-                                    if (charts["current"][type]["data"]["labels"].length >= 13) {
-                                        charts["current"][type]["data"]["labels"] = [];
-                                    }
-                                    charts["current"][type]["data"]["labels"].push(date.toLocaleTimeString());
-                                    indexCurrent = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === "current");
-                                    let indexMiddle = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === "middle");
-                                    if (indexCurrent >= 0) {
-                                        if (charts["current"][type]["data"]["datasets"][indexCurrent]["data"].length >= 13) {
-                                            charts["current"][type]["data"]["datasets"][indexCurrent]["data"] = [];
+                    if (!isLoadingCurrentChartData) {
+                        isLoadingCurrentChartData = true;
+                        $.post({
+                            url: apiURL + "/sensor/data",
+                            data: JSON.stringify({amount: 13}),
+                            processData: false,
+                            contentType: "application/json",
+                            crossDomain: true,
+                            timeout: 10000
+                        }).done(function(response) {
+                            let types = Object.getOwnPropertyNames(response["limits"]);
+                            let labels = [];
+                            let indexCurrent = -1;
+                            for (let [iteration, sensor] of response["sensors"].entries()) {
+                                let date = new Date(Math.trunc(sensor["timestamp"] / 1000));
+                                if (labels.length <= 13) {
+                                    labels.push(date.toLocaleTimeString());
+                                }
+                                for (type of types) {
+                                    if (!["id", "timestamp"].includes(type) && charts["current"].hasOwnProperty(type)) {
+                                        //console.log(charts["current"][type]["data"]["labels"].length);
+                                        if (charts["current"][type]["data"]["labels"].length >= 13) {
+                                            charts["current"][type]["data"]["labels"] = [];
                                         }
-                                        charts["current"][type]["data"]["datasets"][indexCurrent]["data"].push({x: date.toLocaleTimeString(), y: sensor[type]});
-                                        for (pump of response["pumpactivity"]) {
-                                            if (pump["status"]) {
-                                                let indexPump = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === "pump-" + pump["id"].toString());
-                                                if (indexPump >= 0) {
-                                                    if (charts["current"][type]["data"]["datasets"][indexPump]["data"].length >= 13) {
-                                                        charts["current"][type]["data"]["datasets"][indexPump]["data"] = [];
+                                        charts["current"][type]["data"]["labels"].push(date.toLocaleTimeString());
+                                        indexCurrent = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === "current");
+                                        let indexMiddle = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === "middle");
+                                        if (indexCurrent >= 0) {
+                                            if (charts["current"][type]["data"]["datasets"][indexCurrent]["data"].length >= 13) {
+                                                charts["current"][type]["data"]["datasets"][indexCurrent]["data"] = [];
+                                            }
+                                            charts["current"][type]["data"]["datasets"][indexCurrent]["data"].push({x: date.toLocaleTimeString(), y: sensor[type]});
+                                            for (pump of response["pumpactivity"]) {
+                                                if (pump["status"]) {
+                                                    let indexPump = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === "pump-" + pump["id"].toString());
+                                                    if (indexPump >= 0) {
+                                                        if (charts["current"][type]["data"]["datasets"][indexPump]["data"].length >= 13) {
+                                                            charts["current"][type]["data"]["datasets"][indexPump]["data"] = [];
+                                                        }
+                                                        charts["current"][type]["data"]["datasets"][indexPump]["data"].push({x: date.toLocaleTimeString(), y: sensor[type]});
                                                     }
-                                                    charts["current"][type]["data"]["datasets"][indexPump]["data"].push({x: date.toLocaleTimeString(), y: sensor[type]});
                                                 }
                                             }
                                         }
-                                    }
-                                    if (indexMiddle >= 0) {
-                                        if (charts["current"][type]["data"]["datasets"][indexMiddle]["data"].length >= 13) {
-                                            charts["current"][type]["data"]["datasets"][indexMiddle]["data"] = [];
-                                        }
-                                        charts["current"][type]["data"]["datasets"][indexMiddle]["data"].push({x: date.toLocaleTimeString(), y: sensor[type]});
-                                    }
-                                    let limits = Object.getOwnPropertyNames(response["limits"][type]);
-                                    // grenzen in variable speichern, damit geprüft werden kann, ob der letzte messwert unter/über grenze ist!
-                                    for (limit of limits) {
-                                        let indexLimit = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === limit);
-                                        if (indexLimit >= 0) {
-                                            if (charts["current"][type]["data"]["datasets"][indexLimit]["data"].length >= 13) {
-                                                charts["current"][type]["data"]["datasets"][indexLimit]["data"] = [];
+                                        if (indexMiddle >= 0) {
+                                            if (charts["current"][type]["data"]["datasets"][indexMiddle]["data"].length >= 13) {
+                                                charts["current"][type]["data"]["datasets"][indexMiddle]["data"] = [];
                                             }
-                                            charts["current"][type]["data"]["datasets"][indexLimit]["data"].push({x: date.toLocaleTimeString(), y: response["limits"][type][limit]});
+                                            charts["current"][type]["data"]["datasets"][indexMiddle]["data"].push({x: date.toLocaleTimeString(), y: sensor[type]});
+                                        }
+                                        let limits = Object.getOwnPropertyNames(response["limits"][type]);
+                                        for (limit of limits) {
+                                            let indexLimit = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === limit);
+                                            if (indexLimit >= 0) {
+                                                if (charts["current"][type]["data"]["datasets"][indexLimit]["data"].length >= 13) {
+                                                    charts["current"][type]["data"]["datasets"][indexLimit]["data"] = [];
+                                                }
+                                                charts["current"][type]["data"]["datasets"][indexLimit]["data"].push({x: date.toLocaleTimeString(), y: response["limits"][type][limit]});
+                                            }
+                                        }
+                                        if (iteration === 12) {
+                                            charts["current"][type]["options"]["scales"]["x"]["min"] = labels[0];
+                                            charts["current"][type]["options"]["scales"]["x"]["max"] = labels[11];
+                                            charts["current"][type].update("none"); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
+                                            let lastCurrentValue = charts["current"][type]["data"]["datasets"][indexCurrent]["data"][11]["y"];
+                                            if (lastCurrentValue > response["limits"][type]["upperWarningLimit"] && lastCurrentValue < response["limits"][type]["upperControlLimit"]) {
+                                                switchAlert(type, "warning");
+                                            }
+                                            else if (lastCurrentValue > response["limits"][type]["upperControlLimit"]) {
+                                                switchAlert(type, "danger");
+                                            }
+                                            else if (lastCurrentValue < response["limits"][type]["lowerWarningLimit"] && lastCurrentValue > response["limits"][type]["lowerControlLimit"]) {
+                                                switchAlert(type, "warning");
+                                            }
+                                            else if (lastCurrentValue < response["limits"][type]["lowerControlLimit"]) {
+                                                switchAlert(type, "danger");
+                                            }
+                                            else {
+                                                switchAlert(type, "success");
+                                            }
+                                            $("#section-" + type + "> div:last-of-type > canvas").css("visibility", "visible");
+                                            $("#section-" + type + "> div:last-of-type > .chart-overlay ").css("display", "none");
                                         }
                                     }
-                                    if (iteration === 12) {
-                                        charts["current"][type]["options"]["scales"]["x"]["min"] = labels[0];
-                                        charts["current"][type]["options"]["scales"]["x"]["max"] = labels[labels.length -1];
-                                        charts["current"][type].update("none"); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
-                                        $("#section-" + type + "> div:last-of-type > canvas").css("visibility", "visible");
-                                        $("#section-" + type + "> div:last-of-type > .chart-overlay ").css("display", "none");
-                                    }
                                 }
                             }
-                        // messwerte
-                        //let ids = Object.getOwnPropertyNames(sensors); // sind nur ids!
-                        }
-                        /*
-                        let labels = [];
-                        let sensors = {};
-                        // timestamps und diagramme
-                        for (sensor of response["sensors"]) {
-                            let currentSensor = {};
-                            let date = new Date(Math.trunc(sensor["timestamp"] / 1000));
-                            labels.push(date.toLocaleTimeString());
-                            Object.assign(currentSensor, sensor);
-                            delete currentSensor["timestamp"];
-                            delete currentSensor["id"];
-                            sensors[sensor["id"]] = currentSensor;
-                        }
-                        //console.log(sensors, types, labels);
-
-                        // messwerte
-                        let ids = Object.getOwnPropertyNames(sensors); // sind nur ids!
-                        let types = Object.getOwnPropertyNames(response["limits"]);
-                        for (label of labels) {
-                            for (type of types) {
-                                let indexCurrent = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === "current");
-                                let indexMiddle = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === "middle");
-                                if (indexCurrent >= 0) {
-                                    charts["current"][type]["data"]["labels"] = labels;
-                                    charts["current"][type]["data"]["datasets"][indexCurrent]["data"] = [];
-                                    for (id of ids) {
-                                        charts["current"][type]["data"]["datasets"][indexCurrent]["data"].push({x: label, y: sensors[id][type]});
-                                    }
-                                }
-                                if (indexMiddle >= 0) {
-                                    charts["current"][type]["data"]["labels"] = labels;
-                                    //charts["current"]["middle"]["data"]["datasets"][indexMiddle]["data"] = [];
-                                    charts["current"][type]["data"]["datasets"][indexMiddle]["data"].push({x: label, y: response["averages"][type]});
-                                }
-                                let lols = Object.getOwnPropertyNames(response["limits"][type]);
-                                for (lol of lols) {
-                                    let indexLimit = charts["current"][type]["data"]["datasets"].findIndex(key => key["stack"] === lol);
-                                    if (indexLimit >= 0) {
-                                        //charts["current"][type]["data"]["datasets"][indexLimit]["data"] = [];
-                                        charts["current"][type]["data"]["datasets"][indexLimit]["data"].push({x: label, y: response["limits"][type][lol]});
-                                    }
-                                }
-                                charts["current"][type]["options"]["scales"]["x"]["min"] = labels[0];
-                                charts["current"][type]["options"]["scales"]["x"]["max"] = labels[labels.length -1];
-                                charts["current"][type].update("none"); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
-                                $("#section-" + type + "> div:last-of-type > canvas").css("visibility", "visible");
-                                $("#section-" + type + "> div:last-of-type > .chart-overlay ").css("display", "none");
-                            }
-                        }
-                        */
-                    }).fail(function(response) {
-                        $("#historyGallery").prepend(Alert.create("danger", (statusCodes.hasOwnProperty(response["status"]) ? statusCodes[response["status"]] : response["status"] + ": " + response["statusText"])));
-                    }).always(function() {
-                        isLoadingCurrentChartData = false;
-                    });
+                        }).fail(function(response) {
+                            $("#historyGallery").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
+                        }).always(function() {
+                            isLoadingCurrentChartData = false;
+                        });
+                    }
                 }, 5000);
                 /*setInterval(function() {
                     // "current" gilt für das Diagramm der letzten Minute, "history" ist für das Verlaufsdiagramm
@@ -4377,16 +4384,15 @@
         <main>
             <div class="row justify-content-center">
                 <div class="mt-4 p-0" id="panel">
-                    <ul class="nav nav-tabs">
+                    <ul class="nav nav-tabs" id="mainTabNav">
                         <li class="nav-item">
-                          <a class="nav-link active" data-bs-toggle="tab" href="#overview">Übersicht</a>
+                            <a class="nav-link active" data-bs-toggle="tab" href="#overview">Übersicht</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="tab" href="#historyGallery">Bildergalerie</a>
                         </li>
-                        <li class="nav-item">
-                          <a class="nav-link" data-bs-toggle="tab" href="#administration">Administration</a>
-                          <!-- class="nav-link disabled" -->
+                        <li class="nav-item d-none">
+                            <a class="nav-link" data-bs-toggle="tab" href="#administration">Administration</a>
                         </li>
                     </ul>
                     <div class="tab-content p-3 border">
@@ -4405,9 +4411,10 @@
                                 <label class="me-2">Legende:</label>
                                 <div id="section-legend" class="flex-wrap d-flex">
                                     <div class="legendItem"><div style="background-color: black;" class="d-inline-block legendIcon"></div><span class="ms-1">Messwert</span></div>
-                                    <div class="legendItem"><div style="background-color: var(--chart-setpoint-border);" class="d-inline-block legendIcon"></div><span class="ms-1">Sollwert</span></div>
-                                    <div class="legendItem"><div style="background-color: var(--chart-middle-border);" class="d-inline-block legendIcon"></div><span class="ms-1">Mittelwert</span></div>
-                                    <div class="legendItem"><div style="background-color: rgb(112, 146, 190);" class="d-inline-block legendIcon"></div><span class="ms-1">Pumpenaktivität</span></div>
+                                    <div class="legendItem"><div style="background-color: var(--chart-setpoint-border)" class="d-inline-block legendIcon"></div><span class="ms-1">Sollwert</span></div>
+                                    <div class="legendItem"><div style="background-color: var(--chart-middle-border)" class="d-inline-block legendIcon"></div><span class="ms-1">Mittelwert</span></div>
+                                    <div class="legendItem"><div style="background-color: var(--chart-activity-1-border)" class="d-inline-block legendIcon"></div><span class="ms-1">Pumpenaktivität 1</span></div>
+                                    <div class="legendItem"><div style="background-color: var(--chart-activity-2-border)" class="d-inline-block legendIcon"></div><span class="ms-1">Pumpenaktivität 2</span></div>
                                     <div class="legendItem"><div style="border: 2px dashed rgb(220, 53, 69);" class="d-inline-block legendIcon"></div><span class="ms-1">Eingriffsgrenze</span></div>
                                     <div class="legendItem"><div style="border: 1px dashed rgb(255, 115, 0);" class="d-inline-block legendIcon"></div><span class="ms-1">Warngrenze</span></div>
                                 </div>
@@ -4415,8 +4422,8 @@
                             <div id="overviewPanel">
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-co2_level">
                                     <div class="position-relative w-100 text-center pt-2">
-                                        <span>Co²-Gehalt</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="co2" data-chart-title="Co²" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                        <span>Co²-Gehalt (ppm)</span>
+                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="co2_level" data-chart-title="Co²-Gehalt"><i class="fas fa-history"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4428,7 +4435,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-temperature_water">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Wassertemperatur (°C)</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="water-temperature" data-chart-title="Wassertemperatur" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="temperature_water" data-chart-title="Wassertemperatur"><i class="fas fa-history"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4440,7 +4447,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-temperature_air">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Lufttemperatur (°C)</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="air-temperature" data-chart-title="Lufttemperatur" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="temperature_air" data-chart-title="Lufttemperatur"><i class="fas fa-history"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4452,7 +4459,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-humidity">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Luftfeuchtigkeit (%)</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="humidity" data-chart-title="Luftfeuchtigkeit" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="humidity" data-chart-title="Luftfeuchtigkeit"><i class="fas fa-history"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4464,7 +4471,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-ph_value">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>pH-Wert</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ph" data-chart-title="pH-Wert" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ph_value" data-chart-title="pH-Wert"><i class="fas fa-history"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4476,7 +4483,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-ec_value">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Elektrischer Leitwert (G)</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ec" data-chart-title="Elektrischer Leitwert" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ec_value" data-chart-title="Elektrischer Leitwert"><i class="fas fa-history"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4488,7 +4495,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-swimmer_1">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Wasserstand #1 (L)</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="swimmer-1" data-chart-title="Wasserstand #1" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="swimmer_1" data-chart-title="Wasserstand #1"></button><i class="fas fa-history"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4500,7 +4507,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-swimmer_2">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Wasserstand #2 (L)</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="swimmer-2" data-chart-title="Wasserstand #2" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="swimmer_2" data-chart-title="Wasserstand #2"><i class="fas fa-history"></i></button>
                                     </div>   
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4512,7 +4519,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-swimmer_3">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Wasserstand #3 (L)</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="swimmer-3" data-chart-title="Wasserstand #3" data-bs-toggle="modal" data-bs-target="#chartHistoryModal"><i class="fas fa-wrench"></i></button>
+                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="swimmer_3" data-chart-title="Wasserstand #3"><i class="fas fa-history"></i></button>
                                     </div>   
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4585,7 +4592,7 @@
                                                                             <input required type="text" class="form-control col-md-6" id="plantOptionDescriptionInput" aria-label="Bezeichnung" aria-describedby="plantOptionDescriptionInput">
                                                                         </div>
                                                                     </div>-->
-                                                                    <h5 id="plantOptionWaterTemperatureSection" class="mt-4 col-md-12">Wassertemperatur</h5>
+                                                                    <h5 id="plantOptionWaterTemperatureSection" class="col-md-12">Wassertemperatur</h5>
                                                                     <div class="row">
                                                                         <div class="mt-2 col-md-6">
                                                                             <label for="plantOptionWaterTemperatureSetpointInput" class="col-form-label col-md-6">Sollwert:</label>
@@ -4731,8 +4738,8 @@
                                                 <tr>
                                                     <th>Name</th>
                                                     <th>Leistung</th>
-                                                    <th>UPM</th>
-                                                    <th>Status</th>
+                                                    <th>?</th>
+                                                    <th>?</th>
                                                 </tr>
                                             </thead>
                                             <tbody></tbody>
@@ -4777,7 +4784,7 @@
                                     </div>
                                     <div id="collapse-logs-actions" class="collapse hide" data-bs-parent="#logs-accordion">
                                         <div class="card-body">
-                                            <div class="d-flex formContainer mb-3">
+                                            <!--<div class="d-flex formContainer mb-3">
                                                 <label for="logsAdminCategorySelection" class="col-form-label me-2">Kategorie:</label>
                                                 <select class="form-select w-auto d-inline-block" id="logsAdminCategorySelection" data-old="0">
                                                     <option value="0">Alles</option>
@@ -4785,13 +4792,13 @@
                                                     <option value="error">Fehler</option>
                                                     <option value="info">Information</option>
                                                 </select>
-                                            </div>
+                                            </div>-->
                                             <table class="table table-sm w-100 mt-3" id="logsAdminTable">
                                                 <thead>
                                                     <tr>
                                                         <th>ID</th>
-                                                        <th>Typ</th>
                                                         <th>Zeitpunkt</th>
+                                                        <th>Typ</th>
                                                         <th>Nachricht</th>
                                                     </tr>
                                                 </thead>
@@ -4821,7 +4828,7 @@
             <div class="modal-dialog modal-xl modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title"><span id="chartHistoryElementTitle"></span>-Verlauf</h4>
+                        <h4 class="modal-title">Verlauf von <span id="chartHistoryElementTitle"></span></h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
@@ -4831,11 +4838,11 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" data-bs-toggle="pill" href="#lolo">Aktionen</a>
-                                <!-- class="nav-link disabled" -->
                             </li>
                         </ul>
                         <div class="tab-content pt-3 tab-content-simple">
                             <div class="tab-pane active" id="lol">
+                                <!--
                                 <div class="d-inline-flex align-items-center mb-3">
                                     <label for="historyTimespan">Zeitraum:</label>
                                     <select id="historyTimespan" class="form-select ms-2">
@@ -4846,8 +4853,9 @@
                                         <option value="24">Letzte 24 Stunden</option>
                                     </select>
                                 </div>
+                                -->
                                 <div id="history" class="w-100" style="height:60vh">
-                                    <canvas id="charts-history"></canvas>
+                                    <canvas id="history-chart"></canvas>
                                 </div>
                             </div>
                             <div class="tab-pane fade" id="lolo">

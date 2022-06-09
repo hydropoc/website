@@ -1,6 +1,8 @@
 <?php
     $data = [];
     $type = json_decode(file_get_contents("php://input"), true)["type"];
+    $param = json_decode(file_get_contents("php://input"), true);
+    //var_export($param);
     //echo $_GET["type"];
     switch ($type) {
         case "plantPrograms":
@@ -399,6 +401,7 @@
             ];
             break;
         case "logs":
+            /*
             if (array_key_exists("category", $_GET) && in_array($_GET["category"], ["actors", "pumps", "events", "users"])) {
                 $type = 1;
                 foreach (range(1, rand(2, 10)) as $lol) {
@@ -423,7 +426,141 @@
         default:
             $data = null;
             break;
+            */
     }
+    $data = [
+        "draw" => intval($param["draw"]),
+        "recordsTotal" => 20,
+        "recordsFiltered" => 20,
+        "data" => [
+            [
+                468,
+                1654681699827,
+                "error",
+                "Camera not found - check if camera is connected"
+            ],
+            [
+                467,
+                1654681699381,
+                "success",
+                "Backend started on port 3333"
+            ],
+            [
+                466,
+                1654681628763,
+                "error",
+                "Camera not found - check if camera is connected"
+            ],
+            [
+                465,
+                1654681628301,
+                "success",
+                "Backend started on port 3333"
+            ],
+            [
+                464,
+                1654463224286,
+                "error",
+                "Camera not found - check if camera is connected"
+            ],
+            [
+                463,
+                1654463223823,
+                "success",
+                "Backend started on port 3333"
+            ],
+            [
+                462,
+                1654380498176,
+                "error",
+                "Camera not found - check if camera is connected"
+            ],
+            [
+                461,
+                1654380497801,
+                "success",
+                "Backend started on port 3333"
+            ],
+            [
+                460,
+                1654380351448,
+                "error",
+                "Camera not found - check if camera is connected"
+            ],
+            [
+                459,
+                1654380350990,
+                "success",
+                "Backend started on port 3333"
+            ],
+            [
+                458,
+                1654380168437,
+                "error",
+                "Camera not found - check if camera is connected"
+            ],
+            [
+                457,
+                1654380168047,
+                "success",
+                "Backend started on port 3333"
+            ],
+            [
+                456,
+                1654379896767,
+                "error",
+                "Camera not found - check if camera is connected"
+            ],
+            [
+                455,
+                1654379896387,
+                "success",
+                "Backend started on port 3333"
+            ],
+            [
+                454,
+                1654379889539,
+                "error",
+                "Camera not found - check if camera is connected"
+            ],
+            [
+                453,
+                1654379889127,
+                "success",
+                "Backend started on port 3333"
+            ],
+            [
+                452,
+                1654379623788,
+                "error",
+                "Camera not found - check if camera is connected"
+            ],
+            [
+                451,
+                1654379623397,
+                "success",
+                "Backend started on port 3333"
+            ],
+            [
+                450,
+                1654379085024,
+                "error",
+                "Camera not found - check if camera is connected"
+            ],
+            [
+                449,
+                1654379084633,
+                "success",
+                "Backend started on port 3333"
+            ],
+            [
+                448,
+                1654378965803,
+                "error",
+                 "Camera not found - check if camera is connected"
+            ]
+        ]
+            ];
     echo json_encode($data);
     return;
 ?>
