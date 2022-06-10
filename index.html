@@ -44,7 +44,7 @@
                     swimmer_2: [0, 100],
                     swimmer_3: [0, 100],
                     co2_level: [0, 1000],
-                    ec_value: [0, 100]
+                    ec_value: [200, 1400]
                 }
             };
             const dataTablesLocalisation = {
@@ -364,7 +364,7 @@
                 404: "Die angeforderte Ressource wurde nicht gefunden.",
             }
             */
-            //var viewportWidth = visualViewport["width"];
+            var viewportWidth;
             var isLoadingCurrentChartData = false;
             var isLoadingHistoryChartData = false;
             var systemInfosTimer = null;
@@ -387,6 +387,31 @@
                     gradient.addColorStop(step, data[step]);
                 }
                 return gradient;
+            }
+            function getHistoryChartData(sensor) {
+                if (!isLoadingHistoryChartData) {
+                    isLoadingHistoryChartData = true;
+                    $("#historyTimespan").attr("disabled", "disabled").after("<span class='spinner-border ms-2 text-primary kreiselchen' style='flex: 0 0 auto' data-processing='true'></span>");
+                    $.post({
+                        url: apiURL + "/sensor/data_sensor",
+                        data: JSON.stringify({
+                            sensor: sensor,
+                            time: Number.parseInt($("#historyTimespan").val())
+                        }),
+                        processData: false,
+                        contentType: "application/json",
+                        crossDomain: true,
+                        timeout: 10000
+                    }).done(function(response) {
+                        charts["history"].update("none");
+                    }).fail(function(response) {
+                        $("#chartHistoryModal .modal-body").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
+                    }).always(function() {
+                        isLoadingHistoryChartData = false;
+                        $("#historyTimespan").next("[data-processing='true']").remove();
+                        $("#historyTimespan").removeAttr("disabled");
+                    });
+                }
             }
             function togglePump(pump) {
                 $(pump).attr("disabled", "disabled");
@@ -444,10 +469,42 @@
                         text: (path !== null && path.length >= 1 ? path[0] : "(Unbekannte Datei)")
                     },
                     content: {
-                        text: "<img src='" + url + "' class='mw-100'>"
+                        text: "<a href='" + url + "' target='_blank'><img src='" + url + "' class='mw-100'></a>"
                     }
                 };
                 Modal.create(data);
+            }
+            function register() {
+                if ($("#mainModal").hasClass("show") && $("#mainModal").attr("data-name") === "register") {
+                    disableMainModal("#registerButton");
+                    $.post({
+                        url: apiURL + "/user/register",
+                        data: JSON.stringify({
+                            username: $("#registerUsername").val(),
+                            password: $("#registerPassword").val()
+                        }),
+                        processData: false,
+                        contentType: "application/json",
+                        crossDomain: true,
+                        timeout: 10000
+                    }).done(function(response) {
+                        let user = $("#registerUsername").val();
+                        let date = new Date();
+                        date.setHours(date.getHours() + 168); // = 1 Woche
+                        document.cookie = "authToken=" + encodeURIComponent(response["authentification"]) + "; expires=" + date.toUTCString() + "; path=/"; //SameSite=None; Secure"; geht nur bei HTTPS
+                        document.cookie = "username=" + encodeURIComponent(user) + "; expires=" + date.toUTCString() + "; path=/"; // SameSite=None; Secure"; geht nur bei HTTPS
+                        $("a[href='#login']").addClass("d-none");
+                        $("a[href='#register']").addClass("d-none");
+                        $("a[href='#logout']").removeClass("d-none");
+                        $("[data-current-user]").removeClass("d-none").html("<i class='fas fa-user-injured'></i> " + user);
+                        $("#mainTabNav > li:last-of-type").removeClass("d-none");
+                        bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
+                    }).fail(function(response) {
+                        $("#mainModal .modal-body").prepend(Alert.create("danger", (Number.parseInt(response["status"]) === 401 ? "Ungültige Anmeldedaten" : response["status"] + ": " + response["statusText"])));
+                    }).always(function() {
+                        enableMainModal("#registerButton");
+                    });
+                }
             }
             function login() {
                 if ($("#mainModal").hasClass("show") && $("#mainModal").attr("data-name") === "login") {
@@ -455,28 +512,25 @@
                     $.post({
                         url: apiURL + "/user/login",
                         data: JSON.stringify({
-                            email: $("#mail").val(),
-                            password: $("#password").val()
+                            username: $("#loginUsername").val(),
+                            password: $("#loginPassword").val()
                         }),
                         processData: false,
                         contentType: "application/json",
                         crossDomain: true,
                         timeout: 10000
                     }).done(function(response) {
+                        let user = $("#loginUsername").val();
                         let date = new Date();
                         date.setHours(date.getHours() + 168); // = 1 Woche
                         document.cookie = "authToken=" + encodeURIComponent(response["authentification"]) + "; expires=" + date.toUTCString() + "; path=/"; //SameSite=None; Secure"; geht nur bei HTTPS
-                        document.cookie = "username=" + encodeURIComponent(response["username"]) + "; expires=" + date.toUTCString() + "; path=/"; // SameSite=None; Secure"; geht nur bei HTTPS
-                        if (getCookie("authToken").length >= 1 && getCookie("username").length >= 1) {
-                            $("a[href='#login']").addClass("d-none");
-                            $("a[href='#logout']").removeClass("d-none");
-                            $("[data-current-user]").removeClass("d-none").html("<i class='fas fa-user-injured'></i> " + response["username"]);
-                            $("#mainTabNav > li:last-of-type").removeClass("d-none");
-                            bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
-                        }
-                        else {
-                            //
-                        }
+                        document.cookie = "username=" + encodeURIComponent(user) + "; expires=" + date.toUTCString() + "; path=/"; // SameSite=None; Secure"; geht nur bei HTTPS
+                        $("a[href='#login']").addClass("d-none");
+                        $("a[href='#register']").addClass("d-none");
+                        $("a[href='#logout']").removeClass("d-none");
+                        $("[data-current-user]").removeClass("d-none").html("<i class='fas fa-user-injured'></i> " + user);
+                        $("#mainTabNav > li:last-of-type").removeClass("d-none");
+                        bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
                     }).fail(function(response) {
                         $("#mainModal .modal-body").prepend(Alert.create("danger", (Number.parseInt(response["status"]) === 401 ? "Ungültige Anmeldedaten" : response["status"] + ": " + response["statusText"])));
                     }).always(function() {
@@ -542,19 +596,18 @@
                         timeout: 10000
                     }).done(function(response) {
                         let statsText = "";
-
                         statsText += "<tr><td class='align-top'>Betriebssystem</td><td>" + response["type"] + " " + response["release"] + "</td></tr>";
                         statsText += "<tr><td class='align-top'>Architektur</td><td>" + response["arch"] + "</td></tr>";
                         statsText += "<tr><td class='align-top'>Hostname</td><td>" + response["hostname"] + "</td></tr>";
                         statsText += "<tr><td class='align-top'>CPU</td><td>" + response["cpus"][0]["model"];
-                        
+
                         for (let [index, cpu] of response["cpus"].entries()) {
                             statsText += "<div>CPU #" + index + ":<div class='ps-3'>Takt: " + cpu["speed"] + "MHz</div></div>";
                         }                        
 
                         let totalMemory = (response["totalmem"] / 1024 / 1024 / 1024).toFixed(2);
                         let totalMemoryFree = (response["freememory"] / 1024 / 1024 / 1024).toFixed(2);
-                        
+
                         statsText += "<tr><td class='align-top'>RAM (Insgesamt)</td><td>" + totalMemory + " GB</td></tr>";
                         statsText += "<tr><td class='align-top'>RAM (Verwendet)</td><td>" + (totalMemory - totalMemoryFree).toFixed(2) + " GB (~" + (((totalMemory - totalMemoryFree) / totalMemory) * 100).toFixed(2) + " %) </td></tr>";
                         statsText += "<tr><td class='align-top'>Durchschnittslast (1 Minute)</td><td>" + response["loadavg"][0] + "</td></tr>";
@@ -562,7 +615,6 @@
                         statsText += "<tr><td class='align-top'>Durchschnittslast (15 Minuten)</td><td>" + response["loadavg"][2] + "</td></tr>";
                         statsText += "<tr><td class='align-top'>Laufzeit</td><td>" + response["uptime"].duration() + "</td></tr>";
                         statsText += "<tr><td class='align-top'>Backend Version</td><td>" + response["version"] + "</td></tr>";
-                        
                         $("#systemInfosTable").html(statsText);
                     }).fail(function(response) {
                         console.log(response);
@@ -1320,16 +1372,22 @@
                 return "";
             }
             $(window).on("load", function() {
+                viewportWidth = visualViewport["width"];
                 $("#body-overlay").empty();
                 $("#body-overlay").css("opacity", 0).on("transitionend", function() {
                     $(this).remove();
                     $("body").removeClass("overflow-hidden");
+                }).on("resize", function() {
+                    if (visualViewport["width"] !== viewportWidth) {
+                        viewportWidth = visualViewport["width"];
+                    }
                 });
             });
             $(document).on("DOMContentLoaded", function() {
                 // Hier alle Skripte ausführen, die auf DOM zugreifen sollen, bevor Bilder und Ähnliches geladen wurden
                 if (getCookie("authToken").length >= 1 && getCookie("username").length >= 1) {
                     $("a[href='#login']").addClass("d-none");
+                    $("a[href='#register']").addClass("d-none");
                     $("a[href='#logout']").removeClass("d-none");
                     $("[data-current-user]").removeClass("d-none").html("<i class='fas fa-user-injured'></i> " + getCookie("username"));
                     $("#mainTabNav > li:last-of-type").removeClass("d-none");
@@ -1344,7 +1402,7 @@
                 });
                 $("a[href='#systemInfos']").click(function() {
                     let content = "<table class='table-sm w-100'><thead>";
-                    content += "<tr><th class='w-30'>Eigenschaft</th><th>Wert</th></tr>";
+                    content += "<tr><th class='w-25'>Eigenschaft</th><th>Wert</th></tr>";
                     content += "</thead><tbody id='systemInfosTable'></tbody></table>";
                     let data = {
                         name: "systemInfos",
@@ -1364,7 +1422,6 @@
                                 }
                             }
                         },
-                        size: "lg",
                         title: {
                             text: "Systeminformationen"
                         },
@@ -1481,16 +1538,98 @@
                     getGalleryItems();
                     return false;
                 });
+                /*
                 $("#plantsAdminTemplateForm").submit(function() {
                     fillPlantInputs($("#plantsAdminPlantSelection").val());
                     return false;
                 });
+                */
+                $("a[href='#register']").on("click", function() {
+                    let content = "<form enctype='text/plain' method='post' action='/' id='registerForm' class='w-100'><input type='submit' class='d-none' id='registerSubmit'><label for='registerUsername' class='form-label'>Benutzername:</label>";
+                    content += "<input type='text' class='form-control' minlength='4' id='registerUsername' placeholder='Benutzername eingeben' required></div>";
+                    content += "<div class='mt-3'><label for='registerPassword' class='form-label'>Passwort:</label>";
+                    content += "<input type='password' class='form-control' minlength='6' id='registerPassword' placeholder='Passwort eingeben' required></div>";
+                    content += "<div class='mt-3'><label for='registerConfirmPassword' class='form-label'>Passwort bestätigen:</label>";
+                    content += "<input type='password' class='form-control' minlength='6' id='registerConfirmPassword' placeholder='Passwort bestätigen' reokquired></div>";
+                    let data = {
+                        name: "register",
+                        events: {
+                            show: {
+                                function: function() {
+                                    $("#registerForm").submit(function() {
+                                        register();
+                                        return false;
+                                    });
+                                    $("#registerPassword").on("input", function() {
+                                        this.setCustomValidity("");
+                                        this.checkValidity();
+                                    }).on("invalid", function() {
+                                        if ($(this).val().localeCompare($("#registerConfirmPassword").val() !== 0)) {
+                                            this.setCustomValidity("Bitte geben Sie exakt das gleiche Passwort ein.");
+                                        }
+                                        else {
+                                            this.setCustomValidity("lol");
+                                        }
+                                    });
+                                    $("#registerConfirmPassword").on("input", function() {
+                                        this.setCustomValidity("");
+                                        this.checkValidity();
+                                    }).on("invalid", function() {
+                                        if ($(this).val().localeCompare($("#registerPassword").val() !== 0)) {
+                                            this.setCustomValidity("Bitte geben Sie exakt das gleiche Passwort ein.");
+                                        }
+                                        else {
+                                            this.setCustomValidity("lol");
+                                        }
+                                    });
+                                }
+                            },
+                            hidden: {
+                                function: function() {
+                                    $("#registerForm").off("submit");
+                                    $("#registerPassword").off("input invalid");
+                                }
+                            }
+                        },
+                        title: {
+                            text: "Registrieren"
+                        },
+                        content: {
+                            text: content
+                        },
+                        footer: {
+                            buttons: {
+                                default: {
+                                    text: "Abbrechen",
+                                    class: "btn-danger"
+                                },
+                                custom: [
+                                    {
+                                        text: "Registrieren",
+                                        class: "btn-primary",
+                                        attributes: {
+                                            id: "registerButton"
+                                        },
+                                        actions: {
+                                            click: {
+                                                function: function() {
+                                                    $("#registerSubmit").click();
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    };
+                    Modal.create(data);
+                });
                 $("a[href='#login']").on("click", function() {
-                    let content = "<form enctype='text/plain' method='post' action='/' id='loginForm' class='w-100'><input type='submit' class='d-none' id='loginSubmit'><label for='mail' class='form-label'>E-Mail:</label>";
-                    content += "<input type='text' class='form-control' id='mail' placeholder='E-Mail-Adresse eingeben' required></div>";
-                    content += "<div class='mt-3'><label for='password' class='form-label'>Passwort:</label>";
-                    content += "<input type='password' class='form-control' id='password' placeholder='Passwort eingeben' required></div>";
-                    content += "<a href='#'>Ich habe mein Passwort vergessen!</a></form>";
+                    let content = "<form enctype='text/plain' method='post' action='/' id='loginForm' class='w-100'><input type='submit' class='d-none' id='loginSubmit'><label for='loginUsername' class='form-label'>Benutzername:</label>";
+                    content += "<input type='text' class='form-control' id='loginUsername' placeholder='Benutzername eingeben' required></div>";
+                    content += "<div class='mt-3'><label for='loginPassword' class='form-label'>Passwort:</label>";
+                    content += "<input type='password' class='form-control' id='loginPassword' placeholder='Passwort eingeben' required></div>";
+                    content += "<a href='#' class='mt-2'>Ich habe mein Passwort vergessen!</a></form>";
                     let data = {
                         name: "login",
                         events: {
@@ -1545,11 +1684,12 @@
                     document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
                     document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
                     $("a[href='#login']").removeClass("d-none");
+                    $("a[href='#register']").removeClass("d-none");
                     $("a[href='#logout']").addClass("d-none");
                     $("[data-current-user]").addClass("d-none").html("");
                     $("#mainTabNav > li:last-of-type").addClass("d-none");
                 });
-                $(".config-chart-button").click(function() {
+                $(".chart-history-button").click(function() {
                     $("#chartHistoryElementTitle").html($(this).attr("data-chart-title"));
                     $("#chartHistoryModal").attr("data-chart", $(this).attr("data-chart"));
                     new bootstrap.Modal($("#chartHistoryModal")[0]).show();
@@ -1729,10 +1869,14 @@
                 });
                 // DataTables-Layout neu berechnen, wenn sich die Bildschirmbreite ändert, wenn Administrationsseite nicht aktiv war 
                 $("a[href='#administration']").on("shown.bs.tab", function () {
-                    readjustTables();
+                    if (visualViewport["width"] != viewportWidth) {
+                        readjustTables();
+                    }
                 });
                 $("a[href='#plantsAdminOverviewContainer']").on("shown.bs.tab", function () {
-                    readjustTables();
+                    if (visualViewport["width"] != viewportWidth) {
+                        readjustTables();
+                    }
                 });
                 /*
                 $("a[href='#plantsAdminOptionContainer']").on("shown.bs.tab", function() {
@@ -1750,27 +1894,11 @@
                     getGalleryItems();
                 });
                 $("#chartHistoryModal").on("show.bs.modal", function() {
-                    let chart = $(this).attr("data-chart");
-                    if (!["undefined", "", undefined, null].includes(chart)) {
-                        if (!isLoadingHistoryChartData) {
-                            isLoadingHistoryChartData = true;
-                            $.post({
-                                url: apiURL + "/sensor/data",
-                                data: JSON.stringify({sensor: chart}),
-                                processData: false,
-                                contentType: "application/json",
-                                crossDomain: true,
-                                timeout: 10000
-                            }).done(function(response) {
-                            }).fail(function(response) {
-                                $("#history-chart").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
-                            }).always(function() {
-                                isLoadingHistoryChartData = false;
-                            });
-                        }
-                        charts["history"]["options"]["scales"]["y"]["min"] = charts["scales"][chart][0];
-                        charts["history"]["options"]["scales"]["y"]["max"] = charts["scales"][chart][1];
-                        charts["history"].update();
+                    let sensor = $(this).attr("data-chart");
+                    if (!["undefined", "", undefined, null].includes(sensor)) {
+                        charts["history"]["options"]["scales"]["y"]["min"] = charts["scales"][sensor][0];
+                        charts["history"]["options"]["scales"]["y"]["max"] = charts["scales"][sensor][1];
+                        getHistoryChartData(sensor);
                     }
                 });
                 // Aktuell
@@ -3195,41 +3323,12 @@
                 $("[data-bs-toggle='collapse']").click(function() {
                     $(this).children("i:last-of-type").css("transform", ($(this).attr("aria-expanded") === "true" ? "rotate(180deg)" : "rotate(0deg)"));
                 });
-                /*
                 $("#historyTimespan").change(function() {
-                    $(this).attr("disabled", "disabled").after("<span class='spinner-border ms-2 text-primary kreiselchen' style='flex: 0 0 auto' data-processing='true'></span>");
-                    let data = {
-                        authentification: getCookie("authToken"),
-                        chart: $(this).attr("data-chart"),
-                        lol: $(this).val()
-                    };
-                    $.post({
-                        url: "history_charts_data.php",
-                        data: JSON.stringify(data),
-                        processData: false,
-                        contentType: "application/json",
-                        crossDomain: true,
-                        timeout: 10000
-                    }).done(function(response) {
-                        let data = JSON.parse(response);
-                        charts["history"]["data"]["labels"] = data["labels"];
-                        let charts_ = Object.keys(data["data"]);
-                        for (chart of charts_) {
-                            let index = charts["history"]["data"]["datasets"].findIndex(key => key.stack === chart);
-                            if (index >= 0 && data["data"][chart] !== null) {
-                                Object.assign(charts["history"]["data"]["datasets"][index]["data"], data["data"][chart]);
-                                charts["history"]["options"]["scales"]["x"]["min"] = data["labels"][0];
-                                charts["history"]["options"]["scales"]["x"]["max"] = data["labels"][data["labels"].length -1];
-                            }
-                        }
-                        charts["history"].update("none");
-                    }).always(function() {
-                        // Fehler: Entfernt ALLE Kreiselchen!
-                        $("[data-processing='true']").remove();
-                        $("#historyTimespan").removeAttr("disabled");
-                    });
+                    let sensor = $("#chartHistoryModal").attr("data-chart");
+                    if (!["undefined", "", undefined, null].includes(sensor)) {
+                        getHistoryChartData(sensor);
+                    }
                 });
-                */
                 $("#historyGalleryTimespanSelect").change(function() {
                     let that = this;
                     $("#historyGallery").find(".alert").remove();
@@ -3333,7 +3432,8 @@
                                                 switchAlert(type, "danger");
                                             }
                                             else {
-                                                switchAlert(type, "success");
+                                                //switchAlert(type, "success");
+                                                $(type).removeClass("danger warning success")
                                             }
                                             $("#section-" + type + "> div:last-of-type > canvas").css("visibility", "visible");
                                             $("#section-" + type + "> div:last-of-type > .chart-overlay ").css("display", "none");
@@ -3886,7 +3986,7 @@
                 overflow: hidden;
                 content: url("img/iconmonstr-sort-2.svg") url("img/iconmonstr-sort-3.svg") url("img/iconmonstr-sort-4.svg")
             }
-            .config-chart-button {
+            .chart-history-button {
                 right: 15px;
                 position: absolute;
                 z-index: 3;
@@ -4054,6 +4154,9 @@
             }
             .knorke {
                 margin-left: 0.25rem;
+            }
+            #history-chart {
+                max-height: 60vh;
             }
             @media only screen and (max-width: 600px) {
                 .alert > i {
@@ -4362,6 +4465,9 @@
                         <a class="nav-link rounded-3" href="#login"><i class="fas fa-sign-in-alt"></i> Anmelden</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link rounded-3" href="#register"><i class="fas fa-asterisk"></i> Registrieren</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link rounded-3 d-none" href="#logout"><i class="fas fa-sign-out-alt"></i> Abmelden</a>
                     </li>
                 </ul>
@@ -4377,6 +4483,7 @@
                         <li><span class="dropdown-item-text d-none text-secondary" data-current-user="current-user"></span></li>
                         <li><a class="dropdown-item" href="#login"><i class="fas fa-sign-in-alt"></i> Anmelden</a></li>
                         <li><a class="dropdown-item d-none" href="#logout"><i class="fas fa-sign-out-alt"></i> Abmelden</a></li>
+                        <li><a class="dropdown-item" href="#register"><i class="fas fa-asterisk"></i> Registrieren</a></li>
                     </ul>
                 </div> 
             </nav>
@@ -4423,7 +4530,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-co2_level">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Co²-Gehalt (ppm)</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="co2_level" data-chart-title="Co²-Gehalt"><i class="fas fa-history"></i></button>
+                                        <button class="btn btn-xs btn-secondary chart-history-button" data-chart="co2_level" data-chart-title="Co²-Gehalt"><i class="fas fa-history"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4435,7 +4542,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-temperature_water">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Wassertemperatur (°C)</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="temperature_water" data-chart-title="Wassertemperatur"><i class="fas fa-history"></i></button>
+                                        <button class="btn btn-xs btn-secondary chart-history-button" data-chart="temperature_water" data-chart-title="Wassertemperatur"><i class="fas fa-history"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4447,7 +4554,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-temperature_air">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Lufttemperatur (°C)</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="temperature_air" data-chart-title="Lufttemperatur"><i class="fas fa-history"></i></button>
+                                        <button class="btn btn-xs btn-secondary chart-history-button" data-chart="temperature_air" data-chart-title="Lufttemperatur"><i class="fas fa-history"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4459,7 +4566,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-humidity">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Luftfeuchtigkeit (%)</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="humidity" data-chart-title="Luftfeuchtigkeit"><i class="fas fa-history"></i></button>
+                                        <button class="btn btn-xs btn-secondary chart-history-button" data-chart="humidity" data-chart-title="Luftfeuchtigkeit"><i class="fas fa-history"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4471,7 +4578,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-ph_value">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>pH-Wert</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ph_value" data-chart-title="pH-Wert"><i class="fas fa-history"></i></button>
+                                        <button class="btn btn-xs btn-secondary chart-history-button" data-chart="ph_value" data-chart-title="pH-Wert"><i class="fas fa-history"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4483,7 +4590,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-ec_value">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Elektrischer Leitwert (G)</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="ec_value" data-chart-title="Elektrischer Leitwert"><i class="fas fa-history"></i></button>
+                                        <button class="btn btn-xs btn-secondary chart-history-button" data-chart="ec_value" data-chart-title="Elektrischer Leitwert"><i class="fas fa-history"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4495,7 +4602,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-swimmer_1">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Wasserstand #1 (L)</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="swimmer_1" data-chart-title="Wasserstand #1"></button><i class="fas fa-history"></i></button>
+                                        <button class="btn btn-xs btn-secondary chart-history-button" data-chart="swimmer_1" data-chart-title="Wasserstand #1"><i class="fas fa-history"></i></button>
                                     </div>
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4507,7 +4614,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-swimmer_2">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Wasserstand #2 (L)</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="swimmer_2" data-chart-title="Wasserstand #2"><i class="fas fa-history"></i></button>
+                                        <button class="btn btn-xs btn-secondary chart-history-button" data-chart="swimmer_2" data-chart-title="Wasserstand #2"><i class="fas fa-history"></i></button>
                                     </div>   
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4519,7 +4626,7 @@
                                 <div class="rounded-3 lol d-flex align-items-center align-content-center flex-column" id="section-swimmer_3">
                                     <div class="position-relative w-100 text-center pt-2">
                                         <span>Wasserstand #3 (L)</span>
-                                        <button class="btn btn-xs btn-secondary config-chart-button" data-chart="swimmer_3" data-chart-title="Wasserstand #3"><i class="fas fa-history"></i></button>
+                                        <button class="btn btn-xs btn-secondary chart-history-button" data-chart="swimmer_3" data-chart-title="Wasserstand #3"><i class="fas fa-history"></i></button>
                                     </div>   
                                     <div class="position-relative w-100 h-100">
                                         <div class="chart-overlay">
@@ -4832,36 +4939,17 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <ul class="nav nav-pills">
-                            <li class="nav-item">
-                                <a class="nav-link active" data-bs-toggle="pill" href="#lol">Statistik</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" data-bs-toggle="pill" href="#lolo">Aktionen</a>
-                            </li>
-                        </ul>
-                        <div class="tab-content pt-3 tab-content-simple">
-                            <div class="tab-pane active" id="lol">
-                                <!--
-                                <div class="d-inline-flex align-items-center mb-3">
-                                    <label for="historyTimespan">Zeitraum:</label>
-                                    <select id="historyTimespan" class="form-select ms-2">
-                                        <option value="1">Letzte Stunde</option>
-                                        <option value="3">Letzte 3 Stunden</option>
-                                        <option value="6">Letzte 6 Stunden</option>
-                                        <option value="12">Letzte 12 Stunden</option>
-                                        <option value="24">Letzte 24 Stunden</option>
-                                    </select>
-                                </div>
-                                -->
-                                <div id="history" class="w-100" style="height:60vh">
-                                    <canvas id="history-chart"></canvas>
-                                </div>
-                            </div>
-                            <div class="tab-pane fade" id="lolo">
-                                <h2>Ja spinnt der Beppi!</h2>
-                            </div>
+                        <div class="d-inline-flex align-items-center mb-3">
+                            <label for="historyTimespan">Zeitraum:</label>
+                            <select id="historyTimespan" class="form-select ms-2">
+                                <option value="3600" selected="selected">Letzte Stunde</option>
+                                <option value="10800">Letzte 3 Stunden</option>
+                                <option value="21600">Letzte 6 Stunden</option>
+                                <option value="43200">Letzte 12 Stunden</option>
+                                <option value="86400">Letzte 24 Stunden</option>
+                            </select>
                         </div>
+                        <canvas id="history-chart"></canvas>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Schließen</button>
