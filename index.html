@@ -193,60 +193,6 @@
                         $("#userAccountsAdminTable").parent().addClass("table-container");
                     }
                 },
-                plantPrograms: {
-                    order: [0, "asc"],
-                    language: dataTablesLocalisation,
-                    columns: [
-                        {
-                            name: "id",
-                            data: "id"
-                        },
-                        {  
-                            name: "plantID",
-                            data: "plantID",
-                            visible: false
-                        },
-                        {
-                            name: "name",
-                            data: "name"
-                        },
-                        {
-                            name: "description",
-                            data: "description"
-                        },
-                        {
-                            name: "options",
-                            data: function(row, type, set, meta) {
-                                let buttons = "<div class='d-flex flex-wrap' style='gap: 5px'>";
-                                let index = plantPrograms.findIndex(key => key["id"] === row["id"]);
-                                if (index >= 0) {
-                                    buttons += "<button type='button' class='btn btn-sm btn-primary' style='width: 32px' onclick='editPlantProgram(" + row["id"] + ")'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger' style='width: 32px' onclick='confirmPlantProgramDeletion(" + row["id"] + ")'><i class='fas fa-times'></i></button>";
-                                }
-                                else {
-                                    buttons += "<button type='button' class='btn btn-sm btn-primary disabled' disabled='disabled' style='width: 32px'><i class='fas fa-pen'></i></button><button type='button' class='btn btn-sm btn-danger disabled' disabled='disabled' style='width: 32px'><i class='fas fa-times'></i></button>";
-                                }
-                                buttons += "</div>";
-                                return buttons;
-                            }
-                        }
-                    ],
-                    ajax: {
-                        url: "dataTables_test.php",
-                        type: "POST",
-                        contentType: "application/json",
-                        data: function(data, settings) {
-                            data["type"] = "plantPrograms"; // Test
-                            data["authentification"] = getCookie("authToken");
-                            return JSON.stringify(data);
-                        },
-                        dataSrc: function(response) {
-                            return response;
-                        }
-                    },
-                    drawCallback: function(settings) {
-                        $("#plantProgramsAdminTable").parent().addClass("table-container");
-                    }
-                },
                 pumps: {
                     order: [0, "asc"],
                     language: dataTablesLocalisation,
@@ -351,19 +297,6 @@
                     //
                 }
             };
-            /*
-            const plantPrograms = [];
-            const plantProperties = [];
-            const userAccounts = [];
-            const pumps = [];
-            const statusCodes = {
-                0: "Unbekannter Fehler aufgetreten.",
-                400: "Die Anfrage ist fehlerhaft.",
-                401: "",
-                403: "Der Zugriff auf die angeforderte Ressource ist nicht erlaubt.",
-                404: "Die angeforderte Ressource wurde nicht gefunden.",
-            }
-            */
             var viewportWidth;
             var isLoadingCurrentChartData = false;
             var isLoadingHistoryChartData = false;
@@ -403,6 +336,52 @@
                         crossDomain: true,
                         timeout: 10000
                     }).done(function(response) {
+                        // max label anhand anzahl eintäge in response ermitteln!
+                        //let labels = [];
+                        charts["history"]["data"]["labels"] = [];
+                        for (let [iteration, sensorData] of response["sensors"].entries()) {
+                            if (iteration <= 96) {
+                            let date = new Date(Math.trunc(Number.parseInt(sensorData["timestamp"]) / 1000));
+                            /*if (labels.length <= 97) {
+                                labels.push(date.toLocaleTimeString());
+                            }*/
+                            charts["history"]["data"]["labels"].push(date.toLocaleTimeString());
+                            let indexMeasured = charts["history"]["data"]["datasets"].findIndex(key => key["stack"] === "measured");
+                            let indexMiddle = charts["history"]["data"]["datasets"].findIndex(key => key["stack"] === "middle");
+                            if (indexMeasured >= 0) {
+                                if (charts["history"]["data"]["datasets"][indexMeasured]["data"].length >= 97) {
+                                    charts["history"]["data"]["datasets"][indexMeasured]["data"] = [];
+                                }
+                                charts["history"]["data"]["datasets"][indexMeasured]["data"].push({x: date.toLocaleTimeString(), y: sensorData[sensor]});
+                            }
+                            if (indexMiddle >= 0) {
+                                if (charts["history"]["data"]["datasets"][indexMiddle]["data"].length >= 97) {
+                                    charts["history"]["data"]["datasets"][indexMiddle]["data"] = [];
+                                }
+                                charts["history"]["data"]["datasets"][indexMiddle]["data"].push({x: date.toLocaleTimeString(), y: sensorData[sensor]});
+                            }
+                            let limits = Object.getOwnPropertyNames(response["limits"]);
+                            for (limit of limits) {
+                                let indexLimit = charts["history"]["data"]["datasets"].findIndex(key => key["stack"] === limit);
+                                if (indexLimit >= 0) {
+                                    if (charts["history"]["data"]["datasets"][indexLimit]["data"].length >= 97) {
+                                        charts["history"]["data"]["datasets"][indexLimit]["data"] = [];
+                                    }
+                                    charts["history"]["data"]["datasets"][indexLimit]["data"].push({x: date.toLocaleTimeString(), y: response["limits"][limit]});
+                                }
+                            }
+                        }
+                        let indexHighest = charts["history"]["data"]["datasets"].findIndex(key => key["stack"] === "highest");
+                        let indexLowest = charts["history"]["data"]["datasets"].findIndex(key => key["stack"] === "lowest");
+                        if (indexHighest >= 0) {
+                            let dateHighest = new Date(Math.trunc(Number.parseInt(response["minMax"]["maximum"]["timestamp"]) / 1000));
+                            charts["history"]["data"]["datasets"][indexHighest]["data"] = [{x: dateHighest.toLocaleTimeString(), y: response["minMax"]["maximum"]["value"]}];
+                        }
+                        if (indexLowest >= 0) {
+                            let dateLowest = new Date(Math.trunc(Number.parseInt(response["minMax"]["minimum"]["timestamp"]) / 1000));
+                            charts["history"]["data"]["datasets"][indexLowest]["data"] = [{x: dateLowest.toLocaleTimeString(), y: response["minMax"]["minimum"]["value"]}];
+                        }
+                    }
                         charts["history"].update("none");
                     }).fail(function(response) {
                         $("#chartHistoryModal .modal-body").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
@@ -432,16 +411,16 @@
                     crossDomain: true,
                     timeout: 10000
                 }).done(function(response) {
-                    $(pump).removeAttr("disabled");
                     $(parent).parent().find("[data-processing='true']").remove();
                 }).fail(function(response) {
                     $("#pumpsAdminTable_wrapper").before(Alert.create("danger", response["status"] + ": " + response["statusText"]));
                     $("#pumpsAdminTable").DataTable().ajax.reload();
                 }).always(function() {
+                    $(pump).removeAttr("disabled");
                 });
             }
             function disableMainModal(mainButton) {
-                if ($("#body-overlay").length == 0) {
+                if ($("#body-overlay").length === 0) {
                     $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
                 }
                 if ($(mainButton).find("[data-processing='true']").length === 0) {
@@ -461,7 +440,7 @@
             function showHistoryGalleryImage(wtf) {
                 let img = $(wtf).find("img:first-of-type");
                 let url = $(img).attr("src");
-                let path = url.match(/([^\.\/\\]+)(\.[^\.]+)?$/i);
+                let path = url.match(/\/([^\/\\]+?)(\.[^\.]+?)$/i);
                 let data = {
                     name: "showHistoryGalleryImage",
                     size: "fullscreen",
@@ -538,18 +517,6 @@
                     });
                 }
             }
-            // Zurzeit nicht in Verwendung
-            function toggleFormState(element, wtf) {
-                if ($(element).prop("checked")) {
-                    $(wtf).attr("disabled", "disabled");
-                }
-                else {
-                    $(wtf).removeAttr("disabled");
-                }
-            }
-            function showPlantProgramCreationModal(wtf = null) {
-                //
-            }
             Number.prototype.duration = function() {
                 let sec_num = parseInt(this, 10);
                 let weeks = Math.floor((sec_num / 3600 / 24) / 7);
@@ -576,7 +543,7 @@
                 return duration.substr(0, duration.length -2);
             }
             function readjustTables() {
-                let collapses = ["#collapse-plants-actions", "#collapse-plants-programs-actions", "#collapse-user-actions", "#collapse-pump-actions", "#collapse-logs-actions"];
+                let collapses = ["#collapse-plants-actions", "#collapse-user-actions", "#collapse-pump-actions", "#collapse-logs-actions"];
                 let element = null;
                 let tableName = null;
                 for (collapse of collapses) {
@@ -822,7 +789,7 @@
                 static alerts = [];
                 constructor(type, message, options = {}) {
                     // options = {class: "", id = "", closeable = true}
-                    type = (Alert.icons.hasOwnProperty(type.toLowerCase()) ? type.toLowerCase() : "info");
+                    type = (Alert.types.hasOwnProperty(type.toLowerCase()) ? type.toLowerCase() : "primary");
                     let text = "";
                     if (Array.isArray(message)) {
                         text = "<ul class='m-0 p-0' style='list-style-position: inside'>";
@@ -873,7 +840,7 @@
                     $("#" + this.id).remove();
                 }
                 static create(type, message, options = {}) {
-                    type = (Alert.icons.hasOwnProperty(type.toLowerCase()) ? type.toLowerCase() : "info");
+                    type = (Alert.types.hasOwnProperty(type.toLowerCase()) ? type.toLowerCase() : "primary");
                     let text = "";
                     if (Array.isArray(message)) {
                         text = "<ul class='m-0 p-0' style='list-style-position: inside'>";
@@ -942,25 +909,29 @@
                     endDate.setHours(0, 0, 0);
                 }
                 let data = {
-                    startDate: startDate.getTime(), // Zeitspanne; 0 = alles
-                    endDate: endDate.getTime()
+                    startTime: startDate.getTime(), // Zeitspanne; 0 = alles
+                    endTime: endDate.getTime()
                 }
                 $.post({
-                    url: "gallery.php",
+                    url: apiURL + "/plant/pictures",
                     data: JSON.stringify(data),
                     processData: false,
                     contentType: "application/json",
                     crossDomain: true,
                     timeout: 10000
                 }).done(function(response) {
-                    let data = JSON.parse(response);
-                    if (data["images"].length >= 1) {
-                        let images = "";
-                        for (image of data["images"]) {
-                            images += "<div class='historyGalleryItem d-flex flex-column p-1 justify-content-between' onclick='showHistoryGalleryImage(this)'><img src='img/" + image + "'>";
-                            images += "<article><span class='text-secondary'>verdammt</span><br>01.01.1970, 11:11:11 Uhr</article></div>";
-                        }
+                    let images = "";
+                    for (image of response) {
+                        let date = new Date(Math.trunc(Number.parseInt(image["creationTime"]) /1000));
+                        let filename = image["filename"].match(/\/([^\/\\]+?)(\.[^\.]+?)$/i);
+                        images += "<div class='historyGalleryItem d-flex flex-column p-2 justify-content-between' onclick='showHistoryGalleryImage(this)'><img src='" + image["filename"] + "' class='mw-100 mh-100 m-auto'>";
+                        images += "<article><span class='text-secondary'>" + filename[1] + "</span><br>" + ("00" + date.getDate().toString()).substr(-2, 2) + "." + ("00" + (date.getMonth() +1).toString()).substr(-2, 2) + "." + date.getFullYear() + ", " + ("00" + (date.getHours().toString())).substr(-2, 2) + ":" + ("00" + (date.getMinutes().toString())).substr(-2, 2) + ":" + ("00" + (date.getSeconds().toString())).substr(-2, 2) + "</article></div>";
+                    }
+                    if (images.length >= 1) {
                         $("#historyGalleryPanel").html(images);
+                    }
+                    else {
+                        $("#historyGallery").prepend(Alert.create("primary", "Für den angegebenen Zeitraum wurden keine Bilder gefunden."));
                     }
                 // img.naturalWidth and img.naturalHeight
                 }).fail(function(response) {
@@ -1179,16 +1150,6 @@
                 }
             }
             */
-            function fillPlantProgramsSelect(plant) {
-                let index = plantProperties.findIndex(key => key["id"] === plant);
-                if (index >= 0) {
-                    for (program of plantPrograms) {
-                        if (program["plantID"] === plant) {
-                            $("#plantProgramSelection").append("<option value='" + program["id"] + "'>" + program["name"] + "</option>");
-                        }
-                    }
-                }
-            }
             function confirmation(options = {}, resolve) {
                 let data = {
                     name: "confirmation",
@@ -1269,47 +1230,6 @@
                     });
                 }
             }
-            /*
-            async function confirmUserDeletion(user) {
-                let index = userAccounts.findIndex(key => key["id"] === user);
-                if (index >= 0) {
-                    let prompt = new Promise(function(resolve) {
-                        confirmation({
-                            title: "Benutzer entfernen bestätigen",
-                            content: "Soll der Benutzer &quot;"  + userAccounts[index]["fullname"] + "&quot; (ID: " + user + ") wirklich entfernt werden?"
-                        },
-                        resolve);
-                    });
-                    if (await prompt) {
-                        if ($("#body-overlay").length == 0) {
-                            $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
-                        }
-                        if ($("#confirmationButton").find("[data-processing='true']").length == 0) {
-                            $("#confirmationButton").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
-                        }
-                        $("#mainModal .modal-footer > button").attr("disabled", "disabled");
-                        $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
-                        $("#mainModal .modal-body > .alert").remove();
-                        let data = {
-                            user: user
-                        }
-                        $.post("lol", {
-                            _token: authToken,
-                            data: JSON.stringify(data)
-                        }).done(function(response) {
-                            bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
-                        }).fail(function(response) {
-                            $("#mainModal .modal-body").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
-                        }).always(function() {
-                                $("#confirmationButton").find("[data-processing='true']").remove();
-                            $("#body-overlay").remove();
-                            $("#mainModal .modal-footer > button").removeAttr("disabled");
-                            $("#mainModal .modal-header > [data-bs-dismiss='modal']").removeAttr("disabled");
-                        });
-                    }
-                }
-            }
-            */
            /*
             function confirmDiscardPlantEditing() {
                 let prompt = new Promise(function(resolve) {
@@ -1384,7 +1304,6 @@
                 });
             });
             $(document).on("DOMContentLoaded", function() {
-                // Hier alle Skripte ausführen, die auf DOM zugreifen sollen, bevor Bilder und Ähnliches geladen wurden
                 if (getCookie("authToken").length >= 1 && getCookie("username").length >= 1) {
                     $("a[href='#login']").addClass("d-none");
                     $("a[href='#register']").addClass("d-none");
@@ -1494,18 +1413,15 @@
                         }
                     });
                 });
-                /*$("#applyPlantTemplateButton").click(function() {
-                    fillPlantInputs($("#plantsAdminPlantSelection").val());
-                });*/
+                /*
                 $("#plantOptionsForm").on("reset", function() {
                     confirmDiscardPlantEditing();
                     return false;
-                });
+                });*/
                 $("#savePlantOptions").click(function() {
                     $("#savePlantOptionsSubmit").click();
                 });
                 $("#plantOptionsForm").submit(function() {
-                    //$("#discardPlantButton").attr("disabled", "disabled");
                     if ($("#savePlantOptions").find("[data-processing='true']").length === 0) {
                         $("#savePlantOptions").attr("disabled", "disabled").prepend("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary'></span>");
                     }
@@ -1517,7 +1433,7 @@
                         data[$(input).attr("id").slice(8, -5)] = $(input).val();
                     }*/
                     $.post({
-                        url: "http://192.168.100.187:3000/api/plant/"+ (isPlantEditingActive ? "update" : "create"),
+                        url: apiURL + "/plant/",
                         data: JSON.stringify(data),
                         processData: false,
                         contentType: "application/json",
@@ -1531,7 +1447,6 @@
                     }).always(function() {
                         $("#savePlantOptions").find("[data-processing='true']").remove();
                         $("#savePlantOptions").removeAttr("disabled");
-                        //$("#discardPlantButton").removeAttr("disabled");
                     });
                     return false;
                 });
@@ -1539,12 +1454,6 @@
                     getGalleryItems();
                     return false;
                 });
-                /*
-                $("#plantsAdminTemplateForm").submit(function() {
-                    fillPlantInputs($("#plantsAdminPlantSelection").val());
-                    return false;
-                });
-                */
                 $("a[href='#register']").on("click", function() {
                     let content = "<form enctype='text/plain' method='post' action='/' id='registerForm' class='w-100'><input type='submit' class='d-none' id='registerSubmit'><label for='registerUsername' class='form-label'>Benutzername:</label>";
                     content += "<input type='text' class='form-control' minlength='4' id='registerUsername' placeholder='Benutzername eingeben' required></div>";
@@ -1695,72 +1604,8 @@
                     $("#chartHistoryModal").attr("data-chart", $(this).attr("data-chart"));
                     new bootstrap.Modal($("#chartHistoryModal")[0]).show();
                 });
-                /*
-                $.get("dataTables_test.php", {type: "plantdetails"}).done(function(response) {
-                    let data = JSON.parse(response);
-                    Object.assign(plantProperties, data["data"]);
-                    for (plant of data["data"]) {
-                        $("#plantSelection").append("<option value='" + plant["id"] + "'>" + plant["name"] + " (" + plant["id"] + ")" + "</option>");
-                        
-                    }
-                    $("#plantSelection").val(data["data"][0]["id"]).change();
-                    currentChartPlant = data["data"][0]["id"];
-                    fillPlantProgramsSelect(data["data"][0]["id"]);
-                });
-                // Soll nur als Admin sichtbar sein!
-                $.get("dataTables_test.php", {type: "plantPrograms"}).done(function(response) {
-                    let data = JSON.parse(response);
-                    Object.assign(plantPrograms, data["data"]);
-                });
-                */
                 let date = new Date();
                 $("footer").html("&copy; " + "2021-" + date.getFullYear() + " BSDGG/IN20");
-                /*$("#plantSelection").change(function() {
-                    $("#plantProgramSelection").empty().attr("disabled", "disabled");
-                    $(this).attr("disabled", "disabled");
-                    let id = Number.parseInt($(this).val());
-                    fillPlantProgramsSelect(id);
-                    $(this).removeAttr("disabled");
-                    $("#plantProgramSelection").removeAttr("disabled");
-                });*/
-                /*
-                $("#plantProgramsAdminPlantSelection").change(function() {
-                    let options = {};
-                    let value = Number.parseInt($(this).val());
-                    Object.assign(options, dataTablesAdminOptions["plantPrograms"]);
-                    if (!Number.isSafeInteger(Number.parseInt($(this).attr("data-old"))) && value <= 0) {
-                        options["rowGroup"] = {
-                            dataSrc: "plantID",
-                            className: "bg-gray-200",
-                            endRender: null,
-                            // Wird nach Erzeugung ausgelöst!
-                            startRender: function(rows, group) {
-                                let index = plantProperties.findIndex(key => key["id"] === group);
-                                return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + (plantProperties.hasOwnProperty(index) ? plantProperties[index]["name"] : "(Unbekannte Pflanzen-ID: " + group) + "</td><td class='fritz'><button class='btn btn-sm btn-success' onclick='showPlantProgramCreationModal(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>");
-                            }
-                        },
-                        options["orderFixed"] = [0, "asc"];
-                    }
-                    options["destroy"] = true;
-                    if (value >= 1) {
-                        options["ajax"]["data"]["category"] = value;
-                    }
-                    else {
-                        delete options["ajax"]["data"]["category"];
-                    }
-                    $(this).attr("data-old", value);
-                    adminDataTables["plantPrograms"] = $("#plantProgramsAdminTable").DataTable(options).on("draw", function(settings) {
-                        if (!adminDataTables["plantPrograms"].rowGroup().enabled()) {
-                            if ($("#showPlantProgramCreationModalButton").length === 0) {
-                                $("#plantProgramsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3'><button type='button' class='btn btn-success' onclick='showPlantProgramCreationModal()' id='showPlantProgramCreationModalButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
-                            }
-                        }
-                    	else {
-                            $("#showPlantProgramCreationModalButton").remove();
-                        }
-                    });
-                });
-                */
                 /*
                 $("#logsAdminCategorySelection").change(function() {
                     let options = {};
@@ -1794,40 +1639,6 @@
                     }
                     else {
                         $("#userAccountsAdminTable").DataTable().ajax.reload();
-                    }
-                });
-                $("#plants-programs-accordion").on("shown.bs.collapse", function() {
-                    if (!DataTable.isDataTable("#plantProgramsAdminTable")) {
-                        $("#plantProgramsAdminPlantSelection").val("0");
-                        let options = {};
-                        Object.assign(options, dataTablesAdminOptions["plantPrograms"]);
-                        options["rowGroup"] = {
-                            dataSrc: "plantID",
-                            className: "bg-gray-200",
-                            endRender: null,
-                            // Wird nach Erzeugung ausgelöst!
-                            startRender: function(rows, group) {
-                                let index = plantProperties.findIndex(key => key["id"] === group);
-                                return $("<tr>").append("<td colspan='3' class='align-middle' style='color: #282828'>" + (plantProperties.hasOwnProperty(index) ? plantProperties[index]["name"] : "(Unbekannte Pflanzen-ID: " + group) + "</td><td class='fritz'><button class='btn btn-sm btn-success' onclick='showPlantProgramCreationModal(" + group + ")'><i class='fas fa-asterisk'></i> Neu...</button></td>");
-                            }
-                        };
-                        options["orderFixed"] = [0, "asc"];
-                        for (plant of plantProperties) {
-                            $("#plantProgramsAdminPlantSelection").append("<option value='" + plant["id"] + "'>" + plant["name"] + "</option>");
-                        }
-                        adminDataTables["plantPrograms"] = $("#plantProgramsAdminTable").DataTable(options).on("draw", function(settings) {
-                            if (!adminDataTables["plantPrograms"].rowGroup().enabled()) {
-                                if ($("#showPlantProgramCreationModalButton").length === 0) {
-                                    $("#plantProgramsAdminTable_wrapper > .row:last-of-type").before("<div class='d-flex justify-content-end mt-3'><button type='button' class='btn btn-success' onclick='showPlantProgramCreationModal()' id='showPlantProgramCreationModalButton'><i class='fas fa-asterisk'></i> Neu...</button></div>");
-                                }
-                            }
-                            else {
-                                $("#showPlantProgramCreationModalButton").remove();
-                            }
-                        });
-                    }
-                    else {
-                        $("#plantProgramsAdminTable").DataTable().ajax.reload();
                     }
                 });
                 $("#pump-actions-accordion").on("shown.bs.collapse", function() {
@@ -1890,10 +1701,10 @@
                     }
                 });
                 */
-                // Bilderlinks laden
+               /*
                 $("a[href='#historyGallery']").on("shown.bs.tab", function() {
                     getGalleryItems();
-                });
+                });*/
                 $("#chartHistoryModal").on("show.bs.modal", function() {
                     let sensor = $(this).attr("data-chart");
                     if (!["undefined", "", undefined, null].includes(sensor)) {
@@ -1902,7 +1713,6 @@
                         getHistoryChartData(sensor);
                     }
                 });
-                // Aktuell
                 charts["current"]["co2_level"] = new Chart($("#co2-chart-current")[0].getContext("2d"), {
                     options: {
                         plugins: {
@@ -3279,8 +3089,8 @@
                             {
                                 label: "Messwert",
                                 stack: "measured",
-                                borderColor: "rgb(219, 112, 147)",
-                                backgroundColor: "rgba(219, 112, 147, 0.75)",
+                                borderColor: "rgb(0, 0, 0)",
+                                backgroundColor: "rgba(0, 0, 0, 0.75)",
                                 borderWidth: 1,
                                 pointStyle: "circle",
                                 fill: {
@@ -3290,7 +3100,7 @@
                                         if (!chart) {
                                             return;
                                         }
-                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(219, 112, 147, 0.5)", 1: "rgba(219, 112, 147, 0.5)"});
+                                        return getGradient(chart.ctx, chart.chartArea, {0: "rgba(0, 0, 0, 0.3)", 1: "rgba(255, 255, 255, 0.5)"});
                                     }
                                 }
                             },
@@ -3317,6 +3127,50 @@
                                 backgroundColor: "rgba(72, 61, 139, 0.75)",
                                 borderWidth: 2,
                                 pointStyle: "circle"
+                            },
+                            {
+                                label: "Sollwert",
+                                stack: "setpoint",
+                                borderColor: getCSSVar("--chart-setpoint-border"),
+                                backgroundColor: "rgba(253, 126, 20, 0.75)",
+                                borderWidth: 2,
+                                pointStyle: "line"
+                            },
+                            {
+                                label: "Obere Eingriffsgrenze",
+                                stack: "upperControlLimit",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
+                                backgroundColor: "rgba(220, 53, 69, 0.75)",
+                                borderWidth: 2,
+                                borderDash: [10, 5],
+                                pointStyle: "line"
+                            },
+                            {
+                                label: "Obere Warngrenze",
+                                stack: "upperWarningLimit",
+                                borderColor: getCSSVar("--chart-warning-limit-border"),
+                                backgroundColor: "rgba(255, 127, 39, 0.75)",
+                                borderWidth: 1,
+                                borderDash: [5, 5],
+                                pointStyle: "line"
+                            },
+                            {
+                                label: "Untere Eingriffsgrenze",
+                                stack: "lowerControlLimit",
+                                borderColor: getCSSVar("--chart-control-limit-border"),
+                                backgroundColor: "rgba(220, 53, 69, 0.75)",
+                                borderWidth: 2,
+                                borderDash: [10, 5],
+                                pointStyle: "line"
+                            },
+                            {
+                                label: "Untere Warngrenze",
+                                stack: "lowerWarningLimit",
+                                borderColor: getCSSVar("--chart-warning-limit-border"),
+                                backgroundColor: "rgba(255, 127, 39, 0.75)",
+                                borderWidth: 1,
+                                borderDash: [5, 5],
+                                pointStyle: "line"
                             }
                         ]
                     }
@@ -3369,7 +3223,7 @@
                             let labels = [];
                             let indexCurrent = -1;
                             for (let [iteration, sensor] of response["sensors"].entries()) {
-                                let date = new Date(Math.trunc(sensor["timestamp"] / 1000));
+                                let date = new Date(Math.trunc(Number.parseInt(sensor["timestamp"]) / 1000));
                                 if (labels.length <= 13) {
                                     labels.push(date.toLocaleTimeString());
                                 }
@@ -3433,7 +3287,6 @@
                                                 switchAlert(type, "danger");
                                             }
                                             else {
-                                                //switchAlert(type, "success");
                                                 $(type).removeClass("danger warning success")
                                             }
                                             $("#section-" + type + "> div:last-of-type > canvas").css("visibility", "visible");
@@ -3684,12 +3537,13 @@
                 flex: 0 1 100%;
                 border-radius: 5px;
             }*/
+            /*
             .historyGalleryItem > div:first-of-type > div:first-of-type {
                 margin: 0 auto 0 auto;
                 min-height: 100%;
                 max-width: 200px;
                 align-self: flex-start;
-            }
+            }*/
             div.lol {
                 border: 2px solid var(--bs-gray-300, #dee2e6)
             }
@@ -4174,9 +4028,11 @@
                     grid-auto-rows: minmax(300px, auto);
                     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
                 }
+                /*
                 .historyGalleryItem > div:first-of-type > div:first-of-type {
                     max-width: 300px;
                 }
+                */
                 table.dataTable thead > tr > th {
                     font-weight: 600;
                 }
@@ -4261,9 +4117,11 @@
                     grid-auto-rows: minmax(300px, auto);
                     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
                 }
+                /*
                 .historyGalleryItem > div:first-of-type > div:first-of-type {
                     max-width: 300px;
                 }
+                */
                 table.dataTable thead > tr > th {
                     font-weight: 600;
                 }
@@ -4505,16 +4363,6 @@
                     </ul>
                     <div class="tab-content p-3 border">
                         <div class="tab-pane active" id="overview">
-                            <!--
-                            <div class="d-flex formContainer">
-                                <label for="plantSelection" class="col-form-label me-2">Pflanze:</label>
-                                <select class="form-select w-auto d-inline-block" id="plantSelection"></select>
-                                <label for="plantProgramSelection" class="col-form-label me-2">Programm:</label>
-                                <select class="form-select w-auto d-inline-block" id="plantProgramSelection me-2"></select>
-                                <button type="button" class="btn btn-success align-baseline"><i class="fas fa-play"></i></button>
-                                <button type="button" class="btn btn-warning ms-2"><i class="fas fa-pause"></i></button>
-                            </div>
-                        -->
                             <div class="d-flex legendContainer rounded-3 p-2">
                                 <label class="me-2">Legende:</label>
                                 <div id="section-legend" class="flex-wrap d-flex">
@@ -4673,13 +4521,6 @@
                                                     </table>
                                                 </div>
                                                 <div class="tab-pane" id="plantsAdminOptionContainer">
-                                                    <!--
-                                                    <form enctype="text/plain" id="plantsAdminTemplateForm" method="post" action="/" class="w-100 d-flex formContainer mb-3 justify-content-center">
-                                                        <label for="plantsAdminPlantSelection" class="col-form-label me-2">Vorlage:</label>
-                                                        <select class="form-select w-auto d-inline-block" id="plantsAdminPlantSelection" data-old="0"></select>
-                                                        <button type="submit" class="btn btn-primary align-top" id="applyPlantTemplateButton" disabled="disabled"><i class="fas fa-sync"></i> Übernehmen</button>
-                                                    </form>
-                                                    -->
                                                     <div class="d-flex mt-3" id="plantOptionMenu">
                                                         <div id="plantOptionNavigation" class="list-group col-md-2 position-relative align-self-start">
                                                             <!--<a class="list-group-item list-group-item-action" href="#plantOptionGeneralSection">Allgemein</a>-->
@@ -4791,42 +4632,9 @@
                                                     </div>
                                                     <div class="mt-4 d-flex align-content-center align-items-center justify-content-end" style="gap: 5px">
                                                         <button type="button" class="btn btn-success" id="savePlantOptions"><i class="fas fa-plus"></i> Speichern</button>
-                                                        <!--<button type="reset" class="btn btn-danger" id="discardPlantButton"><i class="fas fa-trash-alt"></i> Löschen</button>-->
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="plants-programs-accordion" class="mb-3">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-plants-programs-actions" data-table="plantPrograms">
-                                            <h4 class="ms-0 mt-auto me-auto mb-auto"><i class="fas fa-cubes"></i> Pflanzenprogramme</h4>
-                                            <i class="fas fa-chevron-down ms-auto mt-auto me-2 mb-auto"></i>
-                                        </a>
-                                    </div>
-                                    <div id="collapse-plants-programs-actions" class="collapse hide" data-bs-parent="#plants-programs-actions-accordion">
-                                        <div class="card-body">
-                                            <div class="d-flex formContainer mb-3">
-                                                <label for="plantProgramsAdminPlantSelection" class="col-form-label me-2">Pflanze:</label>
-                                                <select class="form-select w-auto d-inline-block" id="plantProgramsAdminPlantSelection" data-old="0">
-                                                    <option value="0">Alle</option>
-                                                </select>
-                                            </div>
-                                            <table class="table table-sm w-100 mt-3" id="plantProgramsAdminTable">
-                                                <thead>
-                                                    <tr>
-                                                        <th>ID</th>
-                                                        <th>rowTitle</th>
-                                                        <th>Name</th>
-                                                        <th>Beschreibung</th>
-                                                        <th>Optionen</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody></tbody>
-                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -4872,7 +4680,7 @@
                                                         <th>ID</th>
                                                         <th>Benutzername</th>
                                                         <th>Erstellt</th>
-                                                        <th></th>
+                                                        <th>Level</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -4931,7 +4739,6 @@
             </div>
         </main>
         <footer></footer>
-        <!-- Kann möglicherweise nicht mit Modal.create() erzeugt werden, ohne jedes Mal charts["history"] zu zerstören! -->
         <div class="modal fade" id="chartHistoryModal">
             <div class="modal-dialog modal-xl modal-dialog-centered">
                 <div class="modal-content">
