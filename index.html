@@ -1704,6 +1704,7 @@
                         delete options["ajax"]["data"]["category"];
                     }
                     $(this).attr("data-old", value);
+                    $("#logsAdminTable").off("draw.dt");
                     adminDataTables["logs"] = $("#logsAdminTable").DataTable(options);
                 });
                 */
