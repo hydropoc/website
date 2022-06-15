@@ -291,7 +291,7 @@
                         data: function (data, settings) {
                             //data["type"] = $("#logsAdminCategorySelection").val();
                             data['token'] = getCookie('authToken');
-                            console.log(data.order);
+                            data["orderBy"] = [data["columns"][data["order"][0]["column"]]["name"], data["order"][0]["dir"]];
                             return JSON.stringify(data);
                         },
                         dataSrc: function (response) {
@@ -3303,6 +3303,10 @@
                                     if (labels.length <= 13) {
                                         labels.push(date.toLocaleTimeString());
                                     }
+                                        else {
+                                            labels.reverse();
+
+                                        }
                                     for (type of types) {
                                         if (!['id', 'timestamp'].includes(type) && charts['current'].hasOwnProperty(type)) {
                                             //console.log(charts["current"][type]["data"]["labels"].length);
@@ -3347,7 +3351,7 @@
                                             }
                                             if (iteration === 12) {
                                                 charts['current'][type]['options']['scales']['x']['min'] = labels[0];
-                                                charts['current'][type]['options']['scales']['x']['max'] = labels[11];
+                                                charts['current'][type]['options']['scales']['x']['max'] = labels[labels.length -1];
                                                 charts['current'][type].update('none'); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
                                                 let lastCurrentValue = charts['current'][type]['data']['datasets'][indexCurrent]['data'][11]['y'];
                                                 if (lastCurrentValue > response['limits'][type]['upperWarningLimit'] && lastCurrentValue < response['limits'][type]['upperControlLimit']) {
