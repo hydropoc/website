@@ -21,7 +21,7 @@
         <script src="js/litepicker.js"></script>
         <script>
             Chart.register('filler');
-            const apiURL = 'http://hydropoc.api.jongmans.net/api';
+            //const apiURL = 'http://hydropoc.api.jongmans.net/api';
             const charts = {
                 current: {
                     temperature_water: {},
@@ -46,6 +46,13 @@
                     co2_level: [0, 1000],
                     ec_value: [200, 1400],
                 },
+                historyLabelCount: {
+                    86400: 60,
+                    43200: 48,
+                    21600: 36,
+                    10800: 24,
+                    3600: 12
+                }
             };
             const dataTablesLocalisation = {
                 sEmptyTable: 'Keine Daten vorhanden',
@@ -180,7 +187,7 @@
                         },
                     ],
                     ajax: {
-                        url: apiURL + '/user/list',
+                        url: window.apiURL + '/user/list',
                         type: 'POST',
                         contentType: 'application/json',
                         data: function (data, settings) {
@@ -285,7 +292,7 @@
                     ],
                     order: [1, 'asc'],
                     ajax: {
-                        url: apiURL + '/device/logs',
+                        url: window.apiURL + '/device/logs',
                         type: 'POST',
                         contentType: 'application/json',
                         data: function (data, settings) {
@@ -349,10 +356,13 @@
                     isLoadingHistoryChartData = true;
                     $('#historyTimespan').attr('disabled', 'disabled').after("<span class='spinner-border ms-2 text-primary kreiselchen' style='flex: 0 0 auto' data-processing='true'></span>");
                     $.post({
-                        url: apiURL + '/sensor/data_sensor',
+                        // daten werden alle 15 sekunden gemessen
+                        // labelabstand mittels anzahl arrays in response geteilt durch zb. 96 (für 96 labels) berechnen
+                        // daten einfügen wenn moduloperation 0 ergibt?
+                        url: window.apiURL + '/sensor/data_sensor',
                         data: JSON.stringify({
                             sensor: sensor,
-                            time: Number.parseInt($('#historyTimespan').val()),
+                            time: Number.parseInt($('#historyTimespan').val())
                         }),
                         processData: false,
                         contentType: 'application/json',
@@ -361,25 +371,27 @@
                     })
                         .done(function (response) {
                             // max label anhand anzahl eintäge in response ermitteln!
-                            //let labels = [];
+                            let labels = [];
+                            response["sensors"].reverse();
                             charts['history']['data']['labels'] = [];
+                            let labelCount = charts["historyLabelCount"][Number.parseInt($('#historyTimespan').val())];
                             for (let [iteration, sensorData] of response['sensors'].entries()) {
-                                if (iteration <= 96) {
+                                if (iteration <= labelCount) {
                                     let date = new Date(Number.parseInt(sensorData['timestamp']));
-                                    /*if (labels.length <= 97) {
-                                labels.push(date.toLocaleTimeString());
-                            }*/
+                                    if (labels.length <= labelCount) {
+                                        labels.push(date.toLocaleTimeString());
+                                    }
                                     charts['history']['data']['labels'].push(date.toLocaleTimeString());
                                     let indexMeasured = charts['history']['data']['datasets'].findIndex((key) => key['stack'] === 'measured');
                                     let indexMiddle = charts['history']['data']['datasets'].findIndex((key) => key['stack'] === 'middle');
                                     if (indexMeasured >= 0) {
-                                        if (charts['history']['data']['datasets'][indexMeasured]['data'].length >= 97) {
+                                        if (charts['history']['data']['datasets'][indexMeasured]['data'].length >= labelCount) {
                                             charts['history']['data']['datasets'][indexMeasured]['data'] = [];
                                         }
                                         charts['history']['data']['datasets'][indexMeasured]['data'].push({ x: date.toLocaleTimeString(), y: sensorData[sensor] });
                                     }
                                     if (indexMiddle >= 0) {
-                                        if (charts['history']['data']['datasets'][indexMiddle]['data'].length >= 97) {
+                                        if (charts['history']['data']['datasets'][indexMiddle]['data'].length >= labelCount) {
                                             charts['history']['data']['datasets'][indexMiddle]['data'] = [];
                                         }
                                         charts['history']['data']['datasets'][indexMiddle]['data'].push({ x: date.toLocaleTimeString(), y: sensorData[sensor] });
@@ -388,7 +400,7 @@
                                     for (limit of limits) {
                                         let indexLimit = charts['history']['data']['datasets'].findIndex((key) => key['stack'] === limit);
                                         if (indexLimit >= 0) {
-                                            if (charts['history']['data']['datasets'][indexLimit]['data'].length >= 97) {
+                                            if (charts['history']['data']['datasets'][indexLimit]['data'].length >= labelCount) {
                                                 charts['history']['data']['datasets'][indexLimit]['data'] = [];
                                             }
                                             charts['history']['data']['datasets'][indexLimit]['data'].push({ x: date.toLocaleTimeString(), y: response['limits'][limit] });
@@ -406,6 +418,8 @@
                                     charts['history']['data']['datasets'][indexLowest]['data'] = [{ x: dateLowest.toLocaleTimeString(), y: response['minMax']['minimum']['value'] }];
                                 }
                             }
+                            charts['history']['options']['scales']['x']['min'] = labels[0];
+                            charts['history']['options']['scales']['x']['max'] = labels[labels.length -1];
                             charts['history'].update('none');
                         })
                         .fail(function (response) {
@@ -486,7 +500,7 @@
                 if ($('#mainModal').hasClass('show') && $('#mainModal').attr('data-name') === 'register') {
                     disableMainModal('#registerButton');
                     $.post({
-                        url: apiURL + '/user/register',
+                        url: window.apiURL + '/user/register',
                         data: JSON.stringify({
                             username: $('#registerUsername').val(),
                             password: $('#registerPassword').val(),
@@ -533,7 +547,7 @@
                 if ($('#mainModal').hasClass('show') && $('#mainModal').attr('data-name') === 'login') {
                     disableMainModal('#loginButton');
                     $.post({
-                        url: apiURL + '/user/login',
+                        url: window.apiURL + '/user/login',
                         data: JSON.stringify({
                             username: $('#loginUsername').val(),
                             password: $('#loginPassword').val(),
@@ -619,7 +633,7 @@
                 if ($('#mainModal').hasClass('show') && $('#mainModal').attr('data-name') === 'systemInfos' && !isLoadingSystemInfos) {
                     isLoadingSystemInfos = true;
                     $.get({
-                        url: apiURL + '/device/informations',
+                        url: window.apiURL + '/device/informations',
                         crossDomain: true,
                         timeout: 10000,
                     })
@@ -963,7 +977,7 @@
                     endTime: endDate.getTime(),
                 };
                 $.post({
-                    url: apiURL + '/plant/pictures',
+                    url: window.apiURL + '/plant/pictures',
                     data: JSON.stringify(data),
                     processData: false,
                     contentType: 'application/json',
@@ -1350,6 +1364,7 @@
             }
             $(window).on('load', function () {
                 viewportWidth = visualViewport['width'];
+                //while (!window.hasOwnProperty("apiURL"))
                 $('#body-overlay').empty();
                 $('#body-overlay')
                     .css('opacity', 0)
@@ -1364,6 +1379,25 @@
                     });
             });
             $(document).on('DOMContentLoaded', function () {
+                $.get({
+                    url: "http://192.168.20.31:3000",
+                        crossDomain: true,
+                        timeout: 3000,
+                        data: JSON.stringify({data: "lol"})
+                }).done(function(response) {
+                    Object.defineProperty(window, "apiURL", {
+                        value: "http://192.168.20.31:3000/api",
+                        configurable: false,
+                        writable: false
+                    });
+                }).fail(function(response) {
+                    Object.defineProperty(window, "apiURL", {
+                        //value: "http://10.20.45.5:3000/api",
+                        value: "http://hydropoc.api.jongmans.net/api",
+                        configurable: false,
+                        writable: false
+                    });
+                });
                 if (getCookie('authToken').length >= 1 && getCookie('username').length >= 1) {
                     $("a[href='#login']").addClass('d-none');
                     $("a[href='#register']").addClass('d-none');
@@ -1496,7 +1530,7 @@
                         data[$(input).attr("id").slice(8, -5)] = $(input).val();
                     }*/
                     $.post({
-                        url: apiURL + '/plant/',
+                        url: window.apiURL + '/plant/',
                         data: JSON.stringify(data),
                         processData: false,
                         contentType: 'application/json',
@@ -3287,7 +3321,7 @@
                     if (!isLoadingCurrentChartData) {
                         isLoadingCurrentChartData = true;
                         $.post({
-                            url: apiURL + '/sensor/data',
+                            url: window.apiURL + '/sensor/data',
                             data: JSON.stringify({ amount: 13 }),
                             processData: false,
                             contentType: 'application/json',
@@ -3454,7 +3488,10 @@
                     }
                 }, 5000);*/
                 if (window.location.hash) {
-                    $("a[href='" + window.location.hash + "']").first().click();
+                    let hash = window.location.hash;
+                    if (hash.substr(1).length >= 1) {
+                        $("a[href='" + window.location.hash + "']").first().click();
+                    }
                 }
             });
         </script>
