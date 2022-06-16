@@ -47,10 +47,10 @@
                     ec_value: [200, 1400],
                 },
                 historyLabelCount: {
-                    86400: 60,
+                    86400: 95,
                     43200: 48,
-                    21600: 36,
-                    10800: 24,
+                    21600: 24,
+                    10800: 12,
                     3600: 12
                 }
             };
@@ -370,45 +370,63 @@
                         timeout: 10000,
                     })
                         .done(function (response) {
-                            // max label anhand anzahl eintäge in response ermitteln!
+                            // alle 15 sek. messung *4 = 1 min.
+                            // 24 std. = 1440 min. = 60 label (alle 60 min.)
+                            // 12 std. = 720 min. = 60 label (alle 30 min.)
+                            // 6 std. = 360 min. = 60 label (alle 15 min.) 
+                            // 3 std. = 180 min. = 60 label (alle 180 sek.)
+                            // 1 std. = 60 min. = 60 label (alle 60 sek.)
                             let labels = [];
                             response["sensors"].reverse();
                             charts['history']['data']['labels'] = [];
-                            let labelCount = charts["historyLabelCount"][Number.parseInt($('#historyTimespan').val())];
+                            //let labelCount = charts["historyLabelCount"][Number.parseInt($('#historyTimespan').val())];
+                            let labelCount = 60;
+                            let indexMeasured = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'measured');
+                            let indexMiddle = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'middle');
+                            if (indexMeasured >= 0) {
+                                charts['history']['data']['datasets'][indexMeasured]['data'] = [];
+                            }
+                            if (indexMiddle >= 0) {
+                                charts['history']['data']['datasets'][indexMiddle]['data'] = [];
+                            }
+                            //let responseLength = response["sensors"].length;
                             for (let [iteration, sensorData] of response['sensors'].entries()) {
-                                if (iteration <= labelCount) {
-                                    let date = new Date(Number.parseInt(sensorData['timestamp']));
-                                    if (labels.length <= labelCount) {
-                                        labels.push(date.toLocaleTimeString());
-                                    }
-                                    charts['history']['data']['labels'].push(date.toLocaleTimeString());
-                                    let indexMeasured = charts['history']['data']['datasets'].findIndex((key) => key['stack'] === 'measured');
-                                    let indexMiddle = charts['history']['data']['datasets'].findIndex((key) => key['stack'] === 'middle');
+                                // wenn 0 dann 1 min.
+                                if (iteration % 15 === 0) {
+                                    let date = formatDate(Number.parseInt(sensorData['timestamp']), ["date"]) + "@" + formatDate(Number.parseInt(sensorData['timestamp']), ["time"]);
+                                    //if (labels.length <= labelCount) {
+                                        labels.push(formatDate(date));
+                                    //}
+                                    charts['history']['data']['labels'].push(date);
+
                                     if (indexMeasured >= 0) {
-                                        if (charts['history']['data']['datasets'][indexMeasured]['data'].length >= labelCount) {
-                                            charts['history']['data']['datasets'][indexMeasured]['data'] = [];
-                                        }
-                                        charts['history']['data']['datasets'][indexMeasured]['data'].push({ x: date.toLocaleTimeString(), y: sensorData[sensor] });
+                                        //if (charts['history']['data']['datasets'][indexMeasured]['data'].length >= labelCount) {
+                                        //    charts['history']['data']['datasets'][indexMeasured]['data'] = [];
+                                        //}
+                                        charts['history']['data']['datasets'][indexMeasured]['data'].push({ x: date, y: sensorData[sensor] });
                                     }
                                     if (indexMiddle >= 0) {
-                                        if (charts['history']['data']['datasets'][indexMiddle]['data'].length >= labelCount) {
-                                            charts['history']['data']['datasets'][indexMiddle]['data'] = [];
-                                        }
-                                        charts['history']['data']['datasets'][indexMiddle]['data'].push({ x: date.toLocaleTimeString(), y: sensorData[sensor] });
+                                        //if (charts['history']['data']['datasets'][indexMiddle]['data'].length >= labelCount) {
+                                        //    charts['history']['data']['datasets'][indexMiddle]['data'] = [];
+                                        //}
+                                        charts['history']['data']['datasets'][indexMiddle]['data'].push({ x: date, y: sensorData[sensor] });
                                     }
                                     let limits = Object.getOwnPropertyNames(response['limits']);
                                     for (limit of limits) {
-                                        let indexLimit = charts['history']['data']['datasets'].findIndex((key) => key['stack'] === limit);
+                                        let indexLimit = charts['history']['data']['datasets'].findIndex(key => key['stack'] === limit);
                                         if (indexLimit >= 0) {
                                             if (charts['history']['data']['datasets'][indexLimit]['data'].length >= labelCount) {
                                                 charts['history']['data']['datasets'][indexLimit]['data'] = [];
                                             }
-                                            charts['history']['data']['datasets'][indexLimit]['data'].push({ x: date.toLocaleTimeString(), y: response['limits'][limit] });
+                                            else {
+                                            charts['history']['data']['datasets'][indexLimit]['data'].push({ x: date, y: response['limits'][limit] });
+                                            }
                                         }
                                     }
                                 }
-                                let indexHighest = charts['history']['data']['datasets'].findIndex((key) => key['stack'] === 'highest');
-                                let indexLowest = charts['history']['data']['datasets'].findIndex((key) => key['stack'] === 'lowest');
+                                /*
+                                let indexHighest = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'highest');
+                                let indexLowest = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'lowest');
                                 if (indexHighest >= 0) {
                                     let dateHighest = new Date(Number.parseInt(response['minMax']['maximum']['timestamp']));
                                     charts['history']['data']['datasets'][indexHighest]['data'] = [{ x: dateHighest.toLocaleTimeString(), y: response['minMax']['maximum']['value'] }];
@@ -417,6 +435,7 @@
                                     let dateLowest = new Date(Number.parseInt(response['minMax']['minimum']['timestamp']));
                                     charts['history']['data']['datasets'][indexLowest]['data'] = [{ x: dateLowest.toLocaleTimeString(), y: response['minMax']['minimum']['value'] }];
                                 }
+                                */
                             }
                             charts['history']['options']['scales']['x']['min'] = labels[0];
                             charts['history']['options']['scales']['x']['max'] = labels[labels.length -1];
@@ -950,6 +969,22 @@
                 static destroy(id) {
                     Alert.alerts.splice(Alert.alerts.indexOf(id), 1);
                     $('#' + id).remove();
+                }
+            }
+            function formatDate(time, options) {
+                if (Number.isSafeInteger(time)) {
+                    let dateString = "";
+                    let date = new Date(time);
+                    if (options.includes("date") && !options.includes("time")) {
+                        dateString = ("00" + (date.getDate()).toString()).substr(-2, 2) + "." + ("00" + (date.getMonth() +1).toString()).substr(-2, 2) + "." + date.getFullYear();
+                    }
+                    else if (!options.includes("date") && options.includes("time")) {
+                        dateString = ("00" + (date.getHours().toString())).substr(-2, 2) + ":" + ("00" + (date.getMinutes().toString())).substr(-2, 2) + ":" + ("00" + (date.getSeconds().toString())).substr(-2, 2);
+                    }
+                    else if (options.includes("date") && options.includes("time")) {
+                        dateString = ("00" + (date.getDate()).toString()).substr(-2, 2) + "." + ("00" + (date.getMonth() +1).toString()).substr(-2, 2) + "." + date.getFullYear() + ", " + ("00" + (date.getHours().toString())).substr(-2, 2) + ":" + ("00" + (date.getMinutes().toString())).substr(-2, 2) + ":" + ("00" + (date.getSeconds().toString())).substr(-2, 2);
+                    }
+                    return dateString;
                 }
             }
             function getGalleryItems() {
@@ -3147,6 +3182,7 @@
                     options: {
                         plugins: {
                             legend: {
+                                display: false,
                                 labels: {
                                     usePointStyle: true,
                                     pointStyle: 'rect',
@@ -3344,13 +3380,12 @@
                                         }
                                     for (type of types) {
                                         if (!['id', 'timestamp'].includes(type) && charts['current'].hasOwnProperty(type)) {
-                                            //console.log(charts["current"][type]["data"]["labels"].length);
                                             if (charts['current'][type]['data']['labels'].length >= 13) {
                                                 charts['current'][type]['data']['labels'] = [];
                                             }
                                             charts['current'][type]['data']['labels'].push(date.toLocaleTimeString());
-                                            indexCurrent = charts['current'][type]['data']['datasets'].findIndex((key) => key['stack'] === 'current');
-                                            let indexMiddle = charts['current'][type]['data']['datasets'].findIndex((key) => key['stack'] === 'middle');
+                                            indexCurrent = charts['current'][type]['data']['datasets'].findIndex(key => key['stack'] === 'current');
+                                            let indexMiddle = charts['current'][type]['data']['datasets'].findIndex(key => key['stack'] === 'middle');
                                             if (indexCurrent >= 0) {
                                                 if (charts['current'][type]['data']['datasets'][indexCurrent]['data'].length >= 13) {
                                                     charts['current'][type]['data']['datasets'][indexCurrent]['data'] = [];
@@ -3358,7 +3393,7 @@
                                                 charts['current'][type]['data']['datasets'][indexCurrent]['data'].push({ x: date.toLocaleTimeString(), y: sensor[type] });
                                                 for (pump of response['pumpactivity']) {
                                                     if (pump['status']) {
-                                                        let indexPump = charts['current'][type]['data']['datasets'].findIndex((key) => key['stack'] === 'pump-' + pump['id'].toString());
+                                                        let indexPump = charts['current'][type]['data']['datasets'].findIndex(key => key['stack'] === 'pump-' + pump['id'].toString());
                                                         if (indexPump >= 0) {
                                                             if (charts['current'][type]['data']['datasets'][indexPump]['data'].length >= 13) {
                                                                 charts['current'][type]['data']['datasets'][indexPump]['data'] = [];
@@ -3376,7 +3411,7 @@
                                             }
                                             let limits = Object.getOwnPropertyNames(response['limits'][type]);
                                             for (limit of limits) {
-                                                let indexLimit = charts['current'][type]['data']['datasets'].findIndex((key) => key['stack'] === limit);
+                                                let indexLimit = charts['current'][type]['data']['datasets'].findIndex(key => key['stack'] === limit);
                                                 if (indexLimit >= 0) {
                                                     if (charts['current'][type]['data']['datasets'][indexLimit]['data'].length >= 13) {
                                                         charts['current'][type]['data']['datasets'][indexLimit]['data'] = [];
@@ -3388,7 +3423,7 @@
                                                 charts['current'][type]['options']['scales']['x']['min'] = labels[0];
                                                 charts['current'][type]['options']['scales']['x']['max'] = labels[labels.length -1];
                                                 charts['current'][type].update('none'); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
-                                                let lastCurrentValue = charts['current'][type]['data']['datasets'][indexCurrent]['data'][11]['y'];
+                                                let lastCurrentValue = charts['current'][type]['data']['datasets'][indexCurrent]['data'][labels.length -1]['y'];
                                                 if (lastCurrentValue > response['limits'][type]['upperWarningLimit'] && lastCurrentValue < response['limits'][type]['upperControlLimit']) {
                                                     switchAlert(type, 'warning');
                                                 } else if (lastCurrentValue > response['limits'][type]['upperControlLimit']) {
