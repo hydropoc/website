@@ -3295,6 +3295,7 @@
                             timeout: 10000,
                         })
                             .done(function (response) {
+                                response["sensors"].reverse();
                                 let types = Object.getOwnPropertyNames(response['limits']);
                                 let labels = [];
                                 let indexCurrent = -1;
@@ -3452,6 +3453,9 @@
                         });
                     }
                 }, 5000);*/
+                if (window.location.hash) {
+                    $("a[href='" + window.location.hash + "']").first().click();
+                }
             });
         </script>
         <style>
