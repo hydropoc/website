@@ -381,8 +381,12 @@
                             charts['history']['data']['labels'] = [];
                             //let labelCount = charts["historyLabelCount"][Number.parseInt($('#historyTimespan').val())];
                             let labelCount = 60;
+                            let limits = Object.getOwnPropertyNames(response['limits']);
                             let indexMeasured = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'measured');
                             let indexMiddle = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'middle');
+                            let indexHighest = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'highest');
+                            let indexLowest = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'lowest');
+
                             if (indexMeasured >= 0) {
                                 charts['history']['data']['datasets'][indexMeasured]['data'] = [];
                             }
@@ -398,20 +402,13 @@
                                         labels.push(formatDate(date));
                                     //}
                                     charts['history']['data']['labels'].push(date);
-
                                     if (indexMeasured >= 0) {
-                                        //if (charts['history']['data']['datasets'][indexMeasured]['data'].length >= labelCount) {
-                                        //    charts['history']['data']['datasets'][indexMeasured]['data'] = [];
-                                        //}
                                         charts['history']['data']['datasets'][indexMeasured]['data'].push({ x: date, y: sensorData[sensor] });
                                     }
                                     if (indexMiddle >= 0) {
-                                        //if (charts['history']['data']['datasets'][indexMiddle]['data'].length >= labelCount) {
-                                        //    charts['history']['data']['datasets'][indexMiddle]['data'] = [];
-                                        //}
                                         charts['history']['data']['datasets'][indexMiddle]['data'].push({ x: date, y: sensorData[sensor] });
                                     }
-                                    let limits = Object.getOwnPropertyNames(response['limits']);
+                                    /*
                                     for (limit of limits) {
                                         let indexLimit = charts['history']['data']['datasets'].findIndex(key => key['stack'] === limit);
                                         if (indexLimit >= 0) {
@@ -422,21 +419,20 @@
                                             charts['history']['data']['datasets'][indexLimit]['data'].push({ x: date, y: response['limits'][limit] });
                                             }
                                         }
-                                    }
                                 }
-                                /*
-                                let indexHighest = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'highest');
-                                let indexLowest = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'lowest');
-                                if (indexHighest >= 0) {
-                                    let dateHighest = new Date(Number.parseInt(response['minMax']['maximum']['timestamp']));
-                                    charts['history']['data']['datasets'][indexHighest]['data'] = [{ x: dateHighest.toLocaleTimeString(), y: response['minMax']['maximum']['value'] }];
-                                }
-                                if (indexLowest >= 0) {
-                                    let dateLowest = new Date(Number.parseInt(response['minMax']['minimum']['timestamp']));
-                                    charts['history']['data']['datasets'][indexLowest]['data'] = [{ x: dateLowest.toLocaleTimeString(), y: response['minMax']['minimum']['value'] }];
+                            }
+                            if (indexHighest >= 0) {
+                                let dateHighest = formatDate(Number.parseInt(response['minMax']['maximum']['timestamp']), ["date"]) + "@" + formatDate(Number.parseInt(response['minMax']['maximum']['timestamp']), ["time"]);
+                                charts['history']['data']['datasets'][indexHighest]['data'] = [{ x: dateHighest, y: response['minMax']['maximum']['value'] }];
+                            }
+                            if (indexLowest >= 0) {
+                                let dateLowest = formatDate(Number.parseInt(response['minMax']['minimum']['timestamp']), ["date"]) + "@" + formatDate(Number.parseInt(response['minMax']['minimum']['timestamp']), ["time"]);
+                                    //new Date(Number.parseInt(response['minMax']['minimum']['timestamp']));
+                                    charts['history']['data']['datasets'][indexLowest]['data'] = [{ x: dateLowest, y: response['minMax']['minimum']['value'] }];
                                 }
                                 */
                             }
+                        }
                             charts['history']['options']['scales']['x']['min'] = labels[0];
                             charts['history']['options']['scales']['x']['max'] = labels[labels.length -1];
                             charts['history'].update('none');
@@ -1078,153 +1074,6 @@
                 */
             }
             /*
-            function editUser(user) {
-                // Solange man nicht Projektadministrator ist, soll man nur sich selbst bearbeiten können?
-                let index = userAccounts.findIndex(key => key["id"] === user);
-                if (index >= 0) {
-                    let content = "<div><label for='userNameInput' class='form-label'>Benutzername:</label><input type='text' class='form-control' id='userNameInput' placeholder='Benutzernamen eingeben'></div>";
-                    content += "<div class='mt-3'><label for='userSurnameInput' class='form-label'>Nachname:</label><input type='text' class='form-control' id='userSurnameInput' placeholder='Nachnamen eingeben'></div>";
-                    content += "<div class='mt-3'><label for='userFornameInput' class='form-label'>Vorname:</label><input type='text' class='form-control' id='userFornameInput' placeholder='Vornamen eingeben'></div>";
-                    content += "<div class='mt-3'><label for='oldPasswordInput' class='form-label'>Altes Passwort:</label><input type='password' class='form-control' id='oldPasswordInput' placeholder='Altes Passwort eingeben'></div>";
-                    content += "<div class='mt-3'><label for='newPasswordInput' class='form-label'>Neues Passwort:</label><input type='password' class='form-control' id='newPasswordInput' placeholder='Neues Passwort eingeben'></div>";
-                    let data = {
-                        modal: {
-                            name: "editUser"
-                        },
-                        title: {
-                            text: "Benutzer " + userAccounts[index]["fullname"] + " (ID: " + userAccounts[index]["id"] + ") bearbeiten"
-                        },
-                        content: {
-                            text: content
-                        },
-                        footer: {
-                            buttons: {
-                                default: {
-                                    text: "Abbrechen",
-                                    class: "btn-danger"
-                                },
-                                custom: [
-                                    {
-                                        text: "Speichern",
-                                        class: "btn-primary",
-                                        attributes: {
-                                            id: "saveEditedUserButton"
-                                        },
-                                        actions: [
-                                            {
-                                                click: [
-                                                    {
-                                                        function: function() {
-                                                            if ($("#body-overlay").length == 0) {
-                                                                $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
-                                                            }
-                                                            if ($("#saveEditedUserButton").find("[data-processing='true']").length == 0) {
-                                                                $("#saveEditedUserButton").attr("disabled", "disabled").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
-                                                            }
-                                                            $("#mainModal .modal-footer > button").attr("disabled", "disabled");
-                                                            $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
-                                                            $("#mainModal .modal-body > .alert").remove();
-                                                            $.post("lol", {
-                                                                user: userAccounts[index]["id"],
-                                                                username: $("#userNameInput").val(),
-                                                                surname: $("#userSurnameInput").val(),
-                                                                forename: $("#userFornameInput").val()
-                                                            }).done(function(response) {
-                                                            }).fail(function(response) {
-                                                                $("#mainModal .modal-body").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
-                                                            }).always(function() {
-                                                                $("#saveEditedUserButton").find("[data-processing='true']").remove();
-                                                                $("#saveEditedUserButton").removeAttr("disabled");
-                                                                $("#body-overlay").remove();
-                                                                $("#mainModal .modal-footer > [data-bs-dismiss='modal']").removeAttr("disabled");
-                                                                $("#mainModal .modal-header > [data-bs-dismiss='modal']").removeAttr("disabled");
-                                                            });
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                    Modal.create(data);
-                };
-            }
-            function createNewUser() {
-                let content = "<div><label for='newUserUsernameInput' class='form-label'>Benutzername:</label><input type='text' class='form-control' id='newUserUsernameInput' placeholder='Benutzername eingeben'></div>";
-                content += "<div class='mt-3'><label for='newUserSurnameInput' class='form-label'>Nachname:</label><input type='text' class='form-control' id='newUserSurnameInput' placeholder='Nachnamen eingeben'></div>";
-                content += "<div class='mt-3'><label for='newUserFornameInput' class='form-label'>Vorname:</label><input type='text' class='form-control' id='newUserFornameInput' placeholder='Vornamen eingeben'></div>";
-                let data = {
-                    modal: {
-                        name: "addNewUser"
-                    },
-                    title: {
-                        text: "Neuen Benutzer erstellen"
-                    },
-                    content: {
-                        text: content
-                    },
-                    footer: {
-                        buttons: {
-                            default: {
-                                text: "Abbrechen",
-                                class: "btn-danger",
-                                attributes: {
-                                    id: "Fritz"
-                                }
-                            },
-                            custom: [
-                                {
-                                    text: "Speichern",
-                                    class: "btn-primary",
-                                    attributes: {
-                                        id: "saveNewUserButton"
-                                    },
-                                    actions: [
-                                        {
-                                            click: [
-                                                {
-                                                    function: function() {
-                                                        if ($("#body-overlay").length == 0) {
-                                                            $("body").prepend("<div id='body-overlay' style='background-color: transparent'></div>");
-                                                        }
-                                                        if ($("#saveNewUserButton").find("[data-processing='true']").length == 0) {
-                                                            $("#saveNewUserButton").attr("disabled", "disabled").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
-                                                        }
-                                                        $("#mainModal .modal-footer > button").attr("disabled", "disabled");
-                                                        $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr("disabled", "disabled");
-                                                        $("#mainModal .modal-body > .alert").remove();
-                                                        $.post("lol", {
-                                                            username: $("#newUserUsernameInput").val(),
-                                                            surname: $("#newUserSurnameInput").val(),
-                                                            forename: $("#newUserFornameInput").val()
-                                                        }).done(function(response) {
-                                                        }).fail(function(response) {
-                                                            $("#mainModal .modal-body").prepend(Alert.create("danger", response["status"] + ": " + response["statusText"]));
-                                                        }).always(function() {
-                                                            $("#saveNewUserButton").find("[data-processing='true']").remove();
-                                                            $("#saveNewUserButton").removeAttr("disabled");
-                                                            $("#body-overlay").remove();
-                                                            $("#mainModal .modal-footer > [data-bs-dismiss='modal']").removeAttr("disabled");
-                                                            $("#mainModal .modal-header > [data-bs-dismiss='modal']").removeAttr("disabled");
-                                                        });
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    }
-                };
-                Modal.create(data);
-            }
-            */
-
-            /*
             function fillPlantInputs(wtf = null) {
                 let selectedPlant = Number.parseInt(wtf);
                 let index = plantProperties.findIndex(key => key["id"] === selectedPlant);
@@ -1415,19 +1264,19 @@
             });
             $(document).on('DOMContentLoaded', function () {
                 $.get({
-                    url: "http://192.168.20.31:3000",
+                    url: "http://192.168.20.31:3005",
                         crossDomain: true,
                         timeout: 3000,
                         data: JSON.stringify({data: "lol"})
                 }).done(function(response) {
                     Object.defineProperty(window, "apiURL", {
-                        value: "http://192.168.20.31:3000/api",
+                        value: "http://192.168.20.31:3005/api",
                         configurable: false,
                         writable: false
                     });
                 }).fail(function(response) {
                     Object.defineProperty(window, "apiURL", {
-                        //value: "http://10.20.45.5:3000/api",
+                        //value: "http://10.20.45.5:3005/api",
                         value: "http://hydropoc.api.jongmans.net/api",
                         configurable: false,
                         writable: false
@@ -3443,7 +3292,7 @@
                                 }
                             })
                             .fail(function (response) {
-                                $('#historyGallery').prepend(Alert.create('danger', response['status'] + ': ' + response['statusText']));
+                                $('#overview > .legendContainer').first().after(Alert.create('danger', response['status'] + ': ' + response['statusText'], { class: "mt-3" }));
                             })
                             .always(function () {
                                 isLoadingCurrentChartData = false;
@@ -3524,8 +3373,11 @@
                 }, 5000);*/
                 if (window.location.hash) {
                     let hash = window.location.hash;
-                    if (hash.substr(1).length >= 1) {
-                        $("a[href='" + window.location.hash + "']").first().click();
+                    let hashString = hash.substr(1);
+                    if (hashString.length >= 1) {
+                        if (!getCookie("authToken").length >= 1 && hashString !== "login") {
+                            $("a[href='" + hash + "']").first().click();
+                        }
                     }
                 }
             });
