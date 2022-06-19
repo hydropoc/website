@@ -46,12 +46,12 @@
                     co2_level: [0, 1000],
                     ec_value: [200, 1400],
                 },
-                historyLabelCount: {
-                    86400: 95,
-                    43200: 48,
-                    21600: 24,
-                    10800: 12,
-                    3600: 12
+                historyLabelInterval: {
+                    86400: 60, // stündlich
+                    43200: 30, // stündlich
+                    21600: 30, // halbstündlich
+                    10800: 15*4, // viertelstündlich
+                    3600: 15 // minütlich
                 }
             };
             const dataTablesLocalisation = {
@@ -351,14 +351,15 @@
                 }
                 return gradient;
             }
+            function formatDate2(string) {
+                return string.substring(8, 10) + "." + string.substring(5, 7) + "." + string.substring(2, 4) + "@" + string.substring(11, 19);
+            }
             function getHistoryChartData(sensor) {
                 if (!isLoadingHistoryChartData) {
                     isLoadingHistoryChartData = true;
                     $('#historyTimespan').attr('disabled', 'disabled').after("<span class='spinner-border ms-2 text-primary kreiselchen' style='flex: 0 0 auto' data-processing='true'></span>");
                     $.post({
                         // daten werden alle 15 sekunden gemessen
-                        // labelabstand mittels anzahl arrays in response geteilt durch zb. 96 (für 96 labels) berechnen
-                        // daten einfügen wenn moduloperation 0 ergibt?
                         url: window.apiURL + '/sensor/data_sensor',
                         data: JSON.stringify({
                             sensor: sensor,
@@ -370,36 +371,36 @@
                         timeout: 10000,
                     })
                         .done(function (response) {
-                            // alle 15 sek. messung *4 = 1 min.
-                            // 24 std. = 1440 min. = 60 label (alle 60 min.)
-                            // 12 std. = 720 min. = 60 label (alle 30 min.)
-                            // 6 std. = 360 min. = 60 label (alle 15 min.) 
-                            // 3 std. = 180 min. = 60 label (alle 180 sek.)
-                            // 1 std. = 60 min. = 60 label (alle 60 sek.)
+                            // alle 15 sek. messung = 1 min.
+                            // 24 std. = 1440 min. = (alle 60 min.)
+                            // 12 std. = 720 min. = (alle 30 min.)
+                            // 6 std. = 360 min. = (alle 15 min.) 
+                            // 3 std. = 180 min. (alle 180 sek.) mit 15 rechnen (teilen)
+                            // 1 std. = 60 min. = (alle 60 sek.) mit 15 rechnen (teilen)
                             let labels = [];
                             response["sensors"].reverse();
                             charts['history']['data']['labels'] = [];
-                            //let labelCount = charts["historyLabelCount"][Number.parseInt($('#historyTimespan').val())];
-                            let labelCount = 60;
+                            let labelCount = Math.round(response["sensors"].length /15);
                             let limits = Object.getOwnPropertyNames(response['limits']);
                             let indexMeasured = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'measured');
                             let indexMiddle = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'middle');
                             let indexHighest = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'highest');
                             let indexLowest = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'lowest');
-
                             if (indexMeasured >= 0) {
                                 charts['history']['data']['datasets'][indexMeasured]['data'] = [];
                             }
                             if (indexMiddle >= 0) {
                                 charts['history']['data']['datasets'][indexMiddle]['data'] = [];
                             }
-                            //let responseLength = response["sensors"].length;
                             for (let [iteration, sensorData] of response['sensors'].entries()) {
                                 // wenn 0 dann 1 min.
+                                let wtf = Number.parseInt(sensorData['timestamp']);
                                 if (iteration % 15 === 0) {
-                                    let date = formatDate(Number.parseInt(sensorData['timestamp']), ["date"]) + "@" + formatDate(Number.parseInt(sensorData['timestamp']), ["time"]);
+                                    let time = new Date(Number.parseInt(sensorData['timestamp']));
+                                    let date = formatDate2(time.toISOString());
+                                    //formatDate(Number.parseInt(sensorData['timestamp']), ["date"]) + "@" + formatDate(Number.parseInt(sensorData['timestamp']), ["time"]);
                                     //if (labels.length <= labelCount) {
-                                        labels.push(formatDate(date));
+                                        labels.push(date);
                                     //}
                                     charts['history']['data']['labels'].push(date);
                                     if (indexMeasured >= 0) {
@@ -419,20 +420,27 @@
                                             charts['history']['data']['datasets'][indexLimit]['data'].push({ x: date, y: response['limits'][limit] });
                                             }
                                         }
+                                    }
+                                    if (indexHighest >= 0) {
+                                        let dateHighest = formatDate(Number.parseInt(response['minMax']['maximum']['timestamp']), ["date"]) + "@" + formatDate(Number.parseInt(response['minMax']['maximum']['timestamp']), ["time"]);
+                                        charts['history']['data']['datasets'][indexHighest]['data'] = [{ x: dateHighest, y: response['minMax']['maximum']['value'] }];
+                                    }
+                                    if (indexLowest >= 0) {
+                                        let dateLowest = formatDate(Number.parseInt(response['minMax']['minimum']['timestamp']), ["date"]) + "@" + formatDate(Number.parseInt(response['minMax']['minimum']['timestamp']), ["time"]);
+                                            //new Date(Number.parseInt(response['minMax']['minimum']['timestamp']));
+                                            charts['history']['data']['datasets'][indexLowest]['data'] = [{ x: dateLowest, y: response['minMax']['minimum']['value'] }];
+                                        }
+                                    */
+                                    }
+                                    if (iteration === labelCount) {
+                                        let lol = response["sensors"].findIndex(key => key['timestamp'] === wtf);
+                                        console.log(response["sensors"][lol+15]);
+                                        let time_ = new Date(Number.parseInt(response["sensors"][lol+15]['timestamp']));
+                                        let date_ = time_.toISOString();
+                                        labels.push(formatDate2(date_));
+                                        charts['history']['data']['datasets'][indexMeasured]['data'].push({ x: formatDate2(date_), y: lol[sensor] });
+                                    }
                                 }
-                            }
-                            if (indexHighest >= 0) {
-                                let dateHighest = formatDate(Number.parseInt(response['minMax']['maximum']['timestamp']), ["date"]) + "@" + formatDate(Number.parseInt(response['minMax']['maximum']['timestamp']), ["time"]);
-                                charts['history']['data']['datasets'][indexHighest]['data'] = [{ x: dateHighest, y: response['minMax']['maximum']['value'] }];
-                            }
-                            if (indexLowest >= 0) {
-                                let dateLowest = formatDate(Number.parseInt(response['minMax']['minimum']['timestamp']), ["date"]) + "@" + formatDate(Number.parseInt(response['minMax']['minimum']['timestamp']), ["time"]);
-                                    //new Date(Number.parseInt(response['minMax']['minimum']['timestamp']));
-                                    charts['history']['data']['datasets'][indexLowest]['data'] = [{ x: dateLowest, y: response['minMax']['minimum']['value'] }];
-                                }
-                                */
-                            }
-                        }
                             charts['history']['options']['scales']['x']['min'] = labels[0];
                             charts['history']['options']['scales']['x']['max'] = labels[labels.length -1];
                             charts['history'].update('none');
@@ -4597,7 +4605,6 @@
                             </div>
                         </div>
                         <div class="tab-pane fade" id="administration">
-                            <!--
                             <div id="plants-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
@@ -4633,14 +4640,30 @@
                                                 <div class="tab-pane" id="plantsAdminOptionContainer">
                                                     <div class="d-flex mt-3" id="plantOptionMenu">
                                                         <div id="plantOptionNavigation" class="list-group col-md-2 position-relative align-self-start">
+                                                            <a class="list-group-item list-group-item-action" href="#plantOptionCo2LevelSection">Co²-Gehalt</a>
+                                                            <a class="list-group-item list-group-item-action" href="#plantOptionAirTemperatureSection">Lufttemperatur</a>
                                                             <a class="list-group-item list-group-item-action" href="#plantOptionWaterTemperatureSection">Wassertemperatur</a>
+                                                            <a class="list-group-item list-group-item-action" href="#plantOptionHumiditySection">Luftfeuchtigkeit</a>
                                                             <a class="list-group-item list-group-item-action" href="#plantOptionPhSection">pH-Wert</a>
-                                                            <a class="list-group-item list-group-item-action" href="#plantOptionSalinitySection">Salzgehalt</a>
+                                                            <a class="list-group-item list-group-item-action" href="#plantOptionEcSection">Elektrischer Leitwert</a>
+                                                            <a class="list-group-item list-group-item-action" href="#plantOptionWaterLevel1Section">Wasserstand #1</a>
+                                                            <a class="list-group-item list-group-item-action" href="#plantOptionWaterLevel2Section">Wasserstand #2</a>
+                                                            <a class="list-group-item list-group-item-action" href="#plantOptionWaterLevel3Section">Wasserstand #3</a>
                                                         </div>
                                                         <div data-bs-spy="scroll" data-bs-target="#plantOptionNavigation" data-bs-offset="0" class="col-md-10 position-relative" id="plantOptionContainer">
                                                             <div id="plantOptionsFormContainer" class="p-3">
                                                                 <form enctype="text/plain" method="post" action="/" id="plantOptionsForm" class="w-100">
                                                                     <input type="submit" class="d-none" id="savePlantOptionsSubmit">
+                                                                    <div class="row">
+                                                                        <div class="mt-2 col-md-6">
+                                                                            <label for="plantOptionECValueUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionSalinityUpperWarningLimitInput" aria-label="Obere Warngrenze für Salzgehalt" aria-describedby="plantOptionSalinityUpperWarningLimitInput">
+                                                                        </div>
+                                                                        <div class="mt-2 col-md-6">
+                                                                            <label for="plantOptionSalinityLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
+                                                                            <input required type="text" class="form-control col-md-6" id="plantOptionSalinityLowerWarningLimitInput" aria-label="Untere Warngrenze für Salzgehalt" aria-describedby="plantOptionSalinityLowerWarningLimitInput">
+                                                                        </div>
+                                                                    </div>
                                                                     <h5 id="plantOptionWaterTemperatureSection" class="col-md-12">Wassertemperatur</h5>
                                                                     <div class="row">
                                                                         <div class="mt-2 col-md-6">
@@ -4698,7 +4721,7 @@
                                                                         </div>
                                                                     </div>
                                                                     <div class="row">
-                                                                        <h5 id="plantOptionSalinitySection" class="mt-4 col-md-12">Salzgehalt</h5>
+                                                                        <h5 id="plantOptionECLevelSection" class="mt-4 col-md-12">Elektrischer Leitwert</h5>
                                                                     </div>
                                                                     <div class="row">
                                                                         <div class="mt-2 col-md-6">
@@ -4730,15 +4753,15 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="mt-4 d-flex align-content-center align-items-center justify-content-end" style="gap: 5px">
-                                                        <button type="button" class="btn btn-success" id="savePlantOptions"><i class="fas fa-plus"></i> Speichern</button>
+                                                    <div class="mt-4 d-flex formContainer justify-content-end" style="gap: 5px">
+                                                        <button type="button" class="btn btn-success" id="savePlantOptions">Speichern</button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>-->
+                            </div>
                             <!--<div id="pump-actions-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
@@ -4812,7 +4835,7 @@
                                                     <tr>
                                                         <th>ID</th>
                                                         <th>Zeitpunkt</th>
-                                                        <th>Typ</th>
+                                                        <th>Kategorie</th>
                                                         <th>Nachricht</th>
                                                     </tr>
                                                 </thead>
