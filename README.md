@@ -1,10 +1,25 @@
-# Variablen
+# Über die Webseite
 
+Die wunderhübsche Webseite wurde zu 100% manuell erstellt, also ohne die Hilfe von Baukasten- oder ähnlicher Software. Neben einer Desktopansicht bietet sie auch eine mobile Ansicht, was vermutlich weniger bekannt ist. Trotz Sorgfalt kann es sein, dass nicht alle Funktionen dokumentiert wurden, weil sie entweder übersehen oder nicht genutzt werden und vergessen wurden, zu entfernen. Es werden hier nur Codes dokumentiert, die selber produziert oder als "Schnippsel" im Internet gefunden wurden. Für die Funktionsweisen der eingesetzten Bibliotheken müssen daher ihre jeweils eigenen Dokumentationen zur Rate gezogen werden.
+
+## Eingesetzte Bibliotheken
+* jQuery 3.6.0 - https://api.jquery.com/
+* DataTables 1.11.4 - https://datatables.net/manual/index
+* Bootstrap 5.1.3 - https://getbootstrap.com/docs/5.1/
+* Charts.js 3.8.0 - https://www.chartjs.org/docs/
+* Litepicker 2.0.12 - https://litepicker.com/
+
+## Inhaltsverzeichnis
+* [Variablen](#variables)
+
+
+# Variablen {#variables}
+  * [ajaxRequestErrors](#ajaxRequestErrors)
 ```js
 const charts;
 ```
 
-Eine globale Variable, in dem alle Diagramme gespeichert werden sowie die Skalierungswerte gespeichert sind.
+Eine globale Variable, in der alle Diagramme gespeichert werden sowie die Skalierungswerte gespeichert sind.
 
 ```js
 const dataTablesLocalisation;
@@ -12,17 +27,23 @@ const dataTablesLocalisation;
 
 Eine globale Variable, in dem Übersetzungen für die „dataTables“-Bibliothek gespeichert sind.
 
+```js {#ajaxRequestErrors}
+const ajaxRequestErrors;
+```
+
+Eine globale Variable, in der sinngemäße Beschreibungen zu Fehlercodes gespeichert sind, die vom Server bei einer Anfrage zurückgegeben werden, wenn ein Vorgang fehlschlägt.
+
 ```js
 const dataTablesAdminOptions;
 ```
 
-Eine globale Variable, in dem alle DataTables-Konfigurationen für die Tabellen auf der Administrationsseite gespeichert sind.
+Eine globale Variable, in der alle DataTables-Konfigurationen für die Tabellen auf der Administrationsseite gespeichert sind.
 
 ```js
 const adminDataTables;
 ```
 
-Ein globale Variable, in dem alle aktuellen DataTables für die Tabellen auf der Administrationsseiten gespeichert werden.
+Ein globale Variable, in der alle aktuellen DataTables für die Tabellen auf der Administrationsseiten gespeichert werden.
 
 ```js
 var viewportWidth;
@@ -46,7 +67,7 @@ Eine globale Variable, die aussagt, ob momentan neue Messdaten für den Verlauf 
 var systemInfosTimer = null;
 ```
 
-Eine globale Variable, die den Timer zum Aktualisieren der Systeminformationen im entsprechenden Dialog speichert.
+Eine globale Variable, die den Timer zum Aktualisieren der Systeminformationen im entsprechenden Dialog speichert, damit man ebendiesen Timer beim Schließen des Dialogs beenden kann.
 
 ```js
 var isLoadingSystemInfos = false;
@@ -66,13 +87,13 @@ Eine globale Variable, die eine neue Instanz des LitePickers speichert, der auf 
 function getCSSVar(val) { ... };
 ```
 
-Diese Funktion holt sich den Wert der angegebenen CSS-Variable. Existiert keine entsprechende Variable, wird stattdessen eine leere Zeichenkette zurückgegeben.
+Diese Funktion holt sich den Wert der angegebenen CSS-Variable. Existiert keine entsprechende Variable, wird stattdessen eine leere Zeichenkette (`""`) zurückgegeben.
 
 ```js
 function getGradient(context, chartArea, data) { ... };
 ```
 
-Diese Funktion erstellt für ein jeweiliges Diagramm einen Farbverlauf, um so ein Flächendiagramm zu erzeugen. Dies ist für die Anzeige von Pumpenaktivitäten wichtig.
+Diese Funktion erstellt für ein jeweiliges Diagramm einen Farbverlauf, um so ein Flächendiagramm zu erzeugen. Dies ist für die Anzeige von Pumpenaktivitäten nötig.
 
 ```js
 function togglePump(pump) { ... };
@@ -102,13 +123,13 @@ Erweitert den Prototyp von `Number`-Klassen (also den Datentyp Integer) um die F
 function getHistoryChartData(sensor) { ... };
 ```
 
-Diese Funktion lädt den Messwertverlauf des angegebenen Sensors mittels einer Serveranfrage und verabeitet die Daten so, dass pro Minute ein Messwert im jeweiligen Diagramm angezeigt wird. Wenn die Anfrage fehlschlug, wird stattdessen eine Fehlermeldung angezeigt.
+Diese Funktion lädt den Messwertverlauf des angegebenen Sensors mittels einer Serveranfrage und verabeitet die Daten so, dass diese im jeweiligen Diagramm korrekt angezeigt wird. Wenn die Anfrage fehlschlug, wird stattdessen eine Fehlermeldung angezeigt.
 
 ```js
 function readjustTables() { ... };
 ```
 
-Holt sich in einer Schleife die HTML-Elemente aller im Array stehenden Dropdown-Menüs auf der Administrationssicht und die Namen der Tabellen, die sich in den Dropdown-Menüs befinden. Dann wird überprüft, ob es DataTables-Instanzen dieser Tabellen gibt und die Dropdowns ausgeklappt sind. Wenn beides der Fall ist, werden die Layouts der jeweiligen Tabellen neu berechnet. Dies ist nötig, wenn sich die Fenstergröße ändert, während die Tabellen ausgeblendet waren, da diese sonst beim nächsten Anzeigen falsch dargestellt werden.
+Holt sich in einer Schleife die HTML-Elemente aller im Array stehenden Dropdown-Menüs auf der Administrationssicht und die Namen der Tabellen, die sich in den Dropdown-Menüs befinden. Wenn es DataTables-Instanzen dieser Tabellen gibt und die Dropdowns ausgeklappt sind, werden die Layouts der jeweiligen Tabellen neu berechnet. Dies ist nötig, wenn sich die Fenstergröße geändert hat, während die Tabellen ausgeblendet waren, da diese sonst beim nächsten Anzeigen falsch dargestellt werden.
 
 ```js
 function updateSystemInfos() { ... };
@@ -150,11 +171,11 @@ constructor(type, message, options = {}) { ... };
 
 Der Konstruktor, der bei der Erzeugung eines neuen Objekts immer automatisch aufgerufen wird. Das Argument `type` gibt die Art der Meldung an und `message` die anzuzeigende Nachricht innerhalb der Meldung. Das Argument `options` ist optional und kann folgende Optionen festlegen:
 
-* `id?` (string) – Legt eine benutzerdefinierte ID für die Meldung, statt einer automatisch erzeugten, fest.
-* `closeable?` (bool) – Legt fest, ob die Meldung ausgeblendet werden kann.
-* `class?` (string) – Legt zusätzliche benutzerdefinierte CSS-Klassen für die Meldung fest.
+* `id?` (string) - Legt eine benutzerdefinierte ID für die Meldung, statt einer automatisch erzeugten, fest.
+* `closeable?` (bool) - Legt fest, ob die Meldung ausgeblendet werden kann.
+* `class?` (string) - Legt zusätzliche benutzerdefinierte CSS-Klassen für die Meldung fest.
 
-Sollte das Argument `type` nicht in der statischen Eigenschaft `type` vorhanden sein, wird diesem stattdessen der Wert `info` zugewiesen. Handelt es sich beim Argument `message` um ein Array, wird der Variable `text` eine unsortierte HTML-Liste zugewiesen, die jedes Element des Arrays als Listenelement auflistet, ansonsten direkt den Wert von `message`. Ist keine benutzerdefinierte ID angegeben, wird der Variable `id` mittels des aktuellen Datums und einer zufälligen Zahl automatisch eine erzeugt. Sollte es bereits eine gleiche generierte ID geben (auch wenn es unwahrscheinlich wäre), wird in einer Schleife solange eine neue ID erzeugt, bis eine ungenutzte ermittelt wurde. Wenn eine benutzerdefinierte ID verwendet wird, wird geprüft, ob diese bereits einem beliebigen HTML-Element zugeordnet wurde und gibt ggf. eine Fehlermeldung aus. Dann wird die Variable `element` deklariert, die der HTML-Code der Meldung zugewiesen werden soll. Der Variable `closeable` wird entweder der Wert `true` oder `false` zugewiesen, je nachdem, welcher Wert übergeben wurde, um festzulegen, ob die anzuzeigende Meldung geschlossen werden kann. Der Variable `classes` werden, wenn angegeben und gültige Werte übergeben wurden, zusätzliche CSS-Klassen als Zeichenkette zugewiesen. Der Variable `element` wird dann die mittels angegebener Optionen dynamisch erzeugten Bootstrap-Meldung zugewiesen. Die ID der Meldung wird dann zur statischen Klassenvariable `alerts` hinzugefügt. Der nun erzeugten Instanz werden die übergebenen Argumente zugewiesen, um auf sie zugreifen zu können. Zusätzlich erhält sie noch ein Ereignis, welches die ID der Meldung aus der statischen Klassenvariable `alerts` entfernt, wenn die Meldung geschlossen wurde.
+Sollte das Argument `type` nicht in der statischen Eigenschaft `type` vorhanden sein, wird diesem stattdessen der Wert `info` zugewiesen. Handelt es sich beim Argument `message` um ein Array, wird der Variable `text` eine unsortierte HTML-Liste zugewiesen, die jedes Element des Arrays als Listenelement auflistet, ansonsten direkt den Wert von `message`. Ist keine benutzerdefinierte ID angegeben, wird der Variable `id` eine automatisch erzeugte zugewiesen. Wenn eine benutzerdefinierte ID verwendet wird, wird geprüft, ob diese bereits einem beliebigen HTML-Element zugeordnet wurde und gibt ggf. eine Fehlermeldung aus. In der Variable `element` wird der HTML-Code der Meldung gespeichert. Zusätzlich erhält sie noch ein Ereignis, welches die ID der Meldung aus der statischen Klassenvariable `alerts` entfernt, wenn die Meldung geschlossen wurde.
 
 ```js
 destroy() { };
@@ -184,25 +205,25 @@ static create(data = {}) { ... };
 
 Eine statische Methode, mit der der Dialog angepasst und angezeigt wird. Folgende Optionen stehen zur Anpassung im Argument `data` zur Verfügung:
 
-* `size?` (string) - \[`sm`|`default`|`lg`|`xl`|`fullscreen`\] Legt die Größe des Dialogs fest. Wenn kein Wert angegeben wurde, wird `default` verwendet.
-* `static?` (bool) - \[`true`|`false`\] Legt fest, ob der Dialog nicht geschlossen werden soll, wenn außerhalb diesem geklickt oder die Esc-Taste gedrückt wird.
-* `name` - (string) Legt den Namen für den Dialog fest.
-* `events?` (object) - \[`show`|`shown`|`hide`|`hidden`\] Legt benutzerdefinierte Ereignisse für den Dialog fest. Mehrere Ereignisse können durch Komma getrennt werden.
+* `size?` (string) \[`sm`|`default`|`lg`|`xl`|`fullscreen`\] - Legt die Größe des Dialogs fest. Wenn kein Wert angegeben wurde, wird `default` verwendet.
+* `static?` (bool) \[`true`|`false`\] - Legt fest, ob der Dialog nicht geschlossen werden soll, wenn außerhalb diesem geklickt oder die Esc-Taste gedrückt wird.
+* `name` (string) - Legt den Namen für den Dialog fest.
+* `events?` (object) \[`show`|`shown`|`hide`|`hidden`\] - Legt benutzerdefinierte Ereignisse für den Dialog fest. Mehrere Ereignisse können durch Komma getrennt werden.
   * `[Ereignis]` (string) - Name des Ereignisses.
-    * `function` - (function) Die Funktion, die beim Ereignis ausgeführt wird. Diese muss eine anonyme Funktion sein, d.h. ohne Namen.
-    * `args?` (string) - Argumente, die an die Funktion übergeben werden können.
+    * `function` (function|string) - Die Funktion oder der Name der Funktion, die, bzw. der beim Ereignis aufgerufen wird. Wenn eine "echte" Funktion angegeben wurde, muss diese eine anonyme Funktion sein, d.h. ohne Namen.
+    * `args?` (string) - Argumente, die an die Funktion übergeben werden können. Wenn eine echte Funktion angegeben wurde, wird dieses Argument ignoriert, da Argumente auch in der echten Funktion übergeben werden können.
 * `title?` (string) - Legt den Titel des Dialogs fest, der oben angezeigt wird.
 * `content?` (string) - Legt den Inhalt des Dialogs fest.
   * `text?` (string) - Der Inhalt des Dialogs. Dieser muss eine Zeichenkette sein und kann HTML-Code enthalten.
   * `options?` (object) - Legt Optionen für den Dialoginhalt fest.
     * `scroll?` (bool) - Legt fest, ob der Inhalt des Dialogs scrollbar wird, wenn zu viel Inhalt angezeigt wird.
-    * `align?` (bool)- \[`left`|`center`|`right`\] Legt die Ausrichtung des Dialoginhalts fest. Wenn kein Wert angegeben wurde, wird standardmäßig `center` verwendet.
+    * `align?` (bool) \[`left`|`center`|`right`\] - Legt die Ausrichtung des Dialoginhalts fest. Wenn kein Wert angegeben wurde, wird standardmäßig `center` verwendet.
 * `footer?` (object) - Legt den Inhalt für den Footer des Dialogs fest.
   * `buttons?` (array) - Legt Optionen für Schaltflächen im Footer fest.
     * `default?` (object) - Legt Optionen für die Standardschaltfläche fest.
       * `text?` (string) - Legt den Inhalt der Standardschaltfläche fest.
       * `class?` (string) - Legt zusätzliche CSS-Klassen als Zeichenkette fest.
-      * `display?` (bool) - \[`true`|`false`\] - Legt fest, ob die Standardschaltfläche angezeigt wird. Wenn kein Wert angegeben wurde, wird `true` verwendet.
+      * `display?` (bool) \[`true`|`false`\] - Legt fest, ob die Standardschaltfläche angezeigt wird. Wenn kein Wert angegeben wurde, wird `true` verwendet.
       * `attributes?` (object) - Legt zusätzliche HTML-Attribute für die Standardschaltfläche fest.
         * `[Attribut]?` (string) - Legt den Wert des angegebenen HTML-Attributs fest.
     * `custom?` (array) - Legt zusätzliche benutzerdefinierte Schaltflächen fest. Mehrere Schaltflächen können durch Komma getrennt definier werde, wobei diese vom Objekt sein müssen.
@@ -211,9 +232,9 @@ Eine statische Methode, mit der der Dialog angepasst und angezeigt wird. Folgend
       * `attributes?` (object) - Legt zusätzliche HTML-Attribute für die Schaltfläche fest.
         * `[Attribut]?` (string) - Legt den Wert des angegebenen HTML-Attributs fest.
       * `actions?` (object) - Legt zusätzliche Ereignisse für die Schaltfläche fest. Mehrere Ereignisse können durch Komma getrennt definiert werden.
-        * `[Ereignis]?` (optional|object)
-          * `function` (function) - Die Funktion, die beim Ereignis ausgeführt wird. Diese muss eine anonyme Funktion sein, d.h. ohne Namen.
-          * `args?` (array) - Argumente, die an die Funktion übergeben werden können.
+        * `[Ereignis]?` (object) - Name des Ererignisses.
+          * `function` (function|string) - Die Funktion oder der Name der Funktion, die, bzw. der beim Ereignis aufgerufen wird. Wenn eine "echte" Funktion angegeben wurde, muss diese eine anonyme Funktion sein, d.h. ohne Namen.
+          * `args?` (array) - Argumente, die an die Funktion übergeben werden können. Wenn eine echte Funktion angegeben wurde, wird dieses Argument ignoriert, da Argumente auch in der echten Funktion übergeben werden können.
 
 ```js
 function getGalleryItems() { ... };
@@ -231,7 +252,7 @@ Diese Funktion erstellt einen Bestätigungsdialog. Als Argumente werden optional
 function getCookie(cname) { ... };
 ```
 
-Diese Funktion gibt den Wert eines angegebenen Cookies zurück. Existiert kein entsprechendes Cookie, wird stattdessen eine leere Zeichenkette zurückgegeben.
+Diese Funktion gibt den Wert eines angegebenen Cookies zurück. Existiert kein entsprechendes Cookie, wird stattdessen eine leere Zeichenkette (`""`) zurückgegeben.
 
 ```js
 function switchAlert(element, type) { ... };
@@ -243,7 +264,7 @@ Diese Funktion wird verwendet, um die Darstellung der Diagramme zu verändern, j
 function disableMainModal(mainButton) { ... };
 ```
 
-Diese Funktion deaktiviert den Hauptdialog und die angegebene Schaltfläche, damit beim Verarbeiten von Daten die Daten nicht verändert werden können.
+Diese Funktion deaktiviert den Hauptdialog und die angegebene Schaltfläche, damit beim Verarbeiten von Daten diese nicht verändert weren können, bzw. die Schaltfläche zum Absenden der Daten nicht betätigt werden kann.
 
 ```js
 function enableMainModal(mainButton) { ... };
@@ -294,7 +315,7 @@ $("a[href='#staff']").click(function() { ... });
 Diese Funktion zeigt den Hauptdialog mit den Mitwirkenden am HydroPoc-Projekt an.
 
 ```js
-$("#plantOptionsForm").submit(function() { ... });
+$("#chartOptionsForm").submit(function() { ... });
 ```
 
 Diese Funktion wird ausgeführt, wenn das Formular zum Bearbeiten der Messwerte abgesendet wird. Als nächstes wird eine Anfrage mit den gesammelten Daten an den Server gesendet. Wenn das Speichern erfolgreich war, wird eine Erfolgsmeldung angezeigt, ansonsten eine Fehlermeldung.
@@ -333,19 +354,19 @@ Diese Funktion fügt in den Footer den Copyright-Vermerk mit Startjahr des Proje
 $("#user-actions-accordion").on("shown.bs.collapse", function() { ... });
 ```
 
-Diese Funktion wird ausgeführt, wenn das Dropdown-Element für die Benutzer auf der Administrationsseite geöffnet wird. Sollte die darin befindliche Tabelle noch keine DataTables-Instanz sein, wird diese mit den in der Variable dataTablesAdminOptions für sie gespeicherten Optionen erstellt.
+Diese Funktion wird ausgeführt, wenn das Dropdown-Element für die Benutzer auf der Administrationsseite geöffnet wird. Sollte die darin befindliche Tabelle noch keine DataTables-Instanz sein, wird diese mit den in der Variable `dataTablesAdminOptions` für sie gespeicherten Optionen erstellt.
 
 ```js
 $("#pump-actions-accordion").on("shown.bs.collapse", function() { ... });
 ```
 
-Diese Funktion wird ausgeführt, wenn das Dropdown-Element für die Pumpen auf der Administrationsseite geöffnet wird. Sollte die darin befindliche Tabelle noch keine DataTables-Instanz sein, wird diese mit den in der Variable dataTablesAdminOptions für sie gespeicherten Optionen erstellt.
+Diese Funktion wird ausgeführt, wenn das Dropdown-Element für die Pumpen auf der Administrationsseite geöffnet wird. Sollte die darin befindliche Tabelle noch keine DataTables-Instanz sein, wird diese mit den in der Variable `dataTablesAdminOptions` für sie gespeicherten Optionen erstellt.
 
 ```js
 $("#collapse-logs-actions").on("shown.bs.collapse", function() { ... });
 ```
 
-Diese Funktion wird ausgeführt, wenn das Dropdown-Element für die Logs auf der Administrationsseite geöffnet wird. Sollte die darin befindliche Tabelle noch keine DataTables-Instanz sein, wird diese mit den in der Variable dataTablesAdminOptions für sie gespeicherten Optionen erstellt.
+Diese Funktion wird ausgeführt, wenn das Dropdown-Element für die Logs auf der Administrationsseite geöffnet wird. Sollte die darin befindliche Tabelle noch keine DataTables-Instanz sein, wird diese mit den in der Variable `dataTablesAdminOptions` für sie gespeicherten Optionen erstellt.
 
 ```js
 $("#collapse-plants-actions").on("shown.bs.collapse", function(element) { ... });
@@ -359,11 +380,6 @@ $("a[href='#administration']").on("shown.bs.tab", function () { ... });
 
 Diese Funktion wird ausgeführt, wenn der Tab für die Administrationsseite aktiviert und ihr Inhalt angezeigt wurde. Diese wird dazu verwendet, um die Funktion `readjustTables` auszuführen, falls die Bildschirmbreite nicht den gleichen Wert hat, wie die Variable `viewPortWidth`.
 
-```js
-$("a[href='#plantsAdminOverviewContainer']").on("shown.bs.tab", function () { ... });
-```
-
-Diese Funktion wird ausgeführt, wenn der Tab für die Administrationsseite für die gespeicherten Pflanzen im Dropdown-Element der Pflanzen aktiviert und ihr Inhalt angezeigt wurde. Diese wird dazu verwendet, um die Funktion readjustTables auszuführen, falls die Bildschirmbreite nicht den gleichen Wert hat, wie die Variable `viewPortWidth`.
 
 ```js
 $("[data-bs-toggle='collapse']").click(function() { ... });
@@ -377,15 +393,12 @@ $("#historyTimespan").change(function() { ... });
 
 Diese Funktion wird ausgeführt, wenn der Eintrag in der Auswahlliste des Zeitraums für den Messverlauf geändert wird. Daraufhin wird die Funktion `getHistoryChartData` mit dem ausgewählten Sensor ausgeführt.
 
-```js
-$("#historyGalleryTimespanSelect").change(function() { ... });
-```
 
 ```js
 $('#historyGalleryTimespanForm').submit(function () { ... });
 ```
 
-Diese Funktion wird ausgeführt, wenn das Formulars zur Auswahl des Zeitraums in der Galerie abgesendet wird. Daraufhin wird die Funktion `getGalleryItems` ausgeführt.
+Diese Funktion wird ausgeführt, wenn das Formular zur Auswahl des Zeitraums in der Galerie abgesendet wird. Daraufhin wird die Funktion `getGalleryItems` ausgeführt.
 
 ```js
 $('#hydroPocLogo').on('click', function () { ... });
@@ -394,10 +407,10 @@ $('#hydroPocLogo').on('click', function () { ... });
 Diese Funktion wird ausgeführt, wenn auf das HydroPoc-Logo geklickt wird, um eine ***ultrafette*** Aktion auszuführen.
 
 ```js
-$('#savePlantOptions').click(function () { ... });
+$('#saveChartOptions').click(function () { ... });
 ```
 
-Diese Funktion wird ausgeführt, wenn auf die Schaltfläche zum Speichern der Pflanzenoptionen geklickt wird. Daraufhin wird das Klick-Ereignis auf das HTML-Element ausgelöst, welches das Formular der Pflanzenoptionen absendet.
+Diese Funktion wird ausgeführt, wenn auf die Schaltfläche zum Speichern der Diagrammnoptionen geklickt wird. Daraufhin wird das Klick-Ereignis auf das HTML-Element ausgelöst, welches das Formular der Diagrammoptionen absendet.
 
 ```js
 $('#chartHistoryModal').on('show.bs.modal', function () { ... });
