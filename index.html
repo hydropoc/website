@@ -47,11 +47,11 @@
                     ec_value: [200, 1400],
                 },
                 historyLabelInterval: {
-                    86400: 60, // stündlich
-                    43200: 30, // stündlich
-                    21600: 30, // halbstündlich
-                    10800: 15*4, // viertelstündlich
-                    3600: 15 // minütlich
+                    86400: 24,
+                    43200: 20,
+                    21600: 15,
+                    10800: 15,
+                    3600: 10
                 }
             };
             const ajaxRequestErrors = {
@@ -312,7 +312,6 @@
                     ],
                     order: [1, 'asc'],
                     ajax: {
-                        //url: getApiUrl() + '/device/logs',
                         type: 'POST',
                         contentType: 'application/json',
                         data: function (data, settings) {
@@ -375,108 +374,105 @@
                 }
                 return gradient;
             }
-            function formatDate2(string) {
-                return string.substring(8, 10) + "." + string.substring(5, 7) + "." + string.substring(2, 4) + "@" + string.substring(11, 19);
-            }
             function getHistoryChartData(sensor) {
                 if (!isLoadingHistoryChartData) {
                     isLoadingHistoryChartData = true;
+                    let interval = Number.parseInt($('#historyTimespan').val());
                     $('#historyTimespan').attr('disabled', 'disabled').after("<span class='spinner-border ms-2 text-primary kreiselchen' style='flex: 0 0 auto' data-processing='true'></span>");
                     $.post({
                         // daten werden alle 15 sekunden gemessen
                         url: window.apiURL + '/sensor/data_sensor',
                         data: JSON.stringify({
                             sensor: sensor,
-                            time: Number.parseInt($('#historyTimespan').val())
+                            time: interval
                         }),
                         processData: false,
                         contentType: 'application/json',
                         crossDomain: true,
                         timeout: 10000,
-                    })
-                        .done(function (response) {
-                            // alle 15 sek. messung = 1 min.
-                            // 24 std. = 1440 min. = (alle 60 min.)
-                            // 12 std. = 720 min. = (alle 30 min.)
-                            // 6 std. = 360 min. = (alle 15 min.) 
-                            // 3 std. = 180 min. (alle 180 sek.) mit 15 rechnen (teilen)
-                            // 1 std. = 60 min. = (alle 60 sek.) mit 15 rechnen (teilen)
-                            let labels = [];
-                            response["sensors"].reverse();
-                            charts['history']['data']['labels'] = [];
-                            let labelCount = Math.round(response["sensors"].length /15);
-                            let limits = Object.getOwnPropertyNames(response['limits']);
-                            let indexMeasured = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'measured');
-                            let indexMiddle = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'middle');
-                            let indexHighest = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'highest');
-                            let indexLowest = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'lowest');
-                            if (indexMeasured >= 0) {
-                                charts['history']['data']['datasets'][indexMeasured]['data'] = [];
-                            }
-                            if (indexMiddle >= 0) {
-                                charts['history']['data']['datasets'][indexMiddle]['data'] = [];
-                            }
-                            for (let [iteration, sensorData] of response['sensors'].entries()) {
-                                // wenn 0 dann 1 min.
-                                let wtf = Number.parseInt(sensorData['timestamp']);
-                                if (iteration % 15 === 0) {
-                                    let time = new Date(Number.parseInt(sensorData['timestamp']));
-                                    let date = formatDate2(time.toISOString());
-                                    //formatDate(Number.parseInt(sensorData['timestamp']), ["date"]) + "@" + formatDate(Number.parseInt(sensorData['timestamp']), ["time"]);
-                                    //if (labels.length <= labelCount) {
-                                        labels.push(date);
-                                    //}
-                                    charts['history']['data']['labels'].push(date);
-                                    if (indexMeasured >= 0) {
-                                        charts['history']['data']['datasets'][indexMeasured]['data'].push({ x: date, y: sensorData[sensor] });
-                                    }
-                                    if (indexMiddle >= 0) {
-                                        charts['history']['data']['datasets'][indexMiddle]['data'].push({ x: date, y: sensorData[sensor] });
-                                    }
-                                    /*
-                                    for (limit of limits) {
-                                        let indexLimit = charts['history']['data']['datasets'].findIndex(key => key['stack'] === limit);
-                                        if (indexLimit >= 0) {
-                                            if (charts['history']['data']['datasets'][indexLimit]['data'].length >= labelCount) {
-                                                charts['history']['data']['datasets'][indexLimit]['data'] = [];
-                                            }
-                                            else {
+                    }).done(function (response) {
+                        // 24 std. = (1440min / 15sek) * 60min = 5760 / 24sek = 240 label
+                        // 12 std. = (720min / 15sek) * 60min = 2280 / 20sek = 144 label
+                        // 6 std. = (360min / 15sek) * 60min = 1440 / 15sek = 96 label
+                        // 3 std. = (180min / 15sek) * 60min = 720 / 15sek = 48 label
+                        // 1 std. = (60min / 15sek) * 60min = 240 / 10sek = 24 label
+                        let labels = [];
+                        response["sensors"].reverse();
+                        charts['history']['data']['labels'] = [];
+                        let labelCount = Math.round(response["sensors"].length / charts["historyLabelInterval"][interval]);
+                        let limits = Object.getOwnPropertyNames(response['limits']);
+                        let indexMeasured = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'measured');
+                        let indexMiddle = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'middle');
+                        let indexHighest = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'highest');
+                        let indexLowest = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'lowest');
+                        if (indexMeasured >= 0) {
+                            charts['history']['data']['datasets'][indexMeasured]['data'] = [];
+                        }
+                        if (indexMiddle >= 0) {
+                            charts['history']['data']['datasets'][indexMiddle]['data'] = [];
+                        }
+                        for (let [iteration, sensorData] of response['sensors'].entries()) {
+                            let wtf = Number.parseInt(sensorData['timestamp']);
+                            if (iteration % charts["historyLabelInterval"][interval] === 0) {
+                                let time = new Date(wtf);
+                                let IsoDate = time.toISOString();
+                                let date = IsoDate.substring(8, 10) + "." + IsoDate.substring(5, 7) + "." + IsoDate.substring(2, 4) + "@" + IsoDate.substring(11, 19);
+                                //if (labels.length <= labelCount) {
+                                    labels.push(date);
+                                //}
+                                charts['history']['data']['labels'].push(date);
+                                if (indexMeasured >= 0) {
+                                    charts['history']['data']['datasets'][indexMeasured]['data'].push({ x: date, y: sensorData[sensor] });
+                                }
+                                if (indexMiddle >= 0) {
+                                    charts['history']['data']['datasets'][indexMiddle]['data'].push({ x: date, y: sensorData[sensor] });
+                                }
+                                /*
+                                for (limit of limits) {
+                                    let indexLimit = charts['history']['data']['datasets'].findIndex(key => key['stack'] === limit);
+                                    if (indexLimit >= 0) {
+                                        if (charts['history']['data']['datasets'][indexLimit]['data'].length >= labelCount) {
+                                            charts['history']['data']['datasets'][indexLimit]['data'] = [];
+                                        }
+                                        else {
                                             charts['history']['data']['datasets'][indexLimit]['data'].push({ x: date, y: response['limits'][limit] });
-                                            }
                                         }
                                     }
-                                    if (indexHighest >= 0) {
-                                        let dateHighest = formatDate(Number.parseInt(response['minMax']['maximum']['timestamp']), ["date"]) + "@" + formatDate(Number.parseInt(response['minMax']['maximum']['timestamp']), ["time"]);
-                                        charts['history']['data']['datasets'][indexHighest]['data'] = [{ x: dateHighest, y: response['minMax']['maximum']['value'] }];
-                                    }
-                                    if (indexLowest >= 0) {
-                                        let dateLowest = formatDate(Number.parseInt(response['minMax']['minimum']['timestamp']), ["date"]) + "@" + formatDate(Number.parseInt(response['minMax']['minimum']['timestamp']), ["time"]);
-                                            //new Date(Number.parseInt(response['minMax']['minimum']['timestamp']));
-                                            charts['history']['data']['datasets'][indexLowest]['data'] = [{ x: dateLowest, y: response['minMax']['minimum']['value'] }];
-                                        }
-                                    */
-                                    }
-                                    if (iteration === labelCount) {
-                                        let lol = response["sensors"].findIndex(key => key['timestamp'] === wtf);
-                                        console.log(response["sensors"][lol+15]);
-                                        let time_ = new Date(Number.parseInt(response["sensors"][lol+15]['timestamp']));
-                                        let date_ = time_.toISOString();
-                                        labels.push(formatDate2(date_));
-                                        charts['history']['data']['datasets'][indexMeasured]['data'].push({ x: formatDate2(date_), y: lol[sensor] });
+                                }*/
+                                if (indexHighest >= 0) {
+                                    let timeHighest = new Date(Number.parseInt(response['minMax']['maximum']['timestamp']));
+                                    let dateHighest = timeHighest.toISOString();
+                                    $("#historyChartMaximumValue").html(response['minMax']['maximum']['value'] + " (" + dateHighest.substring(8, 10) + "." + dateHighest.substring(5, 7) + "." + dateHighest.substring(0, 4) + ", " + dateHighest.substring(11, 19) + ")");
+                                    //charts['history']['data']['datasets'][indexHighest]['data'] = [{ x: dateHighest, y: response['minMax']['maximum']['value'] }];
+                                }
+                                if (indexLowest >= 0) {
+                                    let timeLowest = new Date(Number.parseInt(response['minMax']['minimum']['timestamp']));
+                                    let dateLowest = timeLowest.toISOString();
+                                    $("#historyChartMinimumValue").html(response['minMax']['minimum']['value'] + " (" + dateLowest.substring(8, 10) + "." + dateLowest.substring(5, 7) + "." + dateLowest.substring(0, 4) + ", " + dateLowest.substring(11, 19) + ")");
+                                    //charts['history']['data']['datasets'][indexLowest]['data'] = [{ x: dateLowest, y: response['minMax']['minimum']['value'] }];
                                     }
                                 }
-                            charts['history']['options']['scales']['x']['min'] = labels[0];
-                            charts['history']['options']['scales']['x']['max'] = labels[labels.length -1];
-                            charts['history'].update('none');
-                        })
-                        .fail(function (response) {
-                            $('#chartHistoryModal .modal-body').prepend(Alert.create('danger', response['status'] + ': ' + response['statusText']));
-                        })
-                        .always(function () {
-                            isLoadingHistoryChartData = false;
-                            $('#historyTimespan').next("[data-processing='true']").remove();
-                            $('#historyTimespan').removeAttr('disabled');
-                        });
+                                if (iteration === labelCount) {
+                                    /*
+                                    let lol = response["sensors"].findIndex(key => key['timestamp'] === wtf);
+                                    console.log(response["sensors"][lol+15]);
+                                    let time_ = new Date(Number.parseInt(response["sensors"][lol+15]['timestamp']));
+                                    let date_ = time_.toISOString();
+                                    labels.push(date_);
+                                    charts['history']['data']['datasets'][indexMeasured]['data'].push({ x: formatDate2(date_), y: lol[sensor] });
+                                    */
+                                }
+                            }
+                        charts['history']['options']['scales']['x']['min'] = labels[0];
+                        charts['history']['options']['scales']['x']['max'] = labels[labels.length -1];
+                        charts['history'].update('none');
+                    }).fail(function (response) {
+                        $('#chartHistoryModal .modal-body').prepend(Alert.create('danger', response['status'] + ': ' + response['statusText']));
+                    }).always(function () {
+                        isLoadingHistoryChartData = false;
+                        $('#historyTimespan').next("[data-processing='true']").remove();
+                        $('#historyTimespan').removeAttr('disabled');
+                    });
                 }
             }
             function togglePump(pump) {
@@ -488,7 +484,7 @@
                 let data = {
                     token: getCookie('authToken'),
                     pump: $(pump).attr('id'),
-                    state: $(pump).val(),
+                    state: $(pump).val()
                 };
                 $.post({
                     url: 'history_charts_data.php',
@@ -496,7 +492,7 @@
                     processData: false,
                     contentType: 'application/json',
                     crossDomain: true,
-                    timeout: 10000,
+                    timeout: 10000
                 }).done(function (response) {
                     $(parent).parent().find("[data-processing='true']").remove();
                 }).fail(function (response) {
@@ -590,33 +586,28 @@
                         contentType: 'application/json',
                         crossDomain: true,
                         timeout: 10000,
-                    })
-                        .done(function (response) {
-                            let user = $('#loginUsername').val();
-                            let date = new Date();
-                            date.setHours(date.getHours() + 168); // = 1 Woche
-                            document.cookie = 'authToken=' + encodeURIComponent(response['token']) + '; expires=' + date.toUTCString() + '; path=/'; //SameSite=None; Secure"; geht nur bei HTTPS
-                            document.cookie = 'username=' + encodeURIComponent(user) + '; expires=' + date.toUTCString() + '; path=/'; // SameSite=None; Secure"; geht nur bei HTTPS
-                            $("a[href='#login']").addClass('d-none');
-                            $("a[href='#register']").addClass('d-none');
-                            $("a[href='#logout']").removeClass('d-none');
-                            $('[data-current-user]')
-                                .removeClass('d-none')
-                                .html("<i class='fas fa-user-injured'></i> " + user);
-                            $('#mainTabNav > li:last-of-type').removeClass('d-none');
-                            bootstrap.Modal.getInstance($('#mainModal')[0]).hide();
-                        })
-                        .fail(function (response) {
-                            if (ajaxRequestErrors.hasOwnProperty(response['responseJSON']['error'])) {
-                                $('#mainModal .modal-body').prepend(Alert.create('danger', ajaxRequestErrors[response['responseJSON']['error']]));
-                            }
-                            else {
-                                $('#mainModal .modal-body').prepend(Alert.create('danger', response['status'] + ': ' + response['statusText']));
-                            }
-                        })
-                        .always(function () {
-                            enableMainModal('#loginButton');
-                        });
+                    }).done(function (response) {
+                        let user = $('#loginUsername').val();
+                        let date = new Date();
+                        date.setHours(date.getHours() + 168); // = 1 Woche
+                        document.cookie = 'authToken=' + encodeURIComponent(response['token']) + '; expires=' + date.toUTCString() + '; path=/'; //SameSite=None; Secure"; geht nur bei HTTPS
+                        document.cookie = 'username=' + encodeURIComponent(user) + '; expires=' + date.toUTCString() + '; path=/'; // SameSite=None; Secure"; geht nur bei HTTPS
+                        $("a[href='#login']").addClass('d-none');
+                        $("a[href='#register']").addClass('d-none');
+                        $("a[href='#logout']").removeClass('d-none');
+                        $('[data-current-user]').removeClass('d-none').html("<i class='fas fa-user-injured'></i> " + user);
+                        $('#mainTabNav > li:last-of-type').removeClass('d-none');
+                        bootstrap.Modal.getInstance($('#mainModal')[0]).hide();
+                    }).fail(function (response) {
+                        if (ajaxRequestErrors.hasOwnProperty(response['responseJSON']['error'])) {
+                            $('#mainModal .modal-body').prepend(Alert.create('danger', ajaxRequestErrors[response['responseJSON']['error']]));
+                        }
+                        else {
+                            $('#mainModal .modal-body').prepend(Alert.create('danger', response['status'] + ': ' + response['statusText']));
+                        }
+                    }).always(function () {
+                        enableMainModal('#loginButton');
+                    });
                 }
             }
             Number.prototype.duration = function () {
@@ -663,94 +654,39 @@
                         url: window.apiURL + '/device/informations',
                         crossDomain: true,
                         timeout: 10000,
+                    }).done(function (response) {
+                        let statsText = '';
+                        statsText += "<tr><td class='align-top'>Betriebssystem</td><td>" + response['type'] + ' ' + response['release'] + '</td></tr>';
+                        statsText += "<tr><td class='align-top'>Architektur</td><td>" + response['arch'] + '</td></tr>';
+                        statsText += "<tr><td class='align-top'>Hostname</td><td>" + response['hostname'] + '</td></tr>';
+                        statsText += "<tr><td class='align-top'>CPU</td><td>" + response['cpus'][0]['model'];
+
+                        for (let [index, cpu] of response['cpus'].entries()) {
+                            statsText += '<div>CPU #' + index + ":<div class='ps-3'>Takt: " + cpu['speed'] + 'MHz</div></div>';
+                        }
+
+                        let totalMemory = (response['totalmem'] / 1024 / 1024 / 1024).toFixed(2);
+                        let totalMemoryFree = (response['freememory'] / 1024 / 1024 / 1024).toFixed(2);
+                        statsText += "<tr><td class='align-top'>RAM (Insgesamt)</td><td>" + totalMemory + ' GB</td></tr>';
+                        statsText += "<tr><td class='align-top'>RAM (Verwendet)</td><td>" + (totalMemory - totalMemoryFree).toFixed(2) + ' GB (~' + (((totalMemory - totalMemoryFree) / totalMemory) * 100).toFixed(2) + ' %) </td></tr>';
+                        statsText += "<tr><td class='align-top'>Durchschnittslast (1 Minute)</td><td>" + response['loadavg'][0] + '</td></tr>';
+                        statsText += "<tr><td class='align-top'>Durchschnittslast (5 Minuten)</td><td>" + response['loadavg'][1] + '</td></tr>';
+                        statsText += "<tr><td class='align-top'>Durchschnittslast (15 Minuten)</td><td>" + response['loadavg'][2] + '</td></tr>';
+                        statsText += "<tr><td class='align-top'>Laufzeit</td><td>" + response['uptime'].duration() + '</td></tr>';
+                        statsText += "<tr><td class='align-top'>Backend Version</td><td>" + response['version'] + '</td></tr>';
+                        $('#systemInfosTable').html(statsText);
+                    }).fail(function (response) {
+                        console.log(response);
                     })
-                        .done(function (response) {
-                            let statsText = '';
-                            statsText += "<tr><td class='align-top'>Betriebssystem</td><td>" + response['type'] + ' ' + response['release'] + '</td></tr>';
-                            statsText += "<tr><td class='align-top'>Architektur</td><td>" + response['arch'] + '</td></tr>';
-                            statsText += "<tr><td class='align-top'>Hostname</td><td>" + response['hostname'] + '</td></tr>';
-                            statsText += "<tr><td class='align-top'>CPU</td><td>" + response['cpus'][0]['model'];
-
-                            for (let [index, cpu] of response['cpus'].entries()) {
-                                statsText += '<div>CPU #' + index + ":<div class='ps-3'>Takt: " + cpu['speed'] + 'MHz</div></div>';
-                            }
-
-                            let totalMemory = (response['totalmem'] / 1024 / 1024 / 1024).toFixed(2);
-                            let totalMemoryFree = (response['freememory'] / 1024 / 1024 / 1024).toFixed(2);
-
-                            statsText += "<tr><td class='align-top'>RAM (Insgesamt)</td><td>" + totalMemory + ' GB</td></tr>';
-                            statsText += "<tr><td class='align-top'>RAM (Verwendet)</td><td>" + (totalMemory - totalMemoryFree).toFixed(2) + ' GB (~' + (((totalMemory - totalMemoryFree) / totalMemory) * 100).toFixed(2) + ' %) </td></tr>';
-                            statsText += "<tr><td class='align-top'>Durchschnittslast (1 Minute)</td><td>" + response['loadavg'][0] + '</td></tr>';
-                            statsText += "<tr><td class='align-top'>Durchschnittslast (5 Minuten)</td><td>" + response['loadavg'][1] + '</td></tr>';
-                            statsText += "<tr><td class='align-top'>Durchschnittslast (15 Minuten)</td><td>" + response['loadavg'][2] + '</td></tr>';
-                            statsText += "<tr><td class='align-top'>Laufzeit</td><td>" + response['uptime'].duration() + '</td></tr>';
-                            statsText += "<tr><td class='align-top'>Backend Version</td><td>" + response['version'] + '</td></tr>';
-                            $('#systemInfosTable').html(statsText);
-                        })
-                        .fail(function (response) {
-                            console.log(response);
-                        })
-                        .always(function () {
-                            isLoadingSystemInfos = false;
-                        });
+                    .always(function () {
+                        isLoadingSystemInfos = false;
+                    });
                 }
             }
-            // Wird verwendet, um Funktionen innerhalb von Objekten auszuführen
             function achso(callback, args = null) {
                 callback.apply(this, args);
             }
             class Modal {
-                /*
-                data: {
-                     size?: sm|default|lg|xl|fullscreen,
-                    static?: bool,
-                    name: string,
-                    events?: {
-                        hide: {
-                                function: function() { },
-                                args?: []
-                            }
-                        }
-                    },
-                    title: {
-                        text: string
-                    },
-                    content: {
-                        text: string
-                        options?: {
-                            scroll?: bool,
-                            align?: left|center|right
-                        }
-                    },
-                    footer?: {
-                        buttons?: {
-                            default?: {
-                                text: string,
-                                class?: string,
-                                display?: bool,
-                                attributes?: {
-                                    attribute: value
-                                }
-                            }
-                            // Eigene
-                            custom?: [
-                                {
-                                    text: string,
-                                    class?: string,
-                                    attributes?: {},
-                                    actions: {
-                                        click: {
-                                                function: (string|function() {}),
-                                                args?: []
-                                            }
-                                        }
-                                    }
-                                }]
-                            }
-                        }
-                    }
-                }
-                */
                 static create(data = {}) {
                     if ($('#mainModal').hasClass('show')) {
                         $('#mainModal').hide();
@@ -979,22 +915,6 @@
                     $('#' + id).remove();
                 }
             }
-            function formatDate(time, options) {
-                if (Number.isSafeInteger(time)) {
-                    let dateString = "";
-                    let date = new Date(time);
-                    if (options.includes("date") && !options.includes("time")) {
-                        dateString = ("00" + (date.getDate()).toString()).substr(-2, 2) + "." + ("00" + (date.getMonth() +1).toString()).substr(-2, 2) + "." + date.getFullYear();
-                    }
-                    else if (!options.includes("date") && options.includes("time")) {
-                        dateString = ("00" + (date.getHours().toString())).substr(-2, 2) + ":" + ("00" + (date.getMinutes().toString())).substr(-2, 2) + ":" + ("00" + (date.getSeconds().toString())).substr(-2, 2);
-                    }
-                    else if (options.includes("date") && options.includes("time")) {
-                        dateString = ("00" + (date.getDate()).toString()).substr(-2, 2) + "." + ("00" + (date.getMonth() +1).toString()).substr(-2, 2) + "." + date.getFullYear() + ", " + ("00" + (date.getHours().toString())).substr(-2, 2) + ":" + ("00" + (date.getMinutes().toString())).substr(-2, 2) + ":" + ("00" + (date.getSeconds().toString())).substr(-2, 2);
-                    }
-                    return dateString;
-                }
-            }
             function getGalleryItems() {
                 $('#getGalleryItemsButton').attr('disabled', 'disabled');
                 $('#historyGalleryTimespanSelect').attr('disabled', 'disabled');
@@ -1026,29 +946,26 @@
                     contentType: 'application/json',
                     crossDomain: true,
                     timeout: 10000,
-                })
-                    .done(function (response) {
-                        let images = '';
-                        for (image of response) {
-                            let time = new Date(Number.parseInt(image['creationTime']));
-                            let date = time.toISOString();
-                            let filename = image['filename'].match(/\/([^\/\\]+?)(\.[^\.]+?)$/i);
-                            images += "<div class='historyGalleryItem d-flex flex-column p-2 justify-content-between' onclick='showHistoryGalleryImage(this)'><img src='" + image['filename'] + "' class='mw-100 mh-100 m-auto'>";
-                            images += "<article><span class='text-secondary'>" + filename[1] + '</span><br>' + date.substring(8, 10) + "." + date.substring(5, 7) + "." + date.substring(0, 4) + ", " + date.substring(11, 19) + '</article></div>';
-                        }
-                        if (images.length >= 1) {
-                            $('#historyGalleryPanel').html(images);
-                        } else {
-                            $('#historyGallery').prepend(Alert.create('primary', 'Für den angegebenen Zeitraum wurden keine Bilder gefunden.'));
-                        }
-                    })
-                    .fail(function (response) {
-                        $('#historyGallery').prepend(Alert.create('danger', response['status'] + ': ' + response['statusText']));
-                    })
-                    .always(function () {
-                        $('#getGalleryItemsButton').removeAttr('disabled').find("[data-processing='true']").remove();
-                        $('#historyGalleryTimespanSelect').removeAttr('disabled');
-                    });
+                }).done(function (response) {
+                    let images = '';
+                    for (image of response) {
+                        let time = new Date(Number.parseInt(image['creationTime']));
+                        let date = time.toISOString();
+                        let filename = image['filename'].match(/\/([^\/\\]+?)(\.[^\.]+?)$/i);
+                        images += "<div class='historyGalleryItem d-flex flex-column p-2 justify-content-between' onclick='showHistoryGalleryImage(this)'><img src='" + image['filename'] + "' class='mw-100 mh-100 m-auto'>";
+                        images += "<article><span class='text-secondary'>" + filename[1] + '</span><br>' + date.substring(8, 10) + "." + date.substring(5, 7) + "." + date.substring(0, 4) + ", " + date.substring(11, 19) + '</article></div>';
+                    }
+                    if (images.length >= 1) {
+                        $('#historyGalleryPanel').html(images);
+                    } else {
+                        $('#historyGallery').prepend(Alert.create('primary', 'Für den angegebenen Zeitraum wurden keine Bilder gefunden.'));
+                    }
+                }).fail(function (response) {
+                    $('#historyGallery').prepend(Alert.create('danger', response['status'] + ': ' + response['statusText']));
+                }).always(function () {
+                    $('#getGalleryItemsButton').removeAttr('disabled').find("[data-processing='true']").remove();
+                    $('#historyGalleryTimespanSelect').removeAttr('disabled');
+                });
             }
             function editPlant(wtf) {
                 let plant = Number.parseInt(wtf);
@@ -1194,53 +1111,6 @@
                     });
                 }
             }
-            /*
-            function confirmDiscardPlantEditing() {
-                let prompt = new Promise(function(resolve) {
-                    confirmation({
-                        title: "Pflanzenbearbeitung abbrechen",
-                        content: (isPlantEditingActive ? "Soll die Bearbeitung der aktuellen Pflanze wirklich abgebrochen werden?" : "Sollen die ungespeicherten Daten wirklich verworfen werden?")
-                    },
-                    resolve);
-                });
-                prompt.then(function(value) {
-                    $("#chartOptionContainer input[type='text']").val("");
-                    isPlantEditingActive = false;
-                    $("a[href='#plantsAdminOptionContainer']").html("Erstellen");
-                    $("#savechartOptions").html("<i class='fas fa-plus'></i> Hinzufügen");
-                    $(this).html("<i class='fas fa-trash-alt'></i> Löschen");
-                    $("#editPlantAlert").remove();
-                    bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
-                });
-            }
-            // wtf = Index der zu bearbeitenden Pflanze!
-            function confirmReplacePlantEditing(wtf) {
-                let currentPlant = Number.parseInt($("#savechartOptions").attr("data-plant-id"));
-                if (Number.isSafeInteger(currentChartPlant)) {
-                    let index = plantProperties.findIndex(key => key["id"] === currentChartPlant);
-                    if (index >= 0) {
-                        let title = "";
-                        let content = "";
-                        if (wtf === index) {
-                            title = "Pflanzenbearbeitung neu starten bestätigen";
-                            content = "Die Bearbeitung der Pflanze &quot;" + plantProperties[wtf]["name"] + "&quot; (ID: " + plantProperties[wtf]["id"] + ") ist bereits aktiv. Soll diese neu gestartet werden?"
-                        }
-                        else {
-                            title = "Pflanzenbearbeitung abbrechen bestätigen";
-                            content = "Zurzeit ist die Bearbeitung der Pflanze " + plantProperties[index]["name"] + " (ID: " + currentChartPlant + ") aktiv. Soll diese abgebrochen und stattdessen die Pflanze " + plantProperties[wtf]["name"] + " (ID: " + plantProperties[wtf]["id"] + ") bearbeitet werden?";
-                        }
-                        let prompt = new Promise(function(resolve) {
-                            confirmation({
-                                title: title,
-                                content: content
-                            },
-                            resolve);
-                        });
-                        return prompt;
-                    }
-                }
-            }
-            */
             function getCookie(cname) {
                 let name = cname + '=';
                 let ca = document.cookie.split(';');
@@ -1303,9 +1173,7 @@
                     $("a[href='#login']").addClass('d-none');
                     $("a[href='#register']").addClass('d-none');
                     $("a[href='#logout']").removeClass('d-none');
-                    $('[data-current-user]')
-                        .removeClass('d-none')
-                        .html("<i class='fas fa-user-injured'></i> " + getCookie('username'));
+                    $('[data-current-user]').removeClass('d-none').html("<i class='fas fa-user-injured'></i> " + getCookie('username'));
                     $('#mainTabNav > li:last-of-type').removeClass('d-none');
                 }
                 picker = new Litepicker({
@@ -1330,14 +1198,14 @@
                                         clearInterval(systemInfosTimer);
                                         systemInfosTimer = null;
                                     }
-                                },
+                                }
                             },
                             shown: {
                                 function: function (o) {
                                     updateSystemInfos();
                                     systemInfosTimer = setInterval(updateSystemInfos, 5000);
-                                },
-                            },
+                                }
+                            }
                         },
                         title: {
                             text: 'Systeminformationen',
@@ -1409,11 +1277,6 @@
                         }
                     });
                 });
-                /*
-                $("#chartOptionsForm").on("reset", function() {
-                    confirmDiscardPlantEditing();
-                    return false;
-                });*/
                 $('#savechartOptions').click(function () {
                     $('#savechartOptionsSubmit').click();
                 });
@@ -1454,7 +1317,7 @@
                     content += "<div class='mt-3'><label for='registerPassword' class='form-label'>Passwort:</label>";
                     content += "<input type='password' class='form-control' minlength='6' id='registerPassword' placeholder='Passwort eingeben' required></div>";
                     content += "<div class='mt-3'><label for='registerConfirmPassword' class='form-label'>Passwort bestätigen:</label>";
-                    content += "<input type='password' class='form-control' minlength='6' id='registerConfirmPassword' placeholder='Passwort bestätigen' reokquired></div>";
+                    content += "<input type='password' class='form-control' minlength='6' id='registerConfirmPassword' placeholder='Passwort bestätigen' required></div>";
                     let data = {
                         name: 'register',
                         events: {
@@ -1464,38 +1327,38 @@
                                         register();
                                         return false;
                                     });
-                                    $('#registerPassword')
-                                        .on('input', function () {
-                                            this.setCustomValidity('');
-                                            this.checkValidity();
-                                        })
-                                        .on('invalid', function () {
-                                            if (
-                                                $(this)
-                                                    .val()
-                                                    .localeCompare($('#registerConfirmPassword').val() !== 0)
-                                            ) {
-                                                this.setCustomValidity('Bitte geben Sie exakt das gleiche Passwort ein.');
-                                            } else {
-                                                this.setCustomValidity('lol');
-                                            }
-                                        });
-                                    $('#registerConfirmPassword')
-                                        .on('input', function () {
-                                            this.setCustomValidity('');
-                                            this.checkValidity();
-                                        })
-                                        .on('invalid', function () {
-                                            if (
-                                                $(this)
-                                                    .val()
-                                                    .localeCompare($('#registerPassword').val() !== 0)
-                                            ) {
-                                                this.setCustomValidity('Bitte geben Sie exakt das gleiche Passwort ein.');
-                                            } else {
-                                                this.setCustomValidity('lol');
-                                            }
-                                        });
+                                    $('#registerPassword').on('input', function () {
+                                        this.setCustomValidity('');
+                                        this.checkValidity();
+                                    }).on('invalid', function () {
+                                        let minLength = Number.parseInt($(this).attr("minlength"));
+                                        let currentLength = $(this).val().length;
+                                        if ($(this).val().localeCompare($('#registerConfirmPassword').val()) !== 0) {
+                                            this.setCustomValidity('Bitte geben Sie exakt das gleiche Passwort ein.');
+                                        }
+                                        else if (currentLength < minLength) {
+                                            this.setCustomValidity('Bitte geben Sie mindestens noch ' + (minLength - currentLength) + ' Zeichen ein.');
+                                        }
+                                        else {
+                                            this.setCustomValidity('Bitte füllen Sie dieses Feld aus.');
+                                        }
+                                    });
+                                    $('#registerConfirmPassword').on('input', function () {
+                                        this.setCustomValidity('');
+                                        this.checkValidity();
+                                    }).on('invalid', function () {
+                                        let minLength = Number.parseInt($(this).attr("minlength"));
+                                        let currentLength = $(this).val().length;
+                                        if ($(this).val().localeCompare($('#registerPassword').val()) !== 0) {
+                                            this.setCustomValidity('Bitte geben Sie exakt das gleiche Passwort ein.');
+                                        }
+                                        else if (currentLength < minLength) {
+                                            this.setCustomValidity('Bitte geben Sie mindestens noch ' + (minLength - currentLength) + ' Zeichen ein.');
+                                        }
+                                        else {
+                                            this.setCustomValidity('Bitte füllen Sie dieses Feld aus.');
+                                        }
+                                    });
                                 }
                             },
                             hidden: {
@@ -1647,12 +1510,6 @@
                         readjustTables();
                     }
                 });
-                /*
-                $("a[href='#plantsAdminOverviewContainer']").on('shown.bs.collapse', function () {
-                    if (visualViewport['width'] != viewportWidth) {
-                        readjustTables();
-                    }
-                });*/
                 $('#chartHistoryModal').on('show.bs.modal', function () {
                     let sensor = $(this).attr('data-chart');
                     if (!['undefined', '', undefined, null].includes(sensor)) {
@@ -4043,10 +3900,10 @@
                 #chartOptionNavigation {
                     width: 100%;
                 }
-                #chartOptionsFormContainer label {
+                #chartOptionsFormContainer label, #historyChartTimespanColumn > label {
                     padding-left: 0;
                 }
-                #chartOptionsFormContainer input[type='text'] {
+                #chartOptionsFormContainer input[type='text'], #historyChartTimespanColumn > select {
                     width: 100%;
                 }
                 /*
@@ -4096,6 +3953,9 @@
                 .legendContainer {
                     margin-top: 0;
                 }
+                #historyChartMinMaxColumn {
+                    text-align: center;
+                }
             }
             /* Small devices (portrait tablets and large phones, 600px and up) */
             @media only screen and (min-width: 600px) {
@@ -4132,7 +3992,7 @@
                 #chartOptionMenu {
                     flex-direction: column;
                 }
-                #chartOptionsFormContainer input[type='text'] {
+                #chartOptionsFormContainer input[type='text'], #historyChartTimespanColumn > select {
                     width: 100%;
                 }
                 #chartOptionNavigation {
@@ -4177,6 +4037,9 @@
                 .legendContainer {
                     margin-top: 0;
                 }
+                #historyChartMinMaxColumn {
+                    text-align: center;
+                }
             }
             /* Medium devices (landscape tablets, 768px and up) */
             @media only screen and (min-width: 768px) {
@@ -4187,7 +4050,7 @@
                 #chartOptionMenu {
                     flex-direction: column;
                 }
-                #chartOptionsFormContainer .form-check-label {
+                #chartOptionsFormContainer label, #historyChartTimespanColumn > label {
                     padding-left: 0;
                 }
                 #mobile-navbar {
@@ -4206,8 +4069,11 @@
                 .legendContainer .legendItem {
                     width: auto;
                 }
-                #chartOptionsFormContainer input[type='text'] {
+                #chartOptionsFormContainer input[type='text'], #historyChartTimespanColumn > select {
                     width: auto;
+                }
+                #historyChartMinMaxColumn {
+                    text-align: center;
                 }
             }
             /* Large devices (laptops/desktops, 992px and up) */
@@ -4258,8 +4124,11 @@
                 .legendContainer > label {
                     margin-top: 0;
                 }
-                #chartOptionsFormContainer input[type='text'] {
+                #chartOptionsFormContainer input[type='text'], #historyChartTimespanColumn > select {
                     width: auto;
+                }
+                #historyChartMinMaxColumn {
+                    text-align: center;
                 }
             }
             /* Extra large devices (large laptops and desktops, 1200px and up) */
@@ -4290,13 +4159,19 @@
                 .legendContainer .legendItem {
                     width: auto;
                 }
-                #chartOptionsFormContainer input[type='text'] {
+                #chartOptionsFormContainer input[type='text'], #historyChartTimespanColumn > select {
                     width: auto;
+                }
+                #historyChartMinMaxColumn {
+                    text-align: center;
                 }
             }
             @media only screen and (min-width: 1285px) {
-                #chartOptionsFormContainer input[type='text'] {
+                #chartOptionsFormContainer input[type='text'], #historyChartTimespanColumn > select {
                     display: inline-block;
+                }
+                #historyChartMinMaxColumn {
+                    text-align: right;
                 }
             }
         </style>
@@ -4564,7 +4439,7 @@
                                                     <a class="list-group-item list-group-item-action" href="#chartOptionAirTemperatureSection">Lufttemperatur</a>
                                                     <a class="list-group-item list-group-item-action" href="#chartOptionWaterTemperatureSection">Wassertemperatur</a>
                                                     <a class="list-group-item list-group-item-action" href="#chartOptionHumiditySection">Luftfeuchtigkeit</a>
-                                                <a class="list-group-item list-group-item-action" href="#chartOptionPhSection">pH-Wert</a>
+                                                    <a class="list-group-item list-group-item-action" href="#chartOptionPhSection">pH-Wert</a>
                                                     <a class="list-group-item list-group-item-action" href="#chartOptionEcSection">Elektrischer Leitwert</a>
                                                     <a class="list-group-item list-group-item-action" href="#chartOptionWaterLevel1Section">Wasserstand #1</a>
                                                     <a class="list-group-item list-group-item-action" href="#chartOptionWaterLevel2Section">Wasserstand #2</a>
@@ -4580,27 +4455,27 @@
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionCo2ConcentrationSetpointInput" class="col-form-label col-md-6">Sollwert:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionCo2ConcentrationSetpointInput" aria-label="Sollwert für Co²-Gehalt" aria-describedby="chartOptionCo2ConcentrationSetpointInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionCo2ConcentrationSetpointInput" aria-label="Sollwert für Co²-Gehalt" aria-describedby="chartOptionCo2ConcentrationSetpointInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionCo2ConcentrationUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionCo2ConcentrationUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Co²-Gehalt" aria-describedby="chartOptionCo2ConcentrationUpperControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionCo2ConcentrationUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Co²-Gehalt" aria-describedby="chartOptionCo2ConcentrationUpperControlLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionCo2ConcentrationLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionCo2ConcentrationLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Co²-Gehalt" aria-describedby="chartOptionCo2ConcentrationLowerControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionCo2ConcentrationLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Co²-Gehalt" aria-describedby="chartOptionCo2ConcentrationLowerControlLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionCo2ConcentrationUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionCo2ConcentrationUpperWarningLimitInput" aria-label="Obere Warngrenze für Co²-Gehalt" aria-describedby="chartOptionCo2ConcentrationUpperWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionCo2ConcentrationUpperWarningLimitInput" aria-label="Obere Warngrenze für Co²-Gehalt" aria-describedby="chartOptionCo2ConcentrationUpperWarningLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionCo2ConcentrationLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionCo2ConcentrationLowerWarningLimitInput" aria-label="Untere Warngrenze für Co²-Gehalt" aria-describedby="chartOptionCo2ConcentrationLowerWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionCo2ConcentrationLowerWarningLimitInput" aria-label="Untere Warngrenze für Co²-Gehalt" aria-describedby="chartOptionCo2ConcentrationLowerWarningLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
@@ -4609,27 +4484,27 @@
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionAirTemperatureSetpointInput" class="col-form-label col-md-6">Sollwert:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionAirTemperatureSetpointInput" aria-label="Sollwert für Lufttemperatur" aria-describedby="chartOptionAirTemperatureSetpointInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionAirTemperatureSetpointInput" aria-label="Sollwert für Lufttemperatur" aria-describedby="chartOptionAirTemperatureSetpointInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionAirTemperatureUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionAirTemperatureUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Lufttemperatur" aria-describedby="chartOptionAirTemperatureUpperControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionAirTemperatureUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Lufttemperatur" aria-describedby="chartOptionAirTemperatureUpperControlLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionAirTemperatureLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionAirTemperatureLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Lufttemperatur" aria-describedby="chartOptionAirTemperatureLowerControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionAirTemperatureLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Lufttemperatur" aria-describedby="chartOptionAirTemperatureLowerControlLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionAirTemperatureUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionAirTemperatureUpperWarningLimitInput" aria-label="Obere Warngrenze für Lufttemperatur" aria-describedby="chartOptionAirTemperatureUpperWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionAirTemperatureUpperWarningLimitInput" aria-label="Obere Warngrenze für Lufttemperatur" aria-describedby="chartOptionAirTemperatureUpperWarningLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionAirTemperatureLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionAirTemperatureLowerWarningLimitInput" aria-label="Untere Warngrenze für Lufttemperatur" aria-describedby="chartOptionAirTemperatureLowerWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionAirTemperatureLowerWarningLimitInput" aria-label="Untere Warngrenze für Lufttemperatur" aria-describedby="chartOptionAirTemperatureLowerWarningLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
@@ -4638,27 +4513,27 @@
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterTemperatureSetpointInput" class="col-form-label col-md-6">Sollwert:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterTemperatureSetpointInput" aria-label="Sollwert für Temperatur" aria-describedby="chartOptionWaterTemperatureSetpointInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterTemperatureSetpointInput" aria-label="Sollwert für Temperatur" aria-describedby="chartOptionWaterTemperatureSetpointInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterTemperatureUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterTemperatureUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Temperatur" aria-describedby="chartOptionWaterTemperatureUpperControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterTemperatureUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Temperatur" aria-describedby="chartOptionWaterTemperatureUpperControlLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterTemperatureLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterTemperatureLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Temperatur" aria-describedby="chartOptionWaterTemperatureLowerControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterTemperatureLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Temperatur" aria-describedby="chartOptionWaterTemperatureLowerControlLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterTemperatureUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterTemperatureUpperWarningLimitInput" aria-label="Obere Warngrenze für Temperatur" aria-describedby="chartOptionWaterTemperatureUpperWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterTemperatureUpperWarningLimitInput" aria-label="Obere Warngrenze für Temperatur" aria-describedby="chartOptionWaterTemperatureUpperWarningLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterTemperatureLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterTemperatureLowerWarningLimitInput" aria-label="Untere Warngrenze für Temperatur" aria-describedby="chartOptionWaterTemperatureLowerWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterTemperatureLowerWarningLimitInput" aria-label="Untere Warngrenze für Temperatur" aria-describedby="chartOptionWaterTemperatureLowerWarningLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
@@ -4667,27 +4542,27 @@
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionHumiditySetpointInput" class="col-form-label col-md-6">Sollwert:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionHumiditySetpointInput" aria-label="Sollwert für Luftfeuchtigkeit" aria-describedby="chartOptionHumiditySetpointInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionHumiditySetpointInput" aria-label="Sollwert für Luftfeuchtigkeit" aria-describedby="chartOptionHumiditySetpointInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionHumidityUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionHumidityUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Luftfeuchtigkeit" aria-describedby="chartOptionHumidityUpperControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionHumidityUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Luftfeuchtigkeit" aria-describedby="chartOptionHumidityUpperControlLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionHumidityLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionHumidityLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Luftfeuchtigkeit" aria-describedby="chartOptionHumidityLowerControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionHumidityLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Luftfeuchtigkeit" aria-describedby="chartOptionHumidityLowerControlLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionHumidityUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionHumidityUpperWarningLimitInput" aria-label="Obere Warngrenze für Luftfeuchtigkeit" aria-describedby="chartOptionHumidityUpperWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionHumidityUpperWarningLimitInput" aria-label="Obere Warngrenze für Luftfeuchtigkeit" aria-describedby="chartOptionHumidityUpperWarningLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionHumidityLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionHumidityLowerWarningLimitInput" aria-label="Untere Warngrenze für Luftfeuchtigkeit" aria-describedby="chartOptionHumidityLowerWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionHumidityLowerWarningLimitInput" aria-label="Untere Warngrenze für Luftfeuchtigkeit" aria-describedby="chartOptionHumidityLowerWarningLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
@@ -4696,27 +4571,27 @@
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionPhSetpointInput" class="col-form-label col-md-6">Sollwert:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionPhSetpointInput" aria-label="Sollwert für Temperatur" aria-describedby="chartOptionPhSetpointInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionPhSetpointInput" aria-label="Sollwert für Temperatur" aria-describedby="chartOptionPhSetpointInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionPhUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionPhUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Temperatur" aria-describedby="chartOptionPhUpperControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionPhUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Temperatur" aria-describedby="chartOptionPhUpperControlLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionPhLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionPhLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Temperatur" aria-describedby="chartOptionPhLowerControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionPhLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Temperatur" aria-describedby="chartOptionPhLowerControlLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionPhUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionPhUpperWarningLimitInput" aria-label="Obere Warngrenze für Temperatur" aria-describedby="chartOptionPhUpperWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionPhUpperWarningLimitInput" aria-label="Obere Warngrenze für Temperatur" aria-describedby="chartOptionPhUpperWarningLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionPhLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionPhLowerWarningLimitInput" aria-label="Untere Warngrenze für Temperatur" aria-describedby="chartOptionPhLowerWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionPhLowerWarningLimitInput" aria-label="Untere Warngrenze für Temperatur" aria-describedby="chartOptionPhLowerWarningLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
@@ -4725,27 +4600,27 @@
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionEcSetpointInput" class="col-form-label col-md-6">Sollwert:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionEcSetpointInput" aria-label="Sollwert für elektrischen Leitwert" aria-describedby="chartOptionEcSetpointInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionEcSetpointInput" aria-label="Sollwert für elektrischen Leitwert" aria-describedby="chartOptionEcSetpointInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionEcUpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionEcUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für elektrischen Leitwert" aria-describedby="chartOptionEcUpperControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionEcUpperControlLimitInput" aria-label="Obere Eingriffsgrenze für elektrischen Leitwert" aria-describedby="chartOptionEcUpperControlLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionEcLowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionEcLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für elektrischen Leitwert" aria-describedby="chartOptionEcLowerControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionEcLowerControlLimitInput" aria-label="Untere Eingriffsgrenze für elektrischen Leitwert" aria-describedby="chartOptionEcLowerControlLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionEcUpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionEcUpperWarningLimitInput" aria-label="Obere Warngrenze für elektrischen Leitwert" aria-describedby="chartOptionEcUpperWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionEcUpperWarningLimitInput" aria-label="Obere Warngrenze für elektrischen Leitwert" aria-describedby="chartOptionEcUpperWarningLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionEcLowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionEcLowerWarningLimitInput" aria-label="Untere Warngrenze für elektrischen Leitwert" aria-describedby="chartOptionEcLowerWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionEcLowerWarningLimitInput" aria-label="Untere Warngrenze für elektrischen Leitwert" aria-describedby="chartOptionEcLowerWarningLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
@@ -4754,27 +4629,27 @@
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterLevel1SetpointInput" class="col-form-label col-md-6">Sollwert:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel1SetpointInput" aria-label="Sollwert für Wasserstand #1" aria-describedby="chartOptionWaterLevel1SetpointInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel1SetpointInput" aria-label="Sollwert für Wasserstand #1" aria-describedby="chartOptionWaterLevel1SetpointInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterLevel1UpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel1UpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Wasserstand #1" aria-describedby="chartOptionWaterLevel1UpperControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel1UpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Wasserstand #1" aria-describedby="chartOptionWaterLevel1UpperControlLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterLevel1LowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel1LowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Wasserstand #1" aria-describedby="chartOptionWaterLevel1LowerControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel1LowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Wasserstand #1" aria-describedby="chartOptionWaterLevel1LowerControlLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterLevel1UpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel1UpperWarningLimitInput" aria-label="Obere Warngrenze für Wasserstand #1" aria-describedby="chartOptionWaterLevel1UpperWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel1UpperWarningLimitInput" aria-label="Obere Warngrenze für Wasserstand #1" aria-describedby="chartOptionWaterLevel1UpperWarningLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterLevel1LowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel1LowerWarningLimitInput" aria-label="Untere Warngrenze für Wasserstand #1" aria-describedby="chartOptionWaterLevel1LowerWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel1LowerWarningLimitInput" aria-label="Untere Warngrenze für Wasserstand #1" aria-describedby="chartOptionWaterLevel1LowerWarningLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
@@ -4783,27 +4658,27 @@
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterLevel2SetpointInput" class="col-form-label col-md-6">Sollwert:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel2SetpointInput" aria-label="Sollwert für Wasserstand #2" aria-describedby="chartOptionWaterLevel2SetpointInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel2SetpointInput" aria-label="Sollwert für Wasserstand #2" aria-describedby="chartOptionWaterLevel2SetpointInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterLevel2UpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel2UpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Wasserstand #2" aria-describedby="chartOptionWaterLevel2UpperControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel2UpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Wasserstand #2" aria-describedby="chartOptionWaterLevel2UpperControlLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterLevel2LowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel2LowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Wasserstand #2" aria-describedby="chartOptionWaterLevel2LowerControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel2LowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Wasserstand #2" aria-describedby="chartOptionWaterLevel2LowerControlLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterLevel2UpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel2UpperWarningLimitInput" aria-label="Obere Warngrenze für Wasserstand #2" aria-describedby="chartOptionWaterLevel2UpperWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel2UpperWarningLimitInput" aria-label="Obere Warngrenze für Wasserstand #2" aria-describedby="chartOptionWaterLevel2UpperWarningLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterLevel2LowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel2LowerWarningLimitInput" aria-label="Untere Warngrenze für Wasserstand #2" aria-describedby="chartOptionWaterLevel2LowerWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel2LowerWarningLimitInput" aria-label="Untere Warngrenze für Wasserstand #2" aria-describedby="chartOptionWaterLevel2LowerWarningLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
@@ -4812,27 +4687,27 @@
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterLevel3SetpointInput" class="col-form-label col-md-6">Sollwert:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel3SetpointInput" aria-label="Sollwert für Wasserstand #3" aria-describedby="chartOptionWaterLevel3SetpointInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel3SetpointInput" aria-label="Sollwert für Wasserstand #3" aria-describedby="chartOptionWaterLevel3SetpointInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterLevel3UpperControlLimitInput" class="col-form-label col-md-6">Obere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel3UpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Wasserstand #3" aria-describedby="chartOptionWaterLevel3UpperControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel3UpperControlLimitInput" aria-label="Obere Eingriffsgrenze für Wasserstand #3" aria-describedby="chartOptionWaterLevel3UpperControlLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterLevel3LowerControlLimitInput" class="col-form-label col-md-6">Untere Eingriffsgrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel3LowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Wasserstand #3" aria-describedby="chartOptionWaterLevel3LowerControlLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel3LowerControlLimitInput" aria-label="Untere Eingriffsgrenze für Wasserstand #3" aria-describedby="chartOptionWaterLevel3LowerControlLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                             <div class="row">
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterLevel3UpperWarningLimitInput" class="col-form-label col-md-6">Obere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel3UpperWarningLimitInput" aria-label="Obere Warngrenze für Wasserstand #3" aria-describedby="chartOptionWaterLevel3UpperWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel3UpperWarningLimitInput" aria-label="Obere Warngrenze für Wasserstand #3" aria-describedby="chartOptionWaterLevel3UpperWarningLimitInput" pattern="\d">
                                                                 </div>
                                                                 <div class="mt-2 col-md-6">
                                                                     <label for="chartOptionWaterLevel3LowerWarningLimitInput" class="col-form-label col-md-6" >Untere Warngrenze:</label>
-                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel3LowerWarningLimitInput" aria-label="Untere Warngrenze für Wasserstand #3" aria-describedby="chartOptionWaterLevel3LowerWarningLimitInput">
+                                                                    <input required type="text" class="form-control col-md-6" id="chartOptionWaterLevel3LowerWarningLimitInput" aria-label="Untere Warngrenze für Wasserstand #3" aria-describedby="chartOptionWaterLevel3LowerWarningLimitInput" pattern="\d">
                                                                 </div>
                                                             </div>
                                                         </form>
@@ -4942,15 +4817,21 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="d-inline-flex align-items-center mb-3">
-                            <label for="historyTimespan">Zeitraum:</label>
-                            <select id="historyTimespan" class="form-select ms-2">
-                                <option value="3600" selected="selected">Letzte Stunde</option>
-                                <option value="10800">Letzte 3 Stunden</option>
-                                <option value="21600">Letzte 6 Stunden</option>
-                                <option value="43200">Letzte 12 Stunden</option>
-                                <option value="86400">Letzte 24 Stunden</option>
-                            </select>
+                        <div class="row mb-3">
+                            <div class="col-md-3" id="historyChartTimespanColumn">
+                                <label for="historyTimespan" class="form-check-label">Zeitraum:</label>
+                                <select id="historyTimespan" class="form-select">
+                                    <option value="3600" selected="selected">Letzte Stunde</option>
+                                    <option value="10800">Letzte 3 Stunden</option>
+                                    <option value="21600">Letzte 6 Stunden</option>
+                                    <option value="43200">Letzte 12 Stunden</option>
+                                    <option value="86400">Letzte 24 Stunden</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 offset-md-6" id="historyChartMinMaxColumn">
+                                <i class="fas fa-angle-up text-danger"></i> <span id="historyChartMaximumValue"></span><br>
+                                <i class="fas fa-angle-down text-primary"></i> <span id="historyChartMinimumValue"></span>
+                            </div>
                         </div>
                         <canvas id="history-chart"></canvas>
                     </div>

@@ -1,20 +1,19 @@
 # Über die Webseite
 
-Die wunderhübsche Webseite wurde zu 100% manuell erstellt, also ohne die Hilfe von Baukasten- oder ähnlicher Software. Neben einer Desktopansicht bietet sie auch eine mobile Ansicht, was vermutlich weniger bekannt ist. Trotz Sorgfalt kann es sein, dass nicht alle Funktionen dokumentiert wurden, weil sie entweder übersehen oder nicht genutzt werden und vergessen wurden, zu entfernen. Es werden hier nur Codes dokumentiert, die selber produziert oder als "Schnippsel" im Internet gefunden wurden. Für die Funktionsweisen der eingesetzten Bibliotheken müssen daher ihre jeweils eigenen Dokumentationen zur Rate gezogen werden.
+Diese wunderhübsche Webseite wurde zu 100% manuell erstellt, also ohne die Hilfe von Baukasten- oder ähnlicher Design Software. Neben einer Desktopansicht bietet sie auch eine mobile Ansicht (was vermutlich weniger bekannt ist). Trotz Sorgfalt kann es sein, dass nicht jeder Code dokumentiert wurde, weil er entweder übersehen oder nicht genutzt wird und vergessen wurde, zu entfernen. Es wird hier nur Code dokumentiert, der selber produziert oder als "Schnippsel" im Internet gefunden wurde. Für die Funktionsweisen der eingesetzten Bibliotheken müssen daher ihre jeweils eigenen Dokumentationen zu Rate gezogen werden. Ebenfalls werden keine CSS-Syntaxe erläutert, da hierzu bereits genug Dokumentation im Internet existiert und die Syntax auch leicht zu verstehen ist. Obwohl hunderte Stunden an Arbeit und Zeit in die Seite investiert wurde, um diese fehlerfrei zum Laufen zu bekommen, kann nicht ausgeschlossen werden, dass an der einen oder anderen Stelle nicht doch Fehler auftreten, deren Ursachen zuvor nicht bekannt waren.
+<br><br>
 
-## Eingesetzte Bibliotheken
+# Eingesetzte Bibliotheken
+
 * jQuery 3.6.0 - https://api.jquery.com/
 * DataTables 1.11.4 - https://datatables.net/manual/index
 * Bootstrap 5.1.3 - https://getbootstrap.com/docs/5.1/
 * Charts.js 3.8.0 - https://www.chartjs.org/docs/
 * Litepicker 2.0.12 - https://litepicker.com/
+<br><br>
 
-## Inhaltsverzeichnis
-* [Variablen](#variables)
+# Variablen
 
-
-# Variablen {#variables}
-  * [ajaxRequestErrors](#ajaxRequestErrors)
 ```js
 const charts;
 ```
@@ -25,9 +24,9 @@ Eine globale Variable, in der alle Diagramme gespeichert werden sowie die Skalie
 const dataTablesLocalisation;
 ```
 
-Eine globale Variable, in dem Übersetzungen für die „dataTables“-Bibliothek gespeichert sind.
+Eine globale Variable, in dem Übersetzungen für die DataTables-Bibliothek gespeichert sind.
 
-```js {#ajaxRequestErrors}
+```js
 const ajaxRequestErrors;
 ```
 
@@ -44,6 +43,12 @@ const adminDataTables;
 ```
 
 Ein globale Variable, in der alle aktuellen DataTables für die Tabellen auf der Administrationsseiten gespeichert werden.
+
+```js
+var apiURLRequester;
+```
+
+Eine globale Variable, in der ein XHR-Objekt gespeichert wird, um den API Link zu ermitteln.
 
 ```js
 var viewportWidth;
@@ -80,8 +85,9 @@ var picker = null;
 ```
 
 Eine globale Variable, die eine neue Instanz des LitePickers speichert, der auf der Galerieseite angezeigt wird.
+<br><br>
 
-## Funktionen
+# Funktionen
 
 ```js
 function getCSSVar(val) { ... };
@@ -123,7 +129,7 @@ Erweitert den Prototyp von `Number`-Klassen (also den Datentyp Integer) um die F
 function getHistoryChartData(sensor) { ... };
 ```
 
-Diese Funktion lädt den Messwertverlauf des angegebenen Sensors mittels einer Serveranfrage und verabeitet die Daten so, dass diese im jeweiligen Diagramm korrekt angezeigt wird. Wenn die Anfrage fehlschlug, wird stattdessen eine Fehlermeldung angezeigt.
+Diese Funktion lädt den Messwertverlauf des angegebenen Sensors mittels einer Serveranfrage und verabeitet die Daten so, dass diese im jeweiligen Diagramm korrekt angezeigt werden. Wenn die Anfrage fehlschlug, wird stattdessen eine Fehlermeldung angezeigt.
 
 ```js
 function readjustTables() { ... };
@@ -145,7 +151,7 @@ Diese Funktion wird verwendet, um Funktionen, die innerhalb von Objekten stehen,
 
 ### Klasse Alert
 
-Eine Klasse, aus der eine Bootstrap-Meldung (Alert) erzeugt wird und folgende Eigentschaften und Methoden enthält:
+Eine Klasse, aus der eine Bootstrap-Meldung (Alert) erzeugt wird und folgende Eigenschaften und Methoden enthält:
 
 ```js
 static icons = { ... };
@@ -175,7 +181,7 @@ Der Konstruktor, der bei der Erzeugung eines neuen Objekts immer automatisch auf
 * `closeable?` (bool) - Legt fest, ob die Meldung ausgeblendet werden kann.
 * `class?` (string) - Legt zusätzliche benutzerdefinierte CSS-Klassen für die Meldung fest.
 
-Sollte das Argument `type` nicht in der statischen Eigenschaft `type` vorhanden sein, wird diesem stattdessen der Wert `info` zugewiesen. Handelt es sich beim Argument `message` um ein Array, wird der Variable `text` eine unsortierte HTML-Liste zugewiesen, die jedes Element des Arrays als Listenelement auflistet, ansonsten direkt den Wert von `message`. Ist keine benutzerdefinierte ID angegeben, wird der Variable `id` eine automatisch erzeugte zugewiesen. Wenn eine benutzerdefinierte ID verwendet wird, wird geprüft, ob diese bereits einem beliebigen HTML-Element zugeordnet wurde und gibt ggf. eine Fehlermeldung aus. In der Variable `element` wird der HTML-Code der Meldung gespeichert. Zusätzlich erhält sie noch ein Ereignis, welches die ID der Meldung aus der statischen Klassenvariable `alerts` entfernt, wenn die Meldung geschlossen wurde.
+Sollte das Argument `type` nicht in der statischen Eigenschaft `type` vorhanden sein, wird diesem stattdessen der Wert `primary` zugewiesen. Handelt es sich beim Argument `message` um ein Array, wird der Variable `text` eine unsortierte HTML-Liste zugewiesen, die jedes Element des Arrays als Listenelement auflistet, ansonsten direkt den Wert von `message`. Ist keine benutzerdefinierte ID angegeben, wird der Variable `id` eine automatisch erzeugte zugewiesen. Wenn eine benutzerdefinierte ID verwendet wird, wird geprüft, ob diese bereits einem beliebigen HTML-Element zugeordnet wurde und gibt ggf. eine Fehlermeldung aus. In der Variable `element` wird der HTML-Code der Meldung gespeichert. Zusätzlich erhält sie noch ein Ereignis, welches die ID der Meldung aus der statischen Klassenvariable `alerts` entfernt, wenn die Meldung geschlossen wurde.
 
 ```js
 destroy() { };
@@ -205,7 +211,7 @@ static create(data = {}) { ... };
 
 Eine statische Methode, mit der der Dialog angepasst und angezeigt wird. Folgende Optionen stehen zur Anpassung im Argument `data` zur Verfügung:
 
-* `size?` (string) \[`sm`|`default`|`lg`|`xl`|`fullscreen`\] - Legt die Größe des Dialogs fest. Wenn kein Wert angegeben wurde, wird `default` verwendet.
+* `size?` (string) \[`sm`|`default`|`lg`|`xl`|`fullscreen`\] - Legt die Größe des Dialogs fest.
 * `static?` (bool) \[`true`|`false`\] - Legt fest, ob der Dialog nicht geschlossen werden soll, wenn außerhalb diesem geklickt oder die Esc-Taste gedrückt wird.
 * `name` (string) - Legt den Namen für den Dialog fest.
 * `events?` (object) \[`show`|`shown`|`hide`|`hidden`\] - Legt benutzerdefinierte Ereignisse für den Dialog fest. Mehrere Ereignisse können durch Komma getrennt werden.
@@ -214,11 +220,11 @@ Eine statische Methode, mit der der Dialog angepasst und angezeigt wird. Folgend
     * `args?` (string) - Argumente, die an die Funktion übergeben werden können. Wenn eine echte Funktion angegeben wurde, wird dieses Argument ignoriert, da Argumente auch in der echten Funktion übergeben werden können.
 * `title?` (string) - Legt den Titel des Dialogs fest, der oben angezeigt wird.
 * `content?` (string) - Legt den Inhalt des Dialogs fest.
-  * `text?` (string) - Der Inhalt des Dialogs. Dieser muss eine Zeichenkette sein und kann HTML-Code enthalten.
+  * `text?` (string) - Der Inhalt des Dialogs, welcher auch HTML-Code enthalten kann.
   * `options?` (object) - Legt Optionen für den Dialoginhalt fest.
     * `scroll?` (bool) - Legt fest, ob der Inhalt des Dialogs scrollbar wird, wenn zu viel Inhalt angezeigt wird.
-    * `align?` (bool) \[`left`|`center`|`right`\] - Legt die Ausrichtung des Dialoginhalts fest. Wenn kein Wert angegeben wurde, wird standardmäßig `center` verwendet.
-* `footer?` (object) - Legt den Inhalt für den Footer des Dialogs fest.
+    * `align?` (bool) \[`left`|`center`|`right`\] - Legt die Ausrichtung des Dialoginhalts fest. 
+* `footer?` (object) - Legt den Inhalt für den Footer des Dialogs fest, welcher sich jedoch nur auf Schaltflächen bezieht.
   * `buttons?` (array) - Legt Optionen für Schaltflächen im Footer fest.
     * `default?` (object) - Legt Optionen für die Standardschaltfläche fest.
       * `text?` (string) - Legt den Inhalt der Standardschaltfläche fest.
@@ -226,7 +232,7 @@ Eine statische Methode, mit der der Dialog angepasst und angezeigt wird. Folgend
       * `display?` (bool) \[`true`|`false`\] - Legt fest, ob die Standardschaltfläche angezeigt wird. Wenn kein Wert angegeben wurde, wird `true` verwendet.
       * `attributes?` (object) - Legt zusätzliche HTML-Attribute für die Standardschaltfläche fest.
         * `[Attribut]?` (string) - Legt den Wert des angegebenen HTML-Attributs fest.
-    * `custom?` (array) - Legt zusätzliche benutzerdefinierte Schaltflächen fest. Mehrere Schaltflächen können durch Komma getrennt definier werde, wobei diese vom Objekt sein müssen.
+    * `custom?` (array) - Legt zusätzliche benutzerdefinierte Schaltflächen fest. Mehrere Schaltflächen können durch Komma getrennt definiert werden, wobei diese vom Objekt sein müssen.
       * `text?` (string) - Legt den Inhalt der Schaltfläche fest. Dieser kann auch HTML-Code enthalten.
       * `class?` (string) - Legt CSS-Klassen für die Schaltfläche fest.
       * `attributes?` (object) - Legt zusätzliche HTML-Attribute für die Schaltfläche fest.
@@ -273,12 +279,6 @@ function enableMainModal(mainButton) { ... };
 Diese Funktion aktiviert den Hauptdialog und die angegebene Schaltfläche, wenn die Verarbeitung von Daten abgeschlossen ist.
 
 ```js
-function formatDate(time, options) { ... };
-```
-
-Diese Funktion wird verwendet, um eine Ganzzahl in einem deutschen Format umzuwandeln. Es kann nur die Zeit, das Datum oder beides als Format angegeben werden.
-
-```js
 setInterval(function () { ... });
 ```
 
@@ -288,7 +288,7 @@ Diese Funktion wird im festen Intervall ausgeführt, um neue Messdaten vom Serve
 $(window).on("load", function() { ... });
 ```
 
-Diese Funktion wird ausgeführt, sobald sämtliche Inhalte auf der Webseite geladen und verarbeitet wurden. Dadurch wird dann das Ladesymbol entfernt und der Variable `viewportWidth` die aktuelle Fensterbreite zugewiesen.
+Diese Funktion wird ausgeführt, sobald sämtliche Inhalte auf der Webseite geladen und verarbeitet wurden. Dadurch wird dann das Ladesymbol entfernt und der Variable `viewportWidth` die aktuelle Fensterbreite zugewiesen. Außerdem wird hier der API Link ermittelt, der zum Laden aller Daten vom Server verwendet wird.
 
 ```js
 .on("resize", function() { ... });
@@ -318,7 +318,7 @@ Diese Funktion zeigt den Hauptdialog mit den Mitwirkenden am HydroPoc-Projekt an
 $("#chartOptionsForm").submit(function() { ... });
 ```
 
-Diese Funktion wird ausgeführt, wenn das Formular zum Bearbeiten der Messwerte abgesendet wird. Als nächstes wird eine Anfrage mit den gesammelten Daten an den Server gesendet. Wenn das Speichern erfolgreich war, wird eine Erfolgsmeldung angezeigt, ansonsten eine Fehlermeldung.
+Diese Funktion wird ausgeführt, wenn das Formular zum Bearbeiten der Messwerte abgesendet wird, um die jeweiligen eingegebenen Daten zu speichern. Je nachdem, ob das das Speichern erfolgreich war, wird eine Meldung angezeigt.
 
 ```js
 $("a[href='#register']").on("click", function() { ... });
@@ -410,7 +410,7 @@ Diese Funktion wird ausgeführt, wenn auf das HydroPoc-Logo geklickt wird, um ei
 $('#saveChartOptions').click(function () { ... });
 ```
 
-Diese Funktion wird ausgeführt, wenn auf die Schaltfläche zum Speichern der Diagrammnoptionen geklickt wird. Daraufhin wird das Klick-Ereignis auf das HTML-Element ausgelöst, welches das Formular der Diagrammoptionen absendet.
+Diese Funktion wird ausgeführt, wenn auf die Schaltfläche zum Speichern der Diagrammoptionen geklickt wird. Daraufhin wird das Klick-Ereignis auf das HTML-Element ausgelöst, welches das Formular der Diagrammoptionen absendet.
 
 ```js
 $('#chartHistoryModal').on('show.bs.modal', function () { ... });
