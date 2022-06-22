@@ -209,10 +209,13 @@
                             return response['users'];
                         },
                         error: function (response) {
-                            $("#usersReloadButton").removeAttr("disabled").find("[data-processing='true']").remove();
+                            $("#userAccountsAdminTableReloadButton").removeAttr("disabled").find("[data-processing='true']").remove();
                             if (response.hasOwnProperty("responseJSON") && response["responseJSON"].hasOwnProperty("error")) {
                                 if (ajaxRequestErrors.hasOwnProperty(response["responseJSON"]["error"])) {
                                     $("#userAccountsAdminTable_wrapper").before(Alert.create("danger", ajaxRequestErrors[response["responseJSON"]["error"]]));
+                                }
+                                else {
+                                    $("#userAccountsAdminTable_wrapper").before(Alert.create("danger", response["responseJSON"]["error"]));
                                 }
                             }
                             else {
@@ -246,11 +249,9 @@
                         },
                     ],
                     ajax: {
-                        url: 'dataTables_test.php',
                         type: 'POST',
                         contentType: 'application/json',
                         data: function (data, settings) {
-                            data['type'] = 'pumps'; // Test
                             data['token'] = getCookie('authToken');
                             return JSON.stringify(data);
                         },
@@ -258,10 +259,13 @@
                             return response;
                         },
                         error: function (response) {
-                            $("#pumpsReloadButton").removeAttr("disabled").find("[data-processing='true']").remove();
+                            $("#pumpsAdminTableReloadButton").removeAttr("disabled").find("[data-processing='true']").remove();
                             if (response.hasOwnProperty("responseJSON") && response["responseJSON"].hasOwnProperty("error")) {
                                 if (ajaxRequestErrors.hasOwnProperty(response["responseJSON"]["error"])) {
                                     $("#pumpsAdminTable_wrapper").before(Alert.create("danger", ajaxRequestErrors[response["responseJSON"]["error"]]));
+                                }
+                                else {
+                                    $("#pumpsAdminTable_wrapper").before(Alert.create("danger", response["responseJSON"]["error"]));
                                 }
                             }
                             else {
@@ -323,10 +327,13 @@
                             return response['data'];
                         },
                         error: function (response) {
-                            $("#logsReloadButton").removeAttr("disabled").find("[data-processing='true']").remove();
+                            $("#logsAdminTableReloadButton").removeAttr("disabled").find("[data-processing='true']").remove();
                             if (response.hasOwnProperty("responseJSON") && response["responseJSON"].hasOwnProperty("error")) {
                                 if (ajaxRequestErrors.hasOwnProperty(response["responseJSON"]["error"])) {
                                     $("#logsAdminTable_wrapper").before(Alert.create("danger", ajaxRequestErrors[response["responseJSON"]["error"]]));
+                                }
+                                else {
+                                    $("#logsAdminTable_wrapper").before(Alert.create("danger", response["responseJSON"]["error"]));
                                 }
                             }
                             else {
@@ -384,7 +391,8 @@
                         url: window.apiURL + '/sensor/data_sensor',
                         data: JSON.stringify({
                             sensor: sensor,
-                            time: interval
+                            time: interval,
+                            interval: charts["historyLabelInterval"][interval]
                         }),
                         processData: false,
                         contentType: 'application/json',
@@ -403,8 +411,8 @@
                         let limits = Object.getOwnPropertyNames(response['limits']);
                         let indexMeasured = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'measured');
                         let indexMiddle = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'middle');
-                        let indexHighest = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'highest');
-                        let indexLowest = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'lowest');
+                        //let indexHighest = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'highest');
+                        //let indexLowest = charts['history']['data']['datasets'].findIndex(key => key['stack'] === 'lowest');
                         if (indexMeasured >= 0) {
                             charts['history']['data']['datasets'][indexMeasured]['data'] = [];
                         }
@@ -417,9 +425,7 @@
                                 let time = new Date(wtf);
                                 let IsoDate = time.toISOString();
                                 let date = IsoDate.substring(8, 10) + "." + IsoDate.substring(5, 7) + "." + IsoDate.substring(2, 4) + "@" + IsoDate.substring(11, 19);
-                                //if (labels.length <= labelCount) {
-                                    labels.push(date);
-                                //}
+                                labels.push(date);
                                 charts['history']['data']['labels'].push(date);
                                 if (indexMeasured >= 0) {
                                     charts['history']['data']['datasets'][indexMeasured]['data'].push({ x: date, y: sensorData[sensor] });
@@ -439,30 +445,24 @@
                                         }
                                     }
                                 }*/
-                                if (indexHighest >= 0) {
-                                    let timeHighest = new Date(Number.parseInt(response['minMax']['maximum']['timestamp']));
-                                    let dateHighest = timeHighest.toISOString();
-                                    $("#historyChartMaximumValue").html(response['minMax']['maximum']['value'] + " (" + dateHighest.substring(8, 10) + "." + dateHighest.substring(5, 7) + "." + dateHighest.substring(0, 4) + ", " + dateHighest.substring(11, 19) + ")");
-                                    //charts['history']['data']['datasets'][indexHighest]['data'] = [{ x: dateHighest, y: response['minMax']['maximum']['value'] }];
-                                }
-                                if (indexLowest >= 0) {
-                                    let timeLowest = new Date(Number.parseInt(response['minMax']['minimum']['timestamp']));
-                                    let dateLowest = timeLowest.toISOString();
-                                    $("#historyChartMinimumValue").html(response['minMax']['minimum']['value'] + " (" + dateLowest.substring(8, 10) + "." + dateLowest.substring(5, 7) + "." + dateLowest.substring(0, 4) + ", " + dateLowest.substring(11, 19) + ")");
-                                    //charts['history']['data']['datasets'][indexLowest]['data'] = [{ x: dateLowest, y: response['minMax']['minimum']['value'] }];
-                                    }
-                                }
-                                if (iteration === labelCount) {
-                                    /*
-                                    let lol = response["sensors"].findIndex(key => key['timestamp'] === wtf);
-                                    console.log(response["sensors"][lol+15]);
-                                    let time_ = new Date(Number.parseInt(response["sensors"][lol+15]['timestamp']));
-                                    let date_ = time_.toISOString();
-                                    labels.push(date_);
-                                    charts['history']['data']['datasets'][indexMeasured]['data'].push({ x: formatDate2(date_), y: lol[sensor] });
-                                    */
-                                }
+                                let timeLowest = new Date(Number.parseInt(response['minMax']['minimum']['timestamp']));
+                                let timeHighest = new Date(Number.parseInt(response['minMax']['maximum']['timestamp']));
+                                let dateLowest = timeLowest.toISOString();
+                                let dateHighest = timeHighest.toISOString();
+                                $("#historyChartMinimumValue").html(response['minMax']['minimum']['value'] + " (" + dateLowest.substring(8, 10) + "." + dateLowest.substring(5, 7) + "." + dateLowest.substring(0, 4) + ", " + dateLowest.substring(11, 19) + ")");
+                                $("#historyChartMaximumValue").html(response['minMax']['maximum']['value'] + " (" + dateHighest.substring(8, 10) + "." + dateHighest.substring(5, 7) + "." + dateHighest.substring(0, 4) + ", " + dateHighest.substring(11, 19) + ")");
                             }
+                            if (iteration === labelCount) {
+                                /*
+                                let lol = response["sensors"].findIndex(key => key['timestamp'] === wtf);
+                                console.log(response["sensors"][lol+15]);
+                                let time_ = new Date(Number.parseInt(response["sensors"][lol+15]['timestamp']));
+                                let date_ = time_.toISOString();
+                                labels.push(date_);
+                                charts['history']['data']['datasets'][indexMeasured]['data'].push({ x: formatDate2(date_), y: lol[sensor] });
+                                */
+                            }
+                        }
                         charts['history']['options']['scales']['x']['min'] = labels[0];
                         charts['history']['options']['scales']['x']['max'] = labels[labels.length -1];
                         charts['history'].update('none');
@@ -479,7 +479,7 @@
                 $(pump).attr('disabled', 'disabled');
                 let parent = $(pump).parentsUntil('td');
                 if ($(parent).find("[data-processing='true']").length === 0) {
-                    $(parent).after("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary kreiselchen'></span>");
+                    $(parent).after("<span data-processing='true' class='spinner-border spinner-border-sm align-middle me-1 kreiselchen text-primary'></span>");
                 }
                 let data = {
                     token: getCookie('authToken'),
@@ -919,7 +919,7 @@
                 $('#getGalleryItemsButton').attr('disabled', 'disabled');
                 $('#historyGalleryTimespanSelect').attr('disabled', 'disabled');
                 if ($('#getGalleryItemsButton').find("[data-processing='true']").length === 0) {
-                    $('#getGalleryItemsButton').prepend("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary kreiselchen'></span>");
+                    $('#getGalleryItemsButton').prepend("<span data-processing='true' class='spinner-border spinner-border-sm align-middle kreiselchen text-white'></span>");
                 }
                 let startDate = picker.getStartDate();
                 let endDate = picker.getEndDate();
@@ -966,6 +966,14 @@
                     $('#getGalleryItemsButton').removeAttr('disabled').find("[data-processing='true']").remove();
                     $('#historyGalleryTimespanSelect').removeAttr('disabled');
                 });
+            }
+            function reloadDataTableData(element, table) {
+                if (DataTable.isDataTable(table)) {
+                    if ($(element).find("[data-processing='true']").length === 0) {
+                        $(element).attr("disabled", "disabled").prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
+                    }
+                    $(table).DataTable().ajax.reload();
+                }
             }
             function editPlant(wtf) {
                 let plant = Number.parseInt(wtf);
@@ -1065,6 +1073,7 @@
                 };
                 Modal.create(data);
             }
+            /*
             function confirmPlantDeletion(plant) {
                 let index = plantProperties.findIndex((key) => key['id'] === plant);
                 if (index >= 0) {
@@ -1111,6 +1120,7 @@
                     });
                 }
             }
+            */
             function getCookie(cname) {
                 let name = cname + '=';
                 let ca = document.cookie.split(';');
@@ -1277,12 +1287,12 @@
                         }
                     });
                 });
-                $('#savechartOptions').click(function () {
-                    $('#savechartOptionsSubmit').click();
+                $('#saveChartOptions').click(function () {
+                    $('#saveChartOptionsSubmit').click();
                 });
                 $('#chartOptionsForm').submit(function () {
-                    if ($('#savechartOptions').find("[data-processing='true']").length === 0) {
-                        $('#savechartOptions').attr('disabled', 'disabled').prepend("<span data-processing='true' class='spinner-border spinner-border-sm align-middle ms-2 text-secondary kreiselchen'></span>");
+                    if ($('#saveChartOptions').find("[data-processing='true']").length === 0) {
+                        $('#saveChartOptions').attr('disabled', 'disabled').prepend("<span data-processing='true' class='spinner-border spinner-border-sm align-middle me-1 kreiselchen text-white'></span>");
                     }
                     let data = {
                         token: getCookie('authToken'),
@@ -1302,8 +1312,8 @@
                         $('#chartOptionMenu').before(Alert.create('danger', response['status'] + ': ' + response['statusText'], { class: 'mt-3 position-relative' }));
                         scrollTo(0, $('#collapse-chart-actions > .card-body > .alert').last().offset()['top'] - 10);
                     }).always(function () {
-                        $('#savechartOptions').find("[data-processing='true']").remove();
-                        $('#savechartOptions').removeAttr('disabled');
+                        $('#saveChartOptions').find("[data-processing='true']").remove();
+                        $('#saveChartOptions').removeAttr('disabled');
                     });
                     return false;
                 });
@@ -1477,8 +1487,10 @@
                     if (!DataTable.isDataTable('#userAccountsAdminTable')) {
                         options = {};
                         Object.assign(options, dataTablesAdminOptions['userAccounts']);
-                        options["ajax"]["url"] = apiURL + '/user/list';
-                        adminDataTables['userAccounts'] = $('#userAccountsAdminTable').DataTable(options);
+                        options["ajax"]["url"] = window.apiURL + '/user/list';
+                        adminDataTables['userAccounts'] = $('#userAccountsAdminTable').DataTable(options).on("draw.dt", function(settings) {
+                            $("userAccountsAdminTableReloadButton").removeAttr("disabled").find("[data-processing='true']").remove();
+                        });
                     }
                 });
                 $('#pump-actions-accordion').on('shown.bs.collapse', function () {
@@ -1490,10 +1502,13 @@
                     if (!DataTable.isDataTable('#logsAdminTable')) {
                         let options = {};
                         Object.assign(options, dataTablesAdminOptions['logs']);
-                        options["ajax"]["url"] = apiURL + '/device/logs';
-                        adminDataTables['logs'] = $('#logsAdminTable').DataTable(options);
+                        options["ajax"]["url"] = window.apiURL + '/device/logs';
+                        adminDataTables['logs'] = $('#logsAdminTable').DataTable(options).on("draw.dt", function(settings) {
+                            $("#logsAdminTableReloadButton").removeAttr("disabled").find("[data-processing='true']").remove();
+                        });
                     }
                 });
+                /*
                 $('#collapse-plants-actions').on('shown.bs.collapse', function (element) {
                     if ($(element['target']).attr('data-bs-parent') === '#plants-accordion') {
                         if (!DataTable.isDataTable('#plantsAdminTable')) {
@@ -1504,6 +1519,7 @@
                         }
                     }
                 });
+                */
                 // DataTables-Layout neu berechnen, wenn sich die Bildschirmbreite ändert, wenn Administrationsseite nicht aktiv war
                 $("a[href='#administration']").on('shown.bs.tab', function () {
                     if (visualViewport['width'] != viewportWidth) {
@@ -2992,32 +3008,6 @@
                         getHistoryChartData(sensor);
                     }
                 });
-                /*
-                $('#historyGalleryTimespanSelect').change(function () {
-                    let that = this;
-                    $('#historyGallery').find('.alert').remove();
-                    $(this).attr('disabled', 'disabled').after("<span class='spinner-border ms-2 text-primary kreiselchen' style='flex: 0 0 auto' data-processing='true'></span>");
-                    let data = {
-                        token: getCookie('authToken'),
-                        history: $(this).val(),
-                    };
-                    $.post({
-                        url: 'history_charts_data.php',
-                        data: JSON.stringify(data),
-                        processData: false,
-                        contentType: 'application/json',
-                        crossDomain: true,
-                        timeout: 10000,
-                    })
-                        .done(function (response) {})
-                        .fail(function (response) {
-                            $('#historyGallery').prepend(Alert.create('danger', response['status'] + ': ' + response['statusText']));
-                        })
-                        .always(function () {
-                            $(that).removeAttr('disabled');
-                            $('#historyGallery').find("[data-processing='true']").remove();
-                        });
-                });*/
                 setInterval(function () {
                     if (!isLoadingCurrentChartData) {
                         isLoadingCurrentChartData = true;
@@ -4448,7 +4438,7 @@
                                                 <div data-bs-spy="scroll" data-bs-target="#chartOptionNavigation" data-bs-offset="0" class="col-md-10 position-relative" id="chartOptionContainer">
                                                     <div id="chartOptionsFormContainer" class="p-3">
                                                         <form enctype="text/plain" method="post" action="/" id="chartOptionsForm" class="w-100">
-                                                            <input type="submit" class="d-none" id="savechartOptionsSubmit">
+                                                            <input type="submit" class="d-none" id="saveChartOptionsSubmit">
                                                             <div class="row">
                                                                 <h5 id="chartOptionCo2ConcentrationTemperatureSection" class="col-md-12">Co²-Gehalt</h5>
                                                             </div>
@@ -4715,7 +4705,7 @@
                                                 </div>
                                             </div>
                                             <div class="mt-4 d-flex formContainer justify-content-end" style="gap: 5px">
-                                                <button type="button" class="btn btn-success" id="savechartOptions">Speichern</button>
+                                                <button type="button" class="btn btn-success" id="saveChartOptions">Speichern</button>
                                             </div>
                                         </div>
                                     </div>
@@ -4766,6 +4756,9 @@
                                                 </thead>
                                                 <tbody></tbody>
                                             </table>
+                                            <div class="d-flex formContainer justify-content-end mt-3">
+                                                <button class="btn btn-primary" onclick="reloadDataTableData(this, '#userAccountsAdminTable')" id="userAccountsAdminTableReloadButton"><i class="fas fa-sync-alt"></i> Aktualisieren</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -4791,6 +4784,9 @@
                                                 </thead>
                                                 <tbody></tbody>
                                             </table>
+                                            <div class="d-flex formContainer justify-content-end mt-3">
+                                                <button class="btn btn-primary" onclick="reloadDataTableData(this, '#logsAdminTable')" id="logsAdminTableReloadButton"><i class="fas fa-sync-alt"></i> Aktualisieren</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -4818,7 +4814,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="row mb-3">
-                            <div class="col-md-3" id="historyChartTimespanColumn">
+                            <div class="col-md-4" id="historyChartTimespanColumn">
                                 <label for="historyTimespan" class="form-check-label">Zeitraum:</label>
                                 <select id="historyTimespan" class="form-select">
                                     <option value="3600" selected="selected">Letzte Stunde</option>
@@ -4828,7 +4824,7 @@
                                     <option value="86400">Letzte 24 Stunden</option>
                                 </select>
                             </div>
-                            <div class="col-md-3 offset-md-6" id="historyChartMinMaxColumn">
+                            <div class="col-md-3 offset-md-5" id="historyChartMinMaxColumn">
                                 <i class="fas fa-angle-up text-danger"></i> <span id="historyChartMaximumValue"></span><br>
                                 <i class="fas fa-angle-down text-primary"></i> <span id="historyChartMinimumValue"></span>
                             </div>

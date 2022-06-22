@@ -3,7 +3,7 @@
 Diese wunderhübsche Webseite wurde zu 100% manuell erstellt, also ohne die Hilfe von Baukasten- oder ähnlicher Design Software. Neben einer Desktopansicht bietet sie auch eine mobile Ansicht (was vermutlich weniger bekannt ist). Trotz Sorgfalt kann es sein, dass nicht jeder Code dokumentiert wurde, weil er entweder übersehen oder nicht genutzt wird und vergessen wurde, zu entfernen. Es wird hier nur Code dokumentiert, der selber produziert oder als "Schnippsel" im Internet gefunden wurde. Für die Funktionsweisen der eingesetzten Bibliotheken müssen daher ihre jeweils eigenen Dokumentationen zu Rate gezogen werden. Ebenfalls werden keine CSS-Syntaxe erläutert, da hierzu bereits genug Dokumentation im Internet existiert und die Syntax auch leicht zu verstehen ist. Obwohl hunderte Stunden an Arbeit und Zeit in die Seite investiert wurde, um diese fehlerfrei zum Laufen zu bekommen, kann nicht ausgeschlossen werden, dass an der einen oder anderen Stelle nicht doch Fehler auftreten, deren Ursachen zuvor nicht bekannt waren.
 <br><br>
 
-# Eingesetzte Bibliotheken
+## Eingesetzte Bibliotheken
 
 * jQuery 3.6.0 - https://api.jquery.com/
 * DataTables 1.11.4 - https://datatables.net/manual/index
@@ -12,7 +12,7 @@ Diese wunderhübsche Webseite wurde zu 100% manuell erstellt, also ohne die Hilf
 * Litepicker 2.0.12 - https://litepicker.com/
 <br><br>
 
-# Variablen
+## Variablen
 
 ```js
 const charts;
@@ -87,13 +87,13 @@ var picker = null;
 Eine globale Variable, die eine neue Instanz des LitePickers speichert, der auf der Galerieseite angezeigt wird.
 <br><br>
 
-# Funktionen
+## Funktionen
 
 ```js
 function getCSSVar(val) { ... };
 ```
 
-Diese Funktion holt sich den Wert der angegebenen CSS-Variable. Existiert keine entsprechende Variable, wird stattdessen eine leere Zeichenkette (`""`) zurückgegeben.
+Diese Funktion holt sich den Wert der angegebenen CSS-Variable `val`. Existiert keine entsprechende Variable, wird stattdessen eine leere Zeichenkette (`""`) zurückgegeben.
 
 ```js
 function getGradient(context, chartArea, data) { ... };
@@ -105,19 +105,25 @@ Diese Funktion erstellt für ein jeweiliges Diagramm einen Farbverlauf, um so ei
 function togglePump(pump) { ... };
 ```
 
-Diese Funktion schaltet die angegebene Pumpe ein oder aus. Dazu wird eine Anfrage an den Server gesendet und ggf. eine Meldung angezeigt, wenn der Vorgang fehlschlug.
+Diese Funktion schaltet die angegebene Pumpe `pump` ein oder aus. Dazu wird eine Anfrage an den Server gesendet und ggf. eine Meldung angezeigt, wenn der Vorgang fehlschlug.
 
 ```js
 function showHistoryGalleryImage(img) { ... };
 ```
 
-Diese Funktion zeigt ein ausgewähltes Bild in der Galerieansicht in einem Dialog im Großformat an.
+Diese Funktion zeigt ein ausgewähltes Bild `img` in der Galerieansicht in einem Dialog im Großformat an.
+
+```js
+function reloadDataTableData(element, table) { ... }
+```
+
+Diese Funktion lädt die Daten für die angegebene Tabelle `table` neu, welche im Vorfeld bereits eine DataTable-Instanz sein muss. `element` ist das HTML-Element, welches die Funktion aufruft und solange deaktiviert wird, bis der Vorgang abgeschlossen ist.
 
 ```js
 function login(element) { ... };
 ```
 
-Diese Funktion meldet den Benutzer an. Dazu wird eine Anfrage an den Server gesendet. Wenn die Anmeldung erfolgreich war, werden Cookies mit dem Benutzernamen und einem Authentifizierungstoken erstellt, ansonsten wird eine Fehlermeldung angezeigt.
+Diese Funktion meldet den Benutzer an. Dazu wird eine Anfrage an den Server gesendet. Das HTML-Element `element`, welches die Funktion aufgerufen hat, wird solange deaktiviert, bis der Vorgang abgeschlossen ist. Wenn die Anmeldung erfolgreich war, werden Cookies mit dem Benutzernamen und einem Authentifizierungstoken erstellt, ansonsten wird eine Fehlermeldung angezeigt.
 
 ```js
 Number.prototype.duration = function() { ... };
@@ -129,7 +135,7 @@ Erweitert den Prototyp von `Number`-Klassen (also den Datentyp Integer) um die F
 function getHistoryChartData(sensor) { ... };
 ```
 
-Diese Funktion lädt den Messwertverlauf des angegebenen Sensors mittels einer Serveranfrage und verabeitet die Daten so, dass diese im jeweiligen Diagramm korrekt angezeigt werden. Wenn die Anfrage fehlschlug, wird stattdessen eine Fehlermeldung angezeigt.
+Diese Funktion lädt den Messwertverlauf des angegebenen Sensors `sensor` mittels einer Serveranfrage und verabeitet die Daten so, dass diese im jeweiligen Diagramm korrekt angezeigt werden. Wenn die Anfrage fehlschlug, wird stattdessen eine Fehlermeldung angezeigt.
 
 ```js
 function readjustTables() { ... };
@@ -199,7 +205,7 @@ Eine statische Version der Funktion `create`, welche im Grunde das gleiche tut, 
 static destroy(id) { ... };
 ```
 
-Eine statische Version der Funktion `destroy`, welche im Grunde das gleiche tut, wie ihr Gegenstück. Der Unterschied ist, dass die ID der zu entfernenden Meldung angegeben werden muss. Da die Funktion nicht auf ein einzelnes Objekt vererbt wird, können mit ihr auch dynamisch erzeugte Meldungen anhand ihrer ID entfernt werden.
+Eine statische Version der Funktion `destroy`, welche im Grunde das gleiche tut, wie ihr Gegenstück. Der Unterschied ist, dass die ID `ìd` der zu entfernenden Meldung angegeben werden muss. Da die Funktion nicht auf ein einzelnes Objekt vererbt wird, können mit ihr auch dynamisch erzeugte Meldungen anhand ihrer ID entfernt werden.
 
 ### Klasse Modal
 
@@ -252,31 +258,31 @@ Diese Funktion lädt Bilder für den angegebenen Zeitraum. Dazu wird eine Anfrag
 function confirmation(options = {}, resolve) { ... };
 ```
 
-Diese Funktion erstellt einen Bestätigungsdialog. Als Argumente werden optionale Optionen und die Funktion zum Erfüllen des Promise übergeben. Letzteres wird beim Klicken auf die Schaltfläche zum Bestätigen ausgeführt, um ebendiese Abfrage zu bestätigen.
+Diese Funktion erstellt einen Bestätigungsdialog. Als Argumente werden optionale Optionen `options` und die Funktion zum Erfüllen des Promise `resolve` übergeben. Letzteres wird beim Klicken auf die Schaltfläche zum Bestätigen ausgeführt, um ebendiese Abfrage zu bestätigen.
 
 ```js
 function getCookie(cname) { ... };
 ```
 
-Diese Funktion gibt den Wert eines angegebenen Cookies zurück. Existiert kein entsprechendes Cookie, wird stattdessen eine leere Zeichenkette (`""`) zurückgegeben.
+Diese Funktion gibt den Wert eines angegebenen Cookies `cname` zurück. Existiert kein entsprechendes Cookie, wird stattdessen eine leere Zeichenkette (`""`) zurückgegeben.
 
 ```js
 function switchAlert(element, type) { ... };
 ```
 
-Diese Funktion wird verwendet, um die Darstellung der Diagramme zu verändern, je nachdem, ob ein Messwert im warnenden oder kritischen Bereich liegt.
+Diese Funktion wird verwendet, um die Darstellung des Containers `element` eines Diagramms in `type` zu ändern, je nachdem, ob ein Messwert im warnenden oder kritischen Bereich liegt.
 
 ```js
 function disableMainModal(mainButton) { ... };
 ```
 
-Diese Funktion deaktiviert den Hauptdialog und die angegebene Schaltfläche, damit beim Verarbeiten von Daten diese nicht verändert weren können, bzw. die Schaltfläche zum Absenden der Daten nicht betätigt werden kann.
+Diese Funktion deaktiviert den Hauptdialog und die angegebene Schaltfläche `mainButton`, damit beim Verarbeiten von Daten diese nicht verändert weren können, bzw. die Schaltfläche `mainButton` zum Absenden der Daten nicht betätigt werden kann.
 
 ```js
 function enableMainModal(mainButton) { ... };
 ```
 
-Diese Funktion aktiviert den Hauptdialog und die angegebene Schaltfläche, wenn die Verarbeitung von Daten abgeschlossen ist.
+Diese Funktion aktiviert den Hauptdialog und die angegebene Schaltfläche `mainButton`, wenn die Verarbeitung von Daten abgeschlossen ist.
 
 ```js
 setInterval(function () { ... });
@@ -369,7 +375,7 @@ $("#collapse-logs-actions").on("shown.bs.collapse", function() { ... });
 Diese Funktion wird ausgeführt, wenn das Dropdown-Element für die Logs auf der Administrationsseite geöffnet wird. Sollte die darin befindliche Tabelle noch keine DataTables-Instanz sein, wird diese mit den in der Variable `dataTablesAdminOptions` für sie gespeicherten Optionen erstellt.
 
 ```js
-$("#collapse-plants-actions").on("shown.bs.collapse", function(element) { ... });
+$("#collapse-plants-actions").on("shown.bs.collapse", function() { ... });
 ```
 
 Diese Funktion wird ausgeführt, wenn das Dropdown-Element für die Pflanzen auf der Administrationsseite geöffnet wird. Sollte die darin befindliche Tabelle noch keine DataTables-Instanz sein, wird diese mit den in der Variable dataTablesAdminOptions für sie gespeicherten Optionen erstellt.
