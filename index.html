@@ -391,7 +391,7 @@
                         url: window.apiURL + '/sensor/data_sensor',
                         data: JSON.stringify({
                             sensor: sensor,
-                            time: interval,
+                            time: (new Date().getTime() - interval),
                             interval: charts["historyLabelInterval"][interval]
                         }),
                         processData: false,
@@ -1138,14 +1138,13 @@
             $(window).on('load', function () {
                 apiURLRequester.done(function(response) {
                     Object.defineProperty(window, "apiURL", {
-                        value: "http://192.168.20.31:3005/api",
+                        value: "http://192.168.20.239:3000/api",
                         configurable: false,
                         writable: false
                     });
                 }).fail(function(response) {
                     Object.defineProperty(window, "apiURL", {
-                        //value: "http://10.20.45.5:3005/api",
-                        value: "http://hydropoc.api.jongmans.net/api",
+                        value: "http://10.20.45.5:3000/api",
                         configurable: false,
                         writable: false
                     });
@@ -1174,7 +1173,7 @@
             });
             $(document).on('DOMContentLoaded', function () {
                 apiURLRequester = $.get({
-                    url: "http://192.168.20.31:3005",
+                    url: "http://192.168.20.31:3000", // wenn netzwerk nicht HydroTik
                         crossDomain: true,
                         timeout: 3000,
                         data: JSON.stringify({data: "lol"})
