@@ -21,7 +21,6 @@
         <script src="js/litepicker.js"></script>
         <script>
             Chart.register('filler');
-            //const apiURL = 'http://hydropoc.api.jongmans.net/api';
             const charts = {
                 current: {
                     temperature_water: {},
@@ -752,7 +751,7 @@
                                 if (data['footer']['buttons'].hasOwnProperty('custom')) {
                                     let customButtons = data['footer']['buttons']['custom'];
                                     for (let customButton of customButtons) {
-                                        if (customButton.hasOwnProperty('text') && !['undefined', '', undefined, null].includes(customButton['text']) /*&& customButton.hasOwnProperty("actions") && !["undefined", undefined, null].includes(customButton["actions"])*/) {
+                                        if (customButton.hasOwnProperty('text') && !['undefined', '', undefined, null].includes(customButton['text'])) {
                                             let currentButton = $("<button type='button' class='btn'>" + customButton['text'] + '</button>');
                                             if (customButton.hasOwnProperty('class') && !['undefined', '', undefined, null].includes(customButton['class'])) {
                                                 $(currentButton).addClass(customButton['class']);
@@ -975,68 +974,6 @@
                     $(table).DataTable().ajax.reload();
                 }
             }
-            function editPlant(wtf) {
-                let plant = Number.parseInt(wtf);
-                /*
-                if (Number.isSafeInteger(plant)) {
-                    let index = plantProperties.findIndex(key => key["id"] === plant);
-                    if (index >= 0) {
-                        if (isPlantEditingActive) {
-                            let prompt = new Promise(function(resolve) {
-                                resolve(confirmReplacePlantEditing(index));
-                            });
-                            prompt.then(function(value) {
-                                $("#savechartOptions").attr("data-plant-id", wtf);
-                                let tab = $("a[href='#plantsAdminOptionContainer']")[0];
-                                $(tab).html("Bearbeitung");
-                                $("#savechartOptions").html("<i class='fas fa-save'></i> Speichern");
-                                $("#discardPlantButton").html("<i class='fas fa-times'></i> Abbrechen");
-                                fillPlantInputs(wtf);
-                                new bootstrap.Tab(tab).show();
-                                bootstrap.Modal.getInstance($("#mainModal")[0]).hide();
-                            });
-                        }
-                        else {
-                            isPlantEditingActive = true;
-                            $("#savechartOptions").attr("data-plant-id", wtf);
-                            let tab = $("a[href='#plantsAdminOptionContainer']")[0];
-                            $(tab).html("Bearbeitung");
-                            $("#savechartOptions").html("<i class='fas fa-save'></i> Speichern");
-                            $("#discardPlantButton").html("<i class='fas fa-times'></i> Abbrechen");
-                            fillPlantInputs(wtf);
-                            new bootstrap.Tab(tab).show();
-                        }
-                    }
-                }
-                */
-            }
-            /*
-            function fillPlantInputs(wtf = null) {
-                let selectedPlant = Number.parseInt(wtf);
-                let index = plantProperties.findIndex(key => key["id"] === selectedPlant);
-                if (index >= 0) {
-                    if (isPlantEditingActive) {
-                        $("#chartOptionDescriptionInput").val(plantProperties[index]["name"]);
-                        if ($("#editPlantAlert").length === 0) {
-                            $("#plantsAdminOptionContainer").prepend(Alert.create("primary", "Zurzeit ist die Bearbeitung der Pflanze &quot;" + plantProperties[index]["name"] + "&quot; (ID: " + plantProperties[index]["id"] + ") aktiv.", {id: "editPlantAlert"}));
-                        }
-                        else {
-                            $("#editPlantAlert > .alertBoxText").html("Zurzeit ist die Bearbeitung der Pflanze &quot;" + plantProperties[index]["name"] + "&quot; (ID: " + plantProperties[index]["id"] + ") aktiv.");
-                        }
-                    }
-                    let properties = Object.getOwnPropertyNames(plantProperties[index]["properties"]);
-                    for (property of properties) {
-                        let propertyName = property[0].toUpperCase() + property.substring(1, property.length);
-                        let values = Object.getOwnPropertyNames(plantProperties[index]["properties"][property]);
-                        for (value of values) {
-                            let inputName = value[0].toUpperCase() + value.substring(1, value.length);
-                            let inputElement = "#chartOption" + propertyName + inputName + "Input";
-                            $(inputElement).val(plantProperties[index]["properties"][property][value]);
-                        }
-                    }
-                }
-            }
-            */
             function confirmation(options = {}, resolve) {
                 let data = {
                     name: 'confirmation',
@@ -1073,54 +1010,6 @@
                 };
                 Modal.create(data);
             }
-            /*
-            function confirmPlantDeletion(plant) {
-                let index = plantProperties.findIndex((key) => key['id'] === plant);
-                if (index >= 0) {
-                    let prompt = new Promise(function (resolve) {
-                        confirmation(
-                            {
-                                title: 'Pflanze entfernen bestätigen',
-                                content: 'Soll die Pflanze &quot;' + plantProperties[index]['name'] + '&quot; (ID: ' + plant + ') wirklich entfernt werden?',
-                            },
-                            resolve
-                        );
-                    });
-                    prompt.then(function (value) {
-                        if ($('#body-overlay').length == 0) {
-                            $('body').prepend("<div id='body-overlay' style='background-color: transparent'></div>");
-                        }
-                        if ($('#confirmationButton').find("[data-processing='true']").length === 0) {
-                            $('#confirmationButton').prepend("<span class='spinner-border me-1 text-white kreiselchen align-text-bottom' data-processing='true'></span>");
-                        }
-                        $('#mainModal .modal-footer > button').attr('disabled', 'disabled');
-                        $("#mainModal .modal-header > [data-bs-dismiss='modal']").attr('disabled', 'disabled');
-                        $('#mainModal .modal-body > .alert').remove();
-                        let data = {
-                            plant: plant,
-                            token: getCookie('authToken'),
-                        };
-                        $.post({
-                            url: '',
-                            data: JSON.stringify(data),
-                            processData: false,
-                            contentType: 'application/json',
-                            crossDomain: true,
-                            timeout: 10000,
-                        }).done(function (response) {
-                                bootstrap.Modal.getInstance($('#mainModal')[0]).hide();
-                        }).fail(function (response) {
-                            $('#mainModal .modal-body').prepend(Alert.create('danger', response['status'] + ': ' + response['statusText']));
-                        }).always(function () {
-                            $('#confirmationButton').find("[data-processing='true']").remove();
-                            $('#body-overlay').remove();
-                            $('#mainModal .modal-footer > button').removeAttr('disabled');
-                            $("#mainModal .modal-header > [data-bs-dismiss='modal']").removeAttr('disabled');
-                        });
-                    });
-                }
-            }
-            */
             function getCookie(cname) {
                 let name = cname + '=';
                 let ca = document.cookie.split(';');
@@ -1138,13 +1027,13 @@
             $(window).on('load', function () {
                 apiURLRequester.done(function(response) {
                     Object.defineProperty(window, "apiURL", {
-                        value: "http://192.168.20.239:3000/api",
+                        value: "http://192.168.20.31:3005/api",
                         configurable: false,
                         writable: false
                     });
                 }).fail(function(response) {
                     Object.defineProperty(window, "apiURL", {
-                        value: "http://10.20.45.5:3000/api",
+                        value: "http://10.20.45.5:3005/api",
                         configurable: false,
                         writable: false
                     });
@@ -1173,7 +1062,7 @@
             });
             $(document).on('DOMContentLoaded', function () {
                 apiURLRequester = $.get({
-                    url: "http://192.168.20.31:3000", // wenn netzwerk nicht HydroTik
+                    url: "http://192.168.20.31:3005", // wenn netzwerk nicht HydroTik
                         crossDomain: true,
                         timeout: 3000,
                         data: JSON.stringify({data: "lol"})
@@ -1296,10 +1185,6 @@
                     let data = {
                         token: getCookie('authToken'),
                     };
-                    /*et inputs = $("#chartOptionsFormContainer input");
-                    for (input of inputs) {
-                        data[$(input).attr("id").slice(8, -5)] = $(input).val();
-                    }*/
                     $.post({
                         url: window.apiURL + '/plant/',
                         data: JSON.stringify(data),
@@ -1507,18 +1392,6 @@
                         });
                     }
                 });
-                /*
-                $('#collapse-plants-actions').on('shown.bs.collapse', function (element) {
-                    if ($(element['target']).attr('data-bs-parent') === '#plants-accordion') {
-                        if (!DataTable.isDataTable('#plantsAdminTable')) {
-                            let options = {};
-                            Object.assign(options, dataTablesAdminOptions['plants']);
-                            options["ajax"]["url"] = apiURL + '/device/logs';
-                            adminDataTables['plants'] = $('#plantsAdminTable').DataTable(options);
-                        }
-                    }
-                });
-                */
                 // DataTables-Layout neu berechnen, wenn sich die Bildschirmbreite ändert, wenn Administrationsseite nicht aktiv war
                 $("a[href='#administration']").on('shown.bs.tab', function () {
                     if (visualViewport['width'] != viewportWidth) {
@@ -3100,78 +2973,6 @@
                         });
                     }
                 }, 5000);
-                /*setInterval(function() {
-                    // "current" gilt für das Diagramm der letzten Minute, "history" ist für das Verlaufsdiagramm
-                    if (!isLoadingCurrentChartData) {
-                        isLoadingCurrentChartData = true;
-                        $.post("current_charts_data.php", {
-                            labels: JSON.stringify(charts["current"]["co2"]["data"]["labels"]),
-                            actuators: JSON.stringify(actuators)
-                        }).done(function(response) {
-                            let data = JSON.parse(response);
-                            let items = Object.keys(data);
-                            // item = Sensor, z.B. co2
-                            for (item of items) {
-                                if (charts["current"].hasOwnProperty(item)) {
-                                    // chart z.B. "current"
-                                    Object.assign(charts["current"][item]["data"]["labels"], data[item]["labels"]);
-                                    let charts_ = Object.keys(data[item]["data"]); // current, setpoint, mean
-                                    for (chart of charts_) {
-                                        let index = charts["current"][item]["data"]["datasets"].findIndex(key => key.stack === chart);
-                                        if (index >= 0 && data[item]["data"][chart] !== null) {
-
-                                            // Aktorenaktionen
-                                            if (chart == "actuator" && data[item]["data"]["actuator"]["enabled"] == 1) {
-                                                currentIndex = charts["current"][item]["data"]["datasets"].findIndex(key => key.stack === "current");
-                                                if (charts["current"][item]["data"]["datasets"][index]["data"].length >= 13) {
-                                                    charts["current"][item]["data"]["datasets"][index]["data"].shift();
-                                                }
-                                                let lastXPosition = charts["current"][item]["data"]["datasets"][currentIndex]["data"].length -1;
-                                                let lastXValue = charts["current"][item]["data"]["datasets"][currentIndex]["data"][lastXPosition]["x"];
-                                                if (lastXValue == data[item]["data"]["actuator"]["data"]["x"]) {
-                                                    // Letztes Element löschen, damit nicht zwei gleiche X-Werte angezeigt werden
-                                                    charts["current"][item]["data"]["datasets"][currentIndex]["data"].splice(lastXPosition, 1);
-                                                }
-                                                // Damit Objekte wirklich zugewiesen werden, statt als Referenz!
-                                                Object.assign(actuators[item], data[item]["data"]["actuator"]);
-                                                delete actuators[item]["data"];
-                                                if (data[item]["data"]["actuator"]["count"] == 0) {
-                                                    actuators[item]["enabled"] = 0;
-                                                }
-                                                charts["current"][item]["data"]["datasets"][index]["data"].push(data[item]["data"]["actuator"]["data"]);
-                                                charts["current"][item]["data"]["datasets"][currentIndex]["data"].push(data[item]["data"]["actuator"]["data"]);
-                                            }
-                                            else {
-                                                if (charts["current"][item]["data"]["datasets"][index]["data"].length >= 13) {
-                                                    charts["current"][item]["data"]["datasets"][index]["data"].shift();
-                                                }
-                                                charts["current"][item]["data"]["datasets"][index]["data"].push(data[item]["data"][chart]);
-                                                charts["current"][item]["options"]["scales"]["x"]["min"] = data[item]["labels"][0];
-                                                charts["current"][item]["options"]["scales"]["x"]["max"] = data[item]["labels"][data[item]["labels"].length -1];
-                                                // Wenn Wert kleiner gleich Warnwert
-                                                if ((Number.parseInt(data[item]["data"]["current"]["y"]) <= Number.parseInt(data[item]["data"]["lowerWarningLimit"]["y"]) && Number.parseInt(data[item]["data"][chart]["y"]) > Number.parseInt(data[item]["data"]["lowerControlLimit"]["y"])) || (Number.parseInt(data[item]["data"]["current"]["y"]) >= Number.parseInt(data[item]["data"]["upperWarningLimit"]["y"]) && Number.parseInt(data[item]["data"][chart]["y"]) < Number.parseInt(data[item]["data"]["upperControlLimit"]["y"]))) {
-                                                    switchAlert(item, "warning");
-                                                }
-                                                else if ((Number.parseInt(data[item]["data"]["current"]["y"]) >= Number.parseInt(data[item]["data"]["upperControlLimit"]["y"]) && Number.parseInt(data[item]["data"]["current"]["y"]) > Number.parseInt(data[item]["data"]["upperWarningLimit"]["y"])) || (Number.parseInt(data[item]["data"]["current"]["y"]) <= Number.parseInt(data[item]["data"]["lowerControlLimit"]["y"]) && Number.parseInt(data[item]["data"][chart]["y"]) < Number.parseInt(data[item]["data"]["lowerWarningLimit"]["y"]))) {
-                                                    switchAlert(item, "danger");
-                                                    console.log("joo");
-                                                }
-                                                else {
-                                                    switchAlert(item, "success");
-                                                }
-                                            }
-                                        }
-                                    }
-                                    charts["current"][item].update("none"); // Sehr rechenintensiv bei zeitgleicher Aktualisierung aller Diagramme
-                                    $("#section-" + item + "> div:last-of-type > canvas").css("visibility", "visible");
-                                    $("#section-" + item + "> div:last-of-type > .chart-overlay ").css("display", "none");
-                                }
-                            }
-                        }).always(function() {
-                            isLoadingCurrentChartData = false;
-                        });
-                    }
-                }, 5000);*/
                 if (window.location.hash) {
                     let hash = window.location.hash;
                     let hashString = hash.substr(1);
@@ -3867,11 +3668,6 @@
                     grid-auto-rows: minmax(300px, auto);
                     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
                 }
-                /*
-                .historyGalleryItem > div:first-of-type > div:first-of-type {
-                    max-width: 300px;
-                }
-                */
                 table.dataTable thead > tr > th {
                     font-weight: 600;
                 }
@@ -3895,20 +3691,12 @@
                 #chartOptionsFormContainer input[type='text'], #historyChartTimespanColumn > select {
                     width: 100%;
                 }
-                /*
-                #chartOptionContainer *:not(input, label) {
-                    padding-left: 0;
-                    margin-left: 0;
-                }*/
                 #chartOptionContainer {
                     width: 100%;
                     margin-top: 1rem;
                     border: 1px solid var(--bs-gray-300, #dee2e6);
                     border-radius: 4px;
-                } /*
-                .formContainer, .legendContainer {
-                    flex-direction: column;
-                }*/
+                }
                 .formContainer {
                     flex-direction: column;
                 }
@@ -3962,11 +3750,6 @@
                     grid-auto-rows: minmax(300px, auto);
                     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
                 }
-                /*
-                .historyGalleryItem > div:first-of-type > div:first-of-type {
-                    max-width: 300px;
-                }
-                */
                 table.dataTable thead > tr > th {
                     font-weight: 600;
                 }
@@ -4710,31 +4493,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!--<div id="pump-actions-accordion" class="mb-3">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <a class="btn d-flex align-items-center" data-bs-toggle="collapse" href="#collapse-pump-actions" data-table="pumps">
-                                            <h4 class="ms-0 mt-auto me-auto mb-auto"><i class="fas fa-fan"></i> Pumpensteuerung</h4>
-                                            <i class="fas fa-chevron-down ms-auto mt-auto me-2 mb-auto"></i>
-                                        </a>
-                                    </div>
-                                    <div id="collapse-pump-actions" class="collapse hide" data-bs-parent="#pump-actions-accordion">
-                                        <div class="card-body">
-                                            <table class="table table-sm w-100 mt-3" id="pumpsAdminTable">
-                                            <thead>
-                                                <tr>
-                                                    <th>Name</th>
-                                                    <th>Leistung</th>
-                                                    <th>?</th>
-                                                    <th>?</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody></tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>-->
                             <div id="user-actions-accordion" class="mb-3">
                                 <div class="card">
                                     <div class="card-header">
